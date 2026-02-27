@@ -1,11 +1,22 @@
+# Finovert---web-
 
-  # Advanced Intro Single Page Website
+Next-generation Virtual CFO platform empowering modern businesses with AI-driven financial intelligence.
 
-  This is a code bundle for Advanced Intro Single Page Website. The original project is available at https://www.figma.com/design/njRtYH2fK7ecW9Eqmi8SSc/Advanced-Intro-Single-Page-Website.
+## Tech Stack
+- React
+- Vite
+- Tailwind CSS
+- Motion (Framer Motion)
+- Lucide React
+- React Router Dom
 
-  ## Running the code
+## Project Structure
+- `src/app/pages`: Page components (e.g., HomePage)
+- `src/app/layouts`: Shared layouts (e.g., MainLayout)
+- `src/app/components`: Reusable UI components
+- `src/app/App.tsx`: Routing configuration
 
-  Run `npm i` to install the dependencies.
-
-  Run `npm run dev` to start the development server.
-  
+## Getting Started
+1. Install dependencies: `npm install`
+2. Run development server: `npm run dev`
+3. Build for production: `npm run build`
