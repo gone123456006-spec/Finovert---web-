@@ -1,0 +1,2 @@
+﻿src/app/components/Hero.tsx(3,23): error TS2307: Cannot find module 'figma:asset/add4e485a4985a38bedb90e998a82d8246524257.png' or its corresponding type declarations.
+src/app/components/WhyFinoverts.tsx(4,30): error TS6133: 'TrendingUp' is declared but its value is never read.
