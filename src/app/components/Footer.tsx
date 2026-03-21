@@ -74,9 +74,9 @@ export function Footer() {
               © 2026 Finovert. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
-              <a href="#privacy" className="hover:text-purple-400 transition-colors">Privacy Policy</a>
+              <a href="/privacy" className="hover:text-purple-400 transition-colors">Privacy Policy</a>
+              <a href="/privacy#account-deletion" className="hover:text-purple-400 transition-colors">Account Delete Policy</a>
               <a href="#terms" className="hover:text-purple-400 transition-colors">Terms of Service</a>
-              <a href="#cookies" className="hover:text-purple-400 transition-colors">Cookie Policy</a>
             </div>
           </div>
         </motion.div>
