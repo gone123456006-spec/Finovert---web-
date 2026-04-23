@@ -1,11 +1,14 @@
 import { motion } from "motion/react";
 import { Twitter, Linkedin, Youtube, Mail, MapPin, Phone } from "lucide-react";
+import logo from "@/assets/logogogw.png";
+
+const APP_LINK = "https://play.google.com/store/apps/details?id=com.brandovert.finovert&pcampaignid=web_share";
 
 export function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+    <footer id="contact" className="bg-gray-900 text-gray-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-12 mb-10 sm:mb-12">
           {/* Brand */}
           <div>
             <motion.div
@@ -14,24 +17,51 @@ export function Footer() {
               transition={{ duration: 0.5 }}
               viewport={{ once: true }}
             >
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent mb-4">
-                Finovert
-              </h3>
-              <p className="text-gray-400 leading-relaxed mb-6">
+              <img
+                src={logo}
+                alt="Finovert Logo"
+                className="h-10 w-auto mb-4 object-contain mx-auto md:mx-0"
+              />
+              <p className="text-gray-400 leading-relaxed mb-6 text-center md:text-left">
                 Smart Finance for Growing Businesses
               </p>
-              <div className="flex gap-4">
-                <a href="#" className="w-10 h-10 rounded-full bg-gray-800 hover:bg-purple-600 flex items-center justify-center transition-colors">
+              
+              {/* Download Button */}
+              <div className="mb-8 flex justify-center md:justify-start">
+                <a 
+                  href={APP_LINK}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 bg-black text-white px-5 py-3 rounded-xl font-bold hover:bg-gray-900 transition-all border border-gray-700 hover:border-gray-500 shadow-xl"
+                >
+                  {/* Official Google Play Store Icon */}
+                  <svg className="w-7 h-7" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#4CAF50" d="M48 428.8V83.2L287.1 256z"/>
+                    <path fill="#F44336" d="M287.1 256L48 83.2l53.1-30.7L340 196.2z"/>
+                    <path fill="#FFC107" d="M287.1 256l52.9-59.8 112 64.7-112 64.6z"/>
+                    <path fill="#2196F3" d="M287.1 256L101.1 459.5 48 428.8l239.1-172.8z"/>
+                    <path fill="#4CAF50" d="M340 315.8l-52.9-59.8L452 191.3l-112 124.5z"/>
+                  </svg>
+                  <div className="flex flex-col items-start leading-none">
+                    <span className="text-[10px] uppercase tracking-wider font-normal text-gray-300">Get it on</span>
+                    <span className="text-[17px] font-semibold tracking-tight">Google Play</span>
+                  </div>
+                </a>
+              </div>
+
+              <div className="flex gap-4 justify-center md:justify-start">
+                <a href="#" className="w-10 h-10 rounded-full bg-gray-800 hover:bg-white hover:text-black flex items-center justify-center transition-all duration-300">
                   <Twitter className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 rounded-full bg-gray-800 hover:bg-purple-600 flex items-center justify-center transition-colors">
+                <a href="https://www.linkedin.com/company/finovert/" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-gray-800 hover:bg-white hover:text-black flex items-center justify-center transition-all duration-300">
                   <Linkedin className="w-5 h-5" />
                 </a>
-                <a href="#" className="w-10 h-10 rounded-full bg-gray-800 hover:bg-purple-600 flex items-center justify-center transition-colors">
+                <a href="#" className="w-10 h-10 rounded-full bg-gray-800 hover:bg-white hover:text-black flex items-center justify-center transition-all duration-300">
                   <Youtube className="w-5 h-5" />
                 </a>
               </div>
             </motion.div>
+
           </div>
 
           {/* Contact */}
@@ -69,11 +99,11 @@ export function Footer() {
           viewport={{ once: true }}
           className="pt-8 border-t border-gray-800"
         >
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
             <p className="text-gray-500 text-sm">
               © 2026 Finovert. All rights reserved.
             </p>
-            <div className="flex gap-6 text-sm">
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-sm">
               <a href="/privacy" className="hover:text-purple-400 transition-colors">Privacy Policy</a>
               <a href="/privacy#account-deletion" className="hover:text-purple-400 transition-colors">Account Delete Policy</a>
               <a href="#terms" className="hover:text-purple-400 transition-colors">Terms of Service</a>

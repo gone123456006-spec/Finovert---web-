@@ -130,6 +130,7 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 
   /**
@@ -181,5 +182,12 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+  }
+
+  textarea,
+  select,
+  button,
+  input {
+    font-family: inherit;
   }
 }
