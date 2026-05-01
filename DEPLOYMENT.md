@@ -1,52 +1,38 @@
-# 🚀 Finovert Deployment Guide (Render.com)
+# 🚀 Finovert Deployment Guide
 
-This guide explains how to deploy your monorepo (Frontend + Backend) to Render using the Blueprint feature.
+Your application is now configured for a split deployment:
+- **Frontend**: Hosted on [Vercel](https://vercel.com)
+- **Backend**: Hosted on [Render](https://render.com)
 
-## 1. Prerequisites
-- A [Render.com](https://render.com) account.
-- Your code pushed to a GitHub or GitLab repository.
-- A MongoDB database (e.g., [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)).
+---
 
-## 2. Deployment Steps
+## 1. Deploying the Backend (Render)
+We use a Blueprint (`render.yaml`) to automate the backend setup.
 
-### Method A: Using the Blueprint (Recommended)
 1. Go to your [Render Dashboard](https://dashboard.render.com/).
 2. Click **New +** and select **Blueprint**.
 3. Connect your GitHub repository.
 4. Render will automatically detect the `render.yaml` file.
-5. It will show you the two services: `finovert-backend` and `finovert-frontend`.
-6. **Important**: You will be prompted to enter the `MONGODB_URI`.
-   - Paste your MongoDB Atlas connection string here.
-7. Click **Apply**.
+5. You will be prompted to enter:
+   - `MONGODB_URI`: Your MongoDB connection string.
+   - `CLIENT_ORIGIN`: Your deployed Vercel frontend URL (e.g., `https://finovert.vercel.app`).
+6. Click **Apply**.
+7. Once deployed, **copy your Render backend URL** (e.g., `https://finovert-backend.onrender.com`).
 
-### Method B: Manual Configuration
-If you prefer to set them up manually:
+---
 
-#### **Backend (Web Service)**
-- **Name**: `finovert-backend`
-- **Environment**: `Node`
-- **Build Command**: `npm install`
-- **Start Command**: `npm start --workspace=backend`
-- **Environment Variables**:
-  - `NODE_ENV`: `production`
-  - `MONGODB_URI`: (Your connection string)
-  - `CLIENT_ORIGIN`: (The URL of your frontend once deployed)
+## 2. Deploying the Frontend (Vercel)
+Vercel is natively configured to build your frontend.
 
-#### **Frontend (Static Site)**
-- **Name**: `finovert-frontend`
-- **Build Command**: `npm install && npm run build --workspace=frontend`
-- **Publish Directory**: `frontend/dist`
-- **Environment Variables**:
-  - `VITE_API_URL`: (The URL of your backend once deployed)
-- **Redirects/Rewrites**:
-  - Add a "Rewrite" rule: Source `/*` -> Destination `/index.html` (Required for React Router).
+1. Go to your [Vercel Dashboard](https://vercel.com/dashboard).
+2. Click **Add New...** > **Project** and select your GitHub repository.
+3. In the **Configure Project** screen:
+   - **Root Directory**: Click Edit and type `frontend`.
+4. In **Environment Variables**, add:
+   - Name: `VITE_API_URL`
+   - Value: *(Paste the backend URL you copied from Render)*
+5. Click **Deploy**.
 
 ## 3. Post-Deployment Checklist
-- [ ] Check the **Events** tab in Render to ensure the build finished successfully.
-- [ ] Verify that the `VITE_API_URL` is correctly set (it should not have a trailing slash unless your code expects it).
-- [ ] Ensure your MongoDB Atlas IP Access List allows connections from everywhere (`0.0.0.0/0`) or specific Render IP addresses.
-
-## 4. Troubleshooting
-- **CORS Errors**: Ensure `CLIENT_ORIGIN` in the backend matches the frontend URL exactly (including `https://`).
-- **Frontend 404 on Refresh**: Ensure the Rewrite rule is set in the Static Site settings on Render.
-- **Vite Build Failures**: Ensure you are using a compatible Node version (Render uses 18+ by default which matches your `package.json`).
+- [ ] Ensure your MongoDB Atlas IP Access List allows connections from everywhere (`0.0.0.0/0`) so Render can connect.
+- [ ] Check Vercel to ensure there are no 404 errors on refresh (this is handled automatically if the Root Directory is set correctly).
