@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { Search, Calendar, User, ArrowRight, BookOpen, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SEO } from "../components/SEO";
+import API_BASE from "../../config/api";
 
 interface BlogPost {
   id?: string;
@@ -96,7 +97,7 @@ export function BlogsPage() {
     // Fetch blogs from backend
     const fetchBlogs = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/blogs');
+        const response = await fetch(`${API_BASE}/api/blogs`);
         if (response.ok) {
           const data = await response.json();
           if (data.length > 0) {

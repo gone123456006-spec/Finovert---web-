@@ -466,7 +466,7 @@ export function AdminDashboard() {
                           )}
                           <button onClick={async () => {
                             if(confirm("Are you sure you want to permanently delete this sub-admin?")) {
-                              await fetch(`http://localhost:5000/api/subadmins/requests/${req._id}`, { method: "DELETE" });
+                              await fetch(`${API_BASE}/api/subadmins/requests/${req._id}`, { method: "DELETE" });
                               fetchPendingRequests();
                             }
                           }} className="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-200 transition-colors">Delete Sub-Admin</button>
@@ -566,7 +566,7 @@ export function AdminDashboard() {
                               )}
                               <button onClick={async () => {
                                 if(confirm("Are you sure you want to permanently delete this application?")) {
-                                  await fetch(`http://localhost:5000/api/internships/${intern._id}`, { method: "DELETE" });
+                                  await fetch(`${API_BASE}/api/internships/${intern._id}`, { method: "DELETE" });
                                   fetchInterns();
                                 }
                               }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors inline-flex" title="Delete Application">
@@ -587,7 +587,7 @@ export function AdminDashboard() {
             const sendEmailAction = async (endpoint: string, payload: object) => {
               setEmailStatus("loading"); setEmailResult("");
               try {
-                const res = await fetch(`http://localhost:5000/api/email/${endpoint}`, {
+                const res = await fetch(`${API_BASE}/api/email/${endpoint}`, {
                   method: "POST", headers: { "Content-Type": "application/json" },
                   body: JSON.stringify(payload)
                 });

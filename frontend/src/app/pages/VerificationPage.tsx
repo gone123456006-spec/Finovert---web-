@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { CheckCircle, XCircle, Search, User, Briefcase, Calendar, Building, FileText, BadgeCheck, RefreshCw } from "lucide-react";
+import API_BASE from "../../config/api";
 
 const DUMMY_RECORDS = [
   {
@@ -62,7 +63,7 @@ export function VerificationPage() {
     setHasSearched(false);
 
     // Fetch from backend API
-    fetch(`http://localhost:5000/api/verifications/${searchId.trim()}`)
+    fetch(`${API_BASE}/api/verifications/${searchId.trim()}`)
       .then((res) => {
         if (res.ok) return res.json();
         throw new Error('Not found');

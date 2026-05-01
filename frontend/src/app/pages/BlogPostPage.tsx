@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
+import API_BASE from "../../config/api";
 
 // Hardcoded fallback posts matching BlogsPage local data
 const LOCAL_POSTS: Record<string, { title: string; author: string; category: string; date: string; readTime: string; image: string; content: string }> = {
@@ -50,17 +51,17 @@ export function BlogPostPage() {
 
       // 2. Try fetching from the backend API
       try {
-        const res = await fetch(`http://localhost:5000/api/blogs/${slug}`);
+        const res = await fetch(`${API_BASE}/api/blogs/${slug}`);
         if (res.ok) {
           let data = await res.json();
 
           // If the stored content is too short, try to scrape the full article
           if (data.sourceLink && (!data.content || data.content.length < 300)) {
             try {
-              const scrapeRes = await fetch(`http://localhost:5000/api/blogs/scrape-full/${slug}`, { method: 'POST' });
+              const scrapeRes = await fetch(`${API_BASE}/api/blogs/scrape-full/${slug}`, { method: 'POST' });
               if (scrapeRes.ok) {
                 // Re-fetch the blog now that content has been updated in DB
-                const updatedRes = await fetch(`http://localhost:5000/api/blogs/${slug}`);
+                const updatedRes = await fetch(`${API_BASE}/api/blogs/${slug}`);
                 if (updatedRes.ok) data = await updatedRes.json();
               }
             } catch {
