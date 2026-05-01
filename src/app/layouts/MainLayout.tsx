@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
+import { AppDownloadPopup } from "../components/AppDownloadPopup";
 
 export function MainLayout() {
     return (
@@ -10,6 +11,7 @@ export function MainLayout() {
                 <Outlet />
             </main>
             <Footer />
+            <AppDownloadPopup />
         </div>
     );
 }

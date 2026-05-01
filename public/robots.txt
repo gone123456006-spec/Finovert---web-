@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://finovert.com/sitemap.xml

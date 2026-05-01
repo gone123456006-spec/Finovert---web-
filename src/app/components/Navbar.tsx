@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import logo from "@/assets/logogogw.png";
 
 export function Navbar() {
@@ -61,12 +61,23 @@ export function Navbar() {
       { name: "About", hash: "#about" },
       { name: "Services", hash: "#services" },
       { name: "Features", hash: "#features" },
+      { 
+        name: "Company", 
+        dropdown: [
+          { name: "ID Verification", path: "/verify" },
+          { name: "Contributors", path: "/contributors" },
+          { name: "Blog & Insights", path: "/blog" }
+        ]
+      },
       { name: "Get In Touch", hash: "#contact" },
     ],
     [],
   );
 
-  const getHref = (hash: string) => (location.pathname === "/" ? hash : `/${hash}`);
+  const getHref = (hash?: string) => {
+    if (!hash) return "#";
+    return location.pathname === "/" ? hash : `/${hash}`;
+  };
 
   const getLinkClasses = (hash: string) =>
     `text-[15px] font-medium transition-colors duration-200 relative group ${
@@ -107,24 +118,39 @@ export function Navbar() {
             className="hidden md:flex items-center gap-7"
           >
             {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={getHref(link.hash)}
-                className={
-                  link.hash === "#contact"
-                    ? getContactButtonClasses(activeHash === link.hash)
-                    : getLinkClasses(link.hash)
-                }
-              >
-                {link.name}
-                {link.hash !== "#contact" && (
-                  <span
-                    className={`absolute -bottom-1 left-0 h-0.5 bg-purple-600 rounded-full transition-all duration-300 ${
-                      activeHash === link.hash ? "w-full" : "w-0 group-hover:w-full"
-                    }`}
-                  />
-                )}
-              </a>
+              link.dropdown ? (
+                <div key={link.name} className="relative group">
+                  <button className="text-[15px] font-medium text-gray-700 hover:text-purple-600 transition-colors duration-200 flex items-center gap-1 py-2">
+                    {link.name}
+                    <ChevronDown className="w-4 h-4 opacity-70 group-hover:rotate-180 transition-transform duration-200" />
+                  </button>
+                  <div className="absolute top-full -left-2 mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)] border border-gray-100/80 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-3 group-hover:translate-y-0 z-50">
+                    <div className="p-2 flex flex-col gap-1">
+                      {link.dropdown.map(item => (
+                        <a 
+                          key={item.name} 
+                          href={item.path} 
+                          className="flex items-center px-4 py-3 text-[14px] font-medium text-gray-600 hover:bg-purple-50/80 hover:text-purple-700 rounded-xl transition-all duration-200"
+                        >
+                          {item.name}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <a
+                  key={link.name}
+                  href={getHref(link.hash)}
+                  className={
+                    link.hash === "#contact"
+                      ? getContactButtonClasses(activeHash === link.hash)
+                      : getLinkClasses(link.hash!)
+                  }
+                >
+                  {link.name}
+                </a>
+              )
             ))}
           </motion.div>
 
@@ -152,26 +178,42 @@ export function Navbar() {
           >
             <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
               {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={getHref(link.hash)}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={
-                    link.hash === "#contact"
-                      ? `mt-2 text-base font-semibold py-2.5 px-3 rounded-lg text-center transition-colors ${
-                          activeHash === link.hash
-                            ? "bg-blue-700 text-white"
-                            : "bg-blue-600 text-white hover:bg-blue-700"
-                        }`
-                      : `text-base font-medium py-2.5 px-3 rounded-lg transition-colors ${
-                          activeHash === link.hash
-                            ? "text-purple-700 bg-purple-50"
-                            : "text-gray-700 hover:text-purple-600 hover:bg-purple-50"
-                        }`
-                  }
-                >
-                  {link.name}
-                </a>
+                link.dropdown ? (
+                  <div key={link.name} className="flex flex-col gap-1 py-2">
+                    <div className="text-sm font-semibold px-3 text-gray-500 uppercase tracking-wider mb-1">{link.name}</div>
+                    {link.dropdown.map(item => (
+                      <a
+                        key={item.name}
+                        href={item.path}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="text-base font-medium py-2.5 px-4 mx-2 rounded-lg text-gray-700 hover:text-purple-700 hover:bg-purple-50 transition-colors"
+                      >
+                        {item.name}
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <a
+                    key={link.name}
+                    href={getHref(link.hash)}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={
+                      link.hash === "#contact"
+                        ? `mt-2 text-base font-semibold py-2.5 px-3 rounded-lg text-center transition-colors ${
+                            activeHash === link.hash
+                              ? "bg-blue-700 text-white"
+                              : "bg-blue-600 text-white hover:bg-blue-700"
+                          }`
+                        : `text-base font-medium py-2.5 px-3 rounded-lg transition-colors ${
+                            activeHash === link.hash
+                              ? "text-purple-700 bg-purple-50"
+                              : "text-gray-700 hover:text-purple-600 hover:bg-purple-50"
+                          }`
+                    }
+                  >
+                    {link.name}
+                  </a>
+                )
               ))}
 
             </div>

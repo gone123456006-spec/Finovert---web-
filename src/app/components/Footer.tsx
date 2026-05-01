@@ -1,14 +1,47 @@
 import { motion } from "motion/react";
 import { Twitter, Linkedin, Youtube, Mail, MapPin, Phone } from "lucide-react";
+import { useEffect } from "react";
 import logo from "@/assets/logogogw.png";
 
 const APP_LINK = "https://play.google.com/store/apps/details?id=com.brandovert.finovert&pcampaignid=web_share";
 
 export function Footer() {
+  // Local SEO Schema for Google Business
+  useEffect(() => {
+    let script = document.querySelector('#local-business-schema') as HTMLScriptElement;
+    if (!script) {
+      script = document.createElement('script');
+      script.id = 'local-business-schema';
+      script.type = 'application/ld+json';
+      document.head.appendChild(script);
+    }
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Finovert",
+      "image": "https://finovert.com/logo.png",
+      "email": "Fintaxcoach@gmail.com",
+      "telephone": "+91 9153832948",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "335, 3rd Floor, Vardhman Sunrize Plaza, Vashundhara Enclave",
+        "addressLocality": "New Delhi",
+        "postalCode": "110096",
+        "addressCountry": "IN"
+      },
+      "url": "https://finovert.com"
+    });
+    return () => {
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
+
   return (
     <footer id="contact" className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 sm:gap-12 mb-10 sm:mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 sm:gap-12 mb-10 sm:mb-12">
           {/* Brand */}
           <div>
             <motion.div
@@ -64,12 +97,35 @@ export function Footer() {
 
           </div>
 
-          {/* Contact */}
+          {/* Company Links */}
           <div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
+              viewport={{ once: true }}
+            >
+              <h4 className="text-white font-semibold mb-4">Company</h4>
+              <ul className="space-y-3">
+                <li>
+                  <a href="/verify" className="text-gray-400 hover:text-white transition-colors">ID Verification</a>
+                </li>
+                <li>
+                  <a href="/contributors" className="text-gray-400 hover:text-white transition-colors">Contributors</a>
+                </li>
+                <li>
+                  <a href="/blog" className="text-gray-400 hover:text-white transition-colors">Blog & Insights</a>
+                </li>
+              </ul>
+            </motion.div>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
             >
               <h4 className="text-white font-semibold mb-4">Get in Touch</h4>
