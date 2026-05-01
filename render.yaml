@@ -1,0 +1,36 @@
+services:
+  # 1. Backend Web Service (Node.js)
+  - type: web
+    name: finovert-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start --workspace=backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # You must set this in the Render dashboard (e.g., MongoDB Atlas connection string)
+      - key: PORT
+        value: 10000 # Render default, but we'll be explicit
+      - key: CLIENT_ORIGIN
+        fromService:
+          type: static_site
+          name: finovert-frontend
+          property: host
+
+  # 2. Frontend Static Site
+  - type: static_site
+    name: finovert-frontend
+    env: static
+    buildCommand: npm install && npm run build --workspace=frontend
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: finovert-backend
+          property: host
+    rewriteRules:
+      - source: /.*
+        destination: /index.html
