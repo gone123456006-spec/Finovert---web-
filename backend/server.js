@@ -35,6 +35,11 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 // ─── App ──────────────────────────────────────────────────────────────────────
 const app = express();
 
+// Trust proxy for rate-limiting behind Render's load balancer
+if (IS_PROD) {
+  app.set('trust proxy', 1);
+}
+
 // ─── Security ─────────────────────────────────────────────────────────────────
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' }, // allow images to load from frontend
