@@ -63,7 +63,7 @@ export function VerificationPage() {
     setHasSearched(false);
 
     // Fetch from backend API
-    fetch(`${API_BASE}/api/verifications/${searchId.trim()}`)
+    fetch(`${API_BASE}/api/verifications/${encodeURIComponent(searchId.trim())}`)
       .then((res) => {
         if (res.ok) return res.json();
         throw new Error('Not found');
