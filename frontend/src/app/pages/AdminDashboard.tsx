@@ -74,17 +74,16 @@ export function AdminDashboard() {
         const data = await res.json();
         setAllVerifications(data);
         // Refresh the ID to stay sequential with current count
-        setVerificationData(prev => ({ ...prev, id: generateVerificationId(data.length) }));
+        setVerificationData(prev => ({ ...prev, id: generateVerificationId() }));
       }
     } catch (e) {
       console.error(e);
     }
   };
 
-  const generateVerificationId = (count: number) => {
-    const year = new Date().getFullYear().toString().slice(2); // e.g. "26"
-    const seq = String(count + 1).padStart(4, '0');             // e.g. "0001"
-    return `FINT/INT/${year}${seq}`;
+  const generateVerificationId = () => {
+    const randomNum = Math.floor(100000 + Math.random() * 900000); // Random 6-digit number
+    return `FINT/INT/${randomNum}`;
   };
 
   const fetchAllBlogs = async () => {
@@ -332,7 +331,7 @@ export function AdminDashboard() {
       if (response.ok) {
         setStatus("success");
         setFetchMessage("Verification record added successfully!");
-        setVerificationData({ id: generateVerificationId(allVerifications.length), name: "", institute: "", joinDate: "", endDate: "", role: "", remarks: "" });
+        setVerificationData({ id: generateVerificationId(), name: "", institute: "", joinDate: "", endDate: "", role: "", remarks: "" });
         fetchVerifications();
         setTimeout(() => setStatus("idle"), 3000);
       } else {
@@ -530,7 +529,7 @@ export function AdminDashboard() {
                   {/* Auto-generated ID — read-only with a refresh button */}
                   <div className="relative">
                     <input required readOnly type="text" name="id" value={verificationData.id} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none uppercase bg-blue-50 font-mono text-blue-700 font-bold pr-28" placeholder="Auto-generated ID" />
-                    <button type="button" onClick={() => setVerificationData(prev => ({ ...prev, id: generateVerificationId(allVerifications.length) }))} className="absolute inset-y-0 right-2 my-auto text-xs font-bold bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-200 transition-colors whitespace-nowrap">Regenerate</button>
+                    <button type="button" onClick={() => setVerificationData(prev => ({ ...prev, id: generateVerificationId() }))} className="absolute inset-y-0 right-2 my-auto text-xs font-bold bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-200 transition-colors whitespace-nowrap">Regenerate</button>
                   </div>
                   <input required type="text" name="name" value={verificationData.name} onChange={(e) => setVerificationData({...verificationData, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none" placeholder="Full Name" />
                   <input type="text" name="institute" value={verificationData.institute} onChange={(e) => setVerificationData({...verificationData, institute: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none" placeholder="Institute" />
