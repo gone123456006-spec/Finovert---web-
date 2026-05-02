@@ -32,6 +32,17 @@ router.post('/', async (req, res) => {
   }
 });
 
+// @route   GET /api/verifications
+// @desc    Get all verification records
+router.get('/', async (req, res) => {
+  try {
+    const verifications = await Verification.find({}).sort({ createdAt: -1 });
+    res.json(verifications);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch verification records' });
+  }
+});
+
 // @route   GET /api/verifications/:id
 // @desc    Get verification by ID
 router.get('/:id', async (req, res) => {
@@ -44,17 +55,6 @@ router.get('/:id', async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch verification record' });
-  }
-});
-
-// @route   GET /api/verifications
-// @desc    Get all verification records
-router.get('/', async (req, res) => {
-  try {
-    const verifications = await Verification.find({}).sort({ createdAt: -1 });
-    res.json(verifications);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch verification records' });
   }
 });
 
