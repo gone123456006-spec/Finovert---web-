@@ -111,15 +111,50 @@ export function AdminDashboard() {
     e.preventDefault();
     if (!url) return;
     
-    // Fix for legacy records: if the URL is relative (e.g. /uploads/...), point it to the backend.
-    const finalUrl = url.startsWith('/') ? `${API_BASE}${url}` : url;
-    
-    const a = document.createElement("a");
-    a.href = finalUrl;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+      if (url.startsWith('data:')) {
+        // Convert base64 to blob to prevent browser crashing or about:blank on large data URLs
+        const arr = url.split(',');
+        const mime = arr[0].match(/:(.*?);/)?.[1] || '';
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        const blob = new Blob([u8arr], { type: mime });
+        const blobUrl = URL.createObjectURL(blob);
+        
+        // Infer extension
+        let ext = "";
+        if (mime === "image/jpeg") ext = ".jpg";
+        else if (mime === "image/png") ext = ".png";
+        else if (mime === "application/pdf") ext = ".pdf";
+        else if (mime.includes("word")) ext = ".docx";
+        
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = filename + ext;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+      } else {
+        // Legacy relative URL fix
+        const finalUrl = url.startsWith('/') ? `${API_BASE}${url}` : url;
+        const a = document.createElement("a");
+        a.href = finalUrl;
+        // add target blank as fallback for external URLs if download fails
+        a.target = "_blank";
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    } catch (err) {
+      console.error("Download failed:", err);
+      window.open(url, '_blank');
+    }
   };
 
   const handleMainLogin = (e: React.FormEvent) => {
