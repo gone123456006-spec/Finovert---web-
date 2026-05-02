@@ -116,6 +116,18 @@ app.use('/uploads', express.static(uploadsDir, {
   etag: true,
 }));
 
+// Fallback for missing old uploads
+app.use('/uploads', (req, res) => {
+  res.status(404).setHeader('Content-Type', 'image/svg+xml').send(`
+    <svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+      <rect width="100%" height="100%" fill="#f8d7da"/>
+      <text x="50%" y="45%" font-family="sans-serif" font-size="20" fill="#721c24" text-anchor="middle" font-weight="bold">Legacy File No Longer Available</text>
+      <text x="50%" y="55%" font-family="sans-serif" font-size="14" fill="#721c24" text-anchor="middle">This file was deleted when the server restarted.</text>
+      <text x="50%" y="65%" font-family="sans-serif" font-size="14" fill="#721c24" text-anchor="middle">Please request a new upload from the user.</text>
+    </svg>
+  `);
+});
+
 // ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api', apiLimiter);
 app.use('/api/blogs', blogRoutes);
