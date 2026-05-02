@@ -133,66 +133,65 @@ export function BlogsPage() {
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header & Search */}
-        <div className="mb-16">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-10"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Insights & <span className="text-blue-600">Resources</span>
-            </h1>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-              Expert articles on FinTech, software engineering, business scaling, and modern product design.
-            </p>
-          </motion.div>
+        {/* Header Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Insights & <span className="text-blue-600">Resources</span>
+          </h1>
+          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            Expert articles on FinTech, software engineering, business scaling, and modern product design.
+          </p>
+        </motion.div>
 
-          {/* Sticky Search & Filters Container */}
-          <div className="sticky top-[72px] z-40 bg-gray-50/80 backdrop-blur-xl py-6 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 transition-all border-b border-transparent data-[sticky=true]:border-gray-200 data-[sticky=true]:shadow-sm">
-            <div className="max-w-7xl mx-auto">
-              {/* Search Bar */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="max-w-2xl mx-auto relative mb-8"
-              >
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl shadow-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  placeholder="Search articles, topics, or keywords..."
-                />
-              </motion.div>
+        {/* Sticky Search & Filters Container */}
+        <div className="sticky top-[68px] sm:top-[72px] z-40 bg-gray-50/95 backdrop-blur-xl py-6 mb-12 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 transition-all duration-300 border-b border-transparent shadow-none [&.is-sticky]:shadow-md [&.is-sticky]:border-gray-200 [&.is-sticky]:bg-white/90">
+          <div className="max-w-7xl mx-auto">
+            {/* Search Bar */}
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="max-w-2xl mx-auto relative mb-6"
+            >
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl shadow-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="Search articles, topics, or keywords..."
+              />
+            </motion.div>
 
-              {/* Categories */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="flex flex-wrap items-center justify-center gap-3"
-              >
-                {CATEGORIES.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setActiveCategory(category)}
-                    className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-                      activeCategory === category
-                        ? "bg-gray-900 text-white shadow-lg scale-105"
-                        : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-900 shadow-sm"
-                    }`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </motion.div>
-            </div>
+            {/* Categories */}
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-wrap items-center justify-center gap-2.5"
+            >
+              {CATEGORIES.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setActiveCategory(category)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                    activeCategory === category
+                      ? "bg-gray-900 text-white shadow-lg scale-105"
+                      : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-900 shadow-sm"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </motion.div>
           </div>
+        </div>
 
         {/* Blog Grid */}
         {loading ? (
