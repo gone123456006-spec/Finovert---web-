@@ -107,6 +107,17 @@ export function AdminDashboard() {
     }
   };
 
+  const handleDownload = (e: React.MouseEvent, url: string, filename: string) => {
+    e.preventDefault();
+    if (!url) return;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   const handleMainLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -563,9 +574,9 @@ export function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3 border border-gray-200">
                             <div className="flex flex-col gap-1.5">
-                              <a href={intern.resumeUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline"><Download className="w-3 h-3" /> Resume</a>
-                              <a href={intern.idProofUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline"><Download className="w-3 h-3" /> ID Proof</a>
-                              <a href={intern.collegeIdUrl} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline"><Download className="w-3 h-3" /> College ID</a>
+                              <button onClick={(e) => handleDownload(e, intern.resumeUrl, `${intern.fullName.replace(/\s+/g, '_')}_Resume`)} className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline bg-transparent border-none p-0 cursor-pointer text-left"><Download className="w-3 h-3" /> Resume</button>
+                              <button onClick={(e) => handleDownload(e, intern.idProofUrl, `${intern.fullName.replace(/\s+/g, '_')}_ID_Proof`)} className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline bg-transparent border-none p-0 cursor-pointer text-left"><Download className="w-3 h-3" /> ID Proof</button>
+                              <button onClick={(e) => handleDownload(e, intern.collegeIdUrl, `${intern.fullName.replace(/\s+/g, '_')}_College_ID`)} className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline bg-transparent border-none p-0 cursor-pointer text-left"><Download className="w-3 h-3" /> College ID</button>
                             </div>
                           </td>
                           <td className="px-4 py-3 border border-gray-200 text-center">
