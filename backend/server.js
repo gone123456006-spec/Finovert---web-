@@ -125,32 +125,33 @@ app.use((err, req, res, next) => {
   res.status(status).json({ message });
 });
 
-// ─── Database + Server ────────────────────────────────────────────────────────
-const startServer = async () => {
-  try {
-    await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 10000,
-    });
-    console.log('✅ Connected to MongoDB');
+// ─── Start Server (port first, then DB) ──────────────────────────────────────
+// We start the HTTP server FIRST so Render's port health check passes immediately.
+// MongoDB connects asynchronously after the port is open.
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server listening on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
+});
 
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`🚀 Server running on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
-    });
-  } catch (error) {
+mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 15000 })
+  .then(() => {
+    console.log('✅ Connected to MongoDB');
+  })
+  .catch((error) => {
     console.error('❌ MongoDB connection failed:', error.message);
-    process.exit(1);
-  }
-};
+    console.error('⚠️  Server will continue running but DB operations will fail.');
+    console.error('⚠️  Check that MongoDB Atlas allows connections from 0.0.0.0/0');
+  });
 
 // Graceful shutdown
 const shutdown = (signal) => {
   console.log(`\n⚠️  Received ${signal}. Closing server...`);
-  mongoose.connection.close(() => {
-    console.log('MongoDB connection closed.');
-    process.exit(0);
+  server.close(() => {
+    mongoose.connection.close().then(() => {
+      console.log('MongoDB connection closed.');
+      process.exit(0);
+    });
   });
 };
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
 
-startServer();

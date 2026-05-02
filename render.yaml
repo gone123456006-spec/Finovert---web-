@@ -13,5 +13,3 @@ services:
         sync: false # You must set this in the Render dashboard (e.g., MongoDB Atlas connection string)
       - key: CLIENT_ORIGIN
         sync: false # Set this to your Vercel frontend URL (e.g., https://finovert.vercel.app)
-      - key: PORT
-        value: 10000
