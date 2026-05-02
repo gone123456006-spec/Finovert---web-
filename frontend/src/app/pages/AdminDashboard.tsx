@@ -110,8 +110,12 @@ export function AdminDashboard() {
   const handleDownload = (e: React.MouseEvent, url: string, filename: string) => {
     e.preventDefault();
     if (!url) return;
+    
+    // Fix for legacy records: if the URL is relative (e.g. /uploads/...), point it to the backend.
+    const finalUrl = url.startsWith('/') ? `${API_BASE}${url}` : url;
+    
     const a = document.createElement("a");
-    a.href = url;
+    a.href = finalUrl;
     a.download = filename;
     document.body.appendChild(a);
     a.click();
