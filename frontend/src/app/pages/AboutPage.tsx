@@ -2,9 +2,9 @@ import { motion } from "motion/react";
 import { Target, Shield, Award, Linkedin, Twitter } from "lucide-react";
 import { SEO } from "../components/SEO";
 
-// Images generated for the team
-import shreeRamImg from "@/assets/founder_shree_ram_raut_1777738754281.png";
-import yuvrajImg from "@/assets/cofounder_yuvraj_singh_1777738899203.png";
+// Images for the team
+import shreeRamImg from "@/assets/FOUNDER .jpeg";
+import yuvrajImg from "@/assets/CO -FOUNDER .jpeg";
 import shyamImg from "@/assets/cto_shyam_kumar_1777739015230.png";
 
 const LEADERSHIP = [
