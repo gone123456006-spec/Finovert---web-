@@ -47,4 +47,26 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// @route   GET /api/verifications
+// @desc    Get all verification records
+router.get('/', async (req, res) => {
+  try {
+    const verifications = await Verification.find({}).sort({ createdAt: -1 });
+    res.json(verifications);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch verification records' });
+  }
+});
+
+// @route   DELETE /api/verifications/:id
+// @desc    Delete a verification record by MongoDB _id
+router.delete('/:id', async (req, res) => {
+  try {
+    await Verification.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to delete verification record' });
+  }
+});
+
 export default router;

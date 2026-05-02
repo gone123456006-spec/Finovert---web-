@@ -28,6 +28,7 @@ export function AdminDashboard() {
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [allBlogs, setAllBlogs] = useState<any[]>([]);
   const [interns, setInterns] = useState<any[]>([]);
+  const [allVerifications, setAllVerifications] = useState<any[]>([]);
   const [expandedSubAdmin, setExpandedSubAdmin] = useState<string | null>(null);
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
 
@@ -66,6 +67,20 @@ export function AdminDashboard() {
     }
   };
 
+  const fetchVerifications = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/verifications`);
+      if (res.ok) setAllVerifications(await res.json());
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const generateVerificationId = () => {
+    const num = Math.floor(1000 + Math.random() * 9000);
+    return `FIN-EMP-${num}`;
+  };
+
   const fetchAllBlogs = async () => {
     try {
       const res = await fetch(`${API_BASE}/api/blogs`);
@@ -91,6 +106,11 @@ export function AdminDashboard() {
     if (authRole === "main_admin") {
       if (activeTab === "requests") fetchPendingRequests();
       if (activeTab === "interns") fetchInterns();
+      if (activeTab === "verification") {
+        fetchVerifications();
+        // Auto-generate a fresh ID every time the tab opens
+        setVerificationData(prev => ({ ...prev, id: generateVerificationId() }));
+      }
     }
   }, [authRole, activeTab]);
 
@@ -308,9 +328,14 @@ export function AdminDashboard() {
       if (response.ok) {
         setStatus("success");
         setFetchMessage("Verification record added successfully!");
-        setVerificationData({ id: "", name: "", institute: "", joinDate: "", endDate: "", role: "", remarks: "" });
+        setVerificationData({ id: generateVerificationId(), name: "", institute: "", joinDate: "", endDate: "", role: "", remarks: "" });
+        fetchVerifications();
         setTimeout(() => setStatus("idle"), 3000);
-      } else setStatus("error");
+      } else {
+        const err = await response.json();
+        setStatus("error");
+        setFetchMessage(err.message || "Failed to add record.");
+      }
     } catch { setStatus("error"); }
   };
 
@@ -493,19 +518,77 @@ export function AdminDashboard() {
           )}
 
           {authRole === "main_admin" && activeTab === "verification" && (
-            <form onSubmit={handleVerificationSubmit} className="space-y-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-100 pb-4"><BadgeCheck className="w-5 h-5 text-blue-600" /> Add Official Record</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <input required type="text" name="id" value={verificationData.id} onChange={(e) => setVerificationData({...verificationData, id: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none uppercase" placeholder="Verification ID (e.g. FIN-EMP-1042)" />
-                <input required type="text" name="name" value={verificationData.name} onChange={(e) => setVerificationData({...verificationData, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none" placeholder="Full Name" />
-                <input type="text" name="institute" value={verificationData.institute} onChange={(e) => setVerificationData({...verificationData, institute: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none" placeholder="Institute" />
-                <input required type="text" name="role" value={verificationData.role} onChange={(e) => setVerificationData({...verificationData, role: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none" placeholder="Role" />
-                <input required type="text" name="joinDate" value={verificationData.joinDate} onChange={(e) => setVerificationData({...verificationData, joinDate: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none" placeholder="Join Date" />
-                <input type="text" name="endDate" value={verificationData.endDate} onChange={(e) => setVerificationData({...verificationData, endDate: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none" placeholder="End Date" />
+            <div className="space-y-10">
+              {/* ── Form ── */}
+              <form onSubmit={handleVerificationSubmit} className="space-y-6">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-4"><BadgeCheck className="w-5 h-5 text-blue-600" /> Add Official Record</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Auto-generated ID — read-only with a refresh button */}
+                  <div className="relative">
+                    <input required readOnly type="text" name="id" value={verificationData.id} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none uppercase bg-blue-50 font-mono text-blue-700 font-bold pr-28" placeholder="Auto-generated ID" />
+                    <button type="button" onClick={() => setVerificationData(prev => ({ ...prev, id: generateVerificationId() }))} className="absolute inset-y-0 right-2 my-auto text-xs font-bold bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-200 transition-colors whitespace-nowrap">Regenerate</button>
+                  </div>
+                  <input required type="text" name="name" value={verificationData.name} onChange={(e) => setVerificationData({...verificationData, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none" placeholder="Full Name" />
+                  <input type="text" name="institute" value={verificationData.institute} onChange={(e) => setVerificationData({...verificationData, institute: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none" placeholder="Institute" />
+                  <input required type="text" name="role" value={verificationData.role} onChange={(e) => setVerificationData({...verificationData, role: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none" placeholder="Role" />
+                  <input required type="text" name="joinDate" value={verificationData.joinDate} onChange={(e) => setVerificationData({...verificationData, joinDate: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none" placeholder="Join Date (e.g. Jan 2024)" />
+                  <input type="text" name="endDate" value={verificationData.endDate} onChange={(e) => setVerificationData({...verificationData, endDate: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none" placeholder="End Date (leave blank if ongoing)" />
+                </div>
+                <textarea required name="remarks" value={verificationData.remarks} onChange={(e) => setVerificationData({...verificationData, remarks: e.target.value})} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none resize-none" placeholder="Remarks (e.g. Completed internship successfully)"></textarea>
+                <button disabled={status === "loading"} type="submit" className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 disabled:opacity-70">
+                  {status === "loading" ? "Saving..." : "Add Record"}
+                </button>
+              </form>
+
+              {/* ── All Records List ── */}
+              <div className="pt-8 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2"><BadgeCheck className="w-5 h-5 text-green-600" /> All Verification Records ({allVerifications.length})</h2>
+                  <button onClick={fetchVerifications} className="text-sm font-semibold text-gray-500 hover:text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg">Refresh</button>
+                </div>
+                {allVerifications.length === 0 ? (
+                  <p className="text-gray-400 italic text-center py-8">No records yet. Add one above.</p>
+                ) : (
+                  <div className="overflow-x-auto rounded-xl border border-gray-200">
+                    <table className="w-full min-w-max text-left border-collapse text-sm bg-white">
+                      <thead>
+                        <tr className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
+                          <th className="px-4 py-3 font-semibold border-b border-gray-200">ID</th>
+                          <th className="px-4 py-3 font-semibold border-b border-gray-200">Name</th>
+                          <th className="px-4 py-3 font-semibold border-b border-gray-200">Role</th>
+                          <th className="px-4 py-3 font-semibold border-b border-gray-200">Institute</th>
+                          <th className="px-4 py-3 font-semibold border-b border-gray-200">Join Date</th>
+                          <th className="px-4 py-3 font-semibold border-b border-gray-200">End Date</th>
+                          <th className="px-4 py-3 font-semibold border-b border-gray-200 text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {allVerifications.map(v => (
+                          <tr key={v._id} className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+                            <td className="px-4 py-3 font-mono text-blue-700 font-bold whitespace-nowrap">{v.id}</td>
+                            <td className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">{v.name}</td>
+                            <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{v.role}</td>
+                            <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{v.institute || '—'}</td>
+                            <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{v.joinDate}</td>
+                            <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{v.endDate || 'Present'}</td>
+                            <td className="px-4 py-3 text-right">
+                              <button onClick={async () => {
+                                if (confirm(`Delete record ${v.id} for ${v.name}?`)) {
+                                  await fetch(`${API_BASE}/api/verifications/${v._id}`, { method: 'DELETE' });
+                                  fetchVerifications();
+                                }
+                              }} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete Record">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
-              <textarea required name="remarks" value={verificationData.remarks} onChange={(e) => setVerificationData({...verificationData, remarks: e.target.value})} rows={3} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none resize-none" placeholder="Remarks"></textarea>
-              <button disabled={status === "loading"} type="submit" className="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700">Add Record</button>
-            </form>
+            </div>
           )}
 
           {authRole === "main_admin" && activeTab === "requests" && (
