@@ -184,7 +184,7 @@ export function AdminDashboard() {
     e.preventDefault();
     setIsSubmitting(true);
     setTimeout(() => {
-      if (password !== "admin123") {
+      if (password !== "Ar@v1234") {
         setError("Incorrect password.");
         generateCaptcha(); 
         setIsSubmitting(false);
