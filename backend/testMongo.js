@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-const MONGODB_URI = 'mongodb+srv://gone123456006_db_user:CqI2vhMepyv4m3Xo@employment-cluster.eeuwgqd.mongodb.net/finovert?retryWrites=true&w=majority&appName=employment-cluster';
+const MONGODB_URI = 'mongodb+srv://gone123456006_db_user:CqI2vhMepyv4m3Xo@employment-cluster.eeuwgqd.mongodb.net/thecfo?retryWrites=true&w=majority&appName=employment-cluster';
 
 mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 })
   .then(() => {

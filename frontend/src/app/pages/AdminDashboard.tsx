@@ -262,7 +262,8 @@ export function AdminDashboard() {
       });
       if (response.ok) {
         const imagePath = await response.text();
-        setFormData(prev => ({ ...prev, image: `${API_BASE}${imagePath}` }));
+        // Server returns a full data URL (base64), no need to prefix API_BASE
+        setFormData(prev => ({ ...prev, image: imagePath }));
       } else {
         alert('Failed to upload image');
       }

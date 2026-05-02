@@ -37,7 +37,8 @@ export function CareersPage() {
       });
       if (response.ok) {
         const filePath = await response.text();
-        setFormData(prev => ({ ...prev, [fieldName]: `${API_BASE}${filePath}` }));
+        // Server returns a full data URL (base64), no need to prefix API_BASE
+        setFormData(prev => ({ ...prev, [fieldName]: filePath }));
       } else {
         alert("Upload failed. Please try again.");
       }
