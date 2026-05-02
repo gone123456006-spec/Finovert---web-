@@ -46,19 +46,32 @@ app.use(helmet({
 }));
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
+// Always allow finovert.com + any Vercel preview + localhost for dev
+const ALWAYS_ALLOWED = [
+  'https://www.finovert.com',
+  'https://finovert.com',
+];
+
 const allowedOrigins = IS_PROD
-  ? [CLIENT_ORIGIN]
+  ? [...ALWAYS_ALLOWED, CLIENT_ORIGIN].filter(Boolean)
   : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      origin.endsWith('.finovert.com')
+    ) {
       return callback(null, true);
     }
+    console.warn(`[CORS] Blocked origin: ${origin}`);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
 }));
+
 
 // ─── Rate Limiting ────────────────────────────────────────────────────────────
 const apiLimiter = rateLimit({
