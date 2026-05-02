@@ -550,44 +550,44 @@ export function AdminDashboard() {
                   <button onClick={fetchVerifications} className="text-sm font-semibold text-gray-500 hover:text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg">Refresh</button>
                 </div>
                 {allVerifications.length === 0 ? (
-                  <p className="text-gray-400 italic text-center py-8">No records yet. Add one above.</p>
+                  <div className="bg-gray-50 border border-dashed border-gray-200 rounded-2xl py-12 text-center">
+                    <p className="text-gray-400 italic">No records found. New records will appear here automatically.</p>
+                  </div>
                 ) : (
-                  <div className="overflow-x-auto rounded-xl border border-gray-200">
-                    <table className="w-full min-w-max text-left border-collapse text-sm bg-white">
-                      <thead>
-                        <tr className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider">
-                          <th className="px-4 py-3 font-semibold border-b border-gray-200">ID</th>
-                          <th className="px-4 py-3 font-semibold border-b border-gray-200">Name</th>
-                          <th className="px-4 py-3 font-semibold border-b border-gray-200">Role</th>
-                          <th className="px-4 py-3 font-semibold border-b border-gray-200">Institute</th>
-                          <th className="px-4 py-3 font-semibold border-b border-gray-200">Join Date</th>
-                          <th className="px-4 py-3 font-semibold border-b border-gray-200">End Date</th>
-                          <th className="px-4 py-3 font-semibold border-b border-gray-200 text-right">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {allVerifications.map(v => (
-                          <tr key={v._id} className="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
-                            <td className="px-4 py-3 font-mono text-blue-700 font-bold whitespace-nowrap">{v.id}</td>
-                            <td className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">{v.name}</td>
-                            <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{v.role}</td>
-                            <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{v.institute || '—'}</td>
-                            <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{v.joinDate}</td>
-                            <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{v.endDate || 'Present'}</td>
-                            <td className="px-4 py-3 text-right">
-                              <button onClick={async () => {
-                                if (confirm(`Delete record ${v.id} for ${v.name}?`)) {
-                                  await fetch(`${API_BASE}/api/verifications/${v._id}`, { method: 'DELETE' });
-                                  fetchVerifications();
-                                }
-                              }} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete Record">
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="grid grid-cols-1 gap-4">
+                    {allVerifications.map(v => (
+                      <div key={v._id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-6 group">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="font-mono text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded border border-blue-100 uppercase tracking-tight">{v.id}</span>
+                            <h3 className="font-bold text-gray-900">{v.name}</h3>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2 mt-3">
+                            <p className="text-xs text-gray-600 flex items-center gap-2"><Briefcase className="w-3 h-3 text-gray-400" /> <span className="font-semibold text-gray-800">{v.role}</span></p>
+                            <p className="text-xs text-gray-600 flex items-center gap-2"><Building className="w-3 h-3 text-gray-400" /> {v.institute || 'N/A'}</p>
+                            <p className="text-xs text-gray-600 flex items-center gap-2"><Calendar className="w-3 h-3 text-gray-400" /> {v.joinDate} — {v.endDate || 'Present'}</p>
+                            <p className="text-xs text-gray-500 italic flex items-center gap-2 truncate max-w-[250px]"><FileText className="w-3 h-3 text-gray-400" /> {v.remarks}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 sm:border-l border-gray-50 sm:pl-6">
+                          <button onClick={() => {
+                            const text = `Verification ID: ${v.id}\nName: ${v.name}\nRole: ${v.role}\nVerify at: https://finovert.com/verification`;
+                            navigator.clipboard.writeText(text);
+                            alert("Copy success!");
+                          }} className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all" title="Copy Details">
+                            <RefreshCw className="w-4 h-4" />
+                          </button>
+                          <button onClick={async () => {
+                            if (confirm(`Are you sure you want to delete the record for ${v.name}?`)) {
+                              const res = await fetch(`${API_BASE}/api/verifications/${v._id}`, { method: 'DELETE' });
+                              if (res.ok) fetchVerifications();
+                            }
+                          }} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all" title="Delete Record">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
