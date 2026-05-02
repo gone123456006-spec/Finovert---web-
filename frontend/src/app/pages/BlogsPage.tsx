@@ -147,15 +147,15 @@ export function BlogsPage() {
           </p>
         </motion.div>
 
-        {/* Sticky Search & Filters Container */}
-        <div className="sticky top-[68px] sm:top-[72px] z-40 bg-gray-50/95 backdrop-blur-xl py-6 mb-12 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 transition-all duration-300 border-b border-transparent shadow-none [&.is-sticky]:shadow-md [&.is-sticky]:border-gray-200 [&.is-sticky]:bg-white/90">
+        {/* Sticky Search Container */}
+        <div className="sticky top-[68px] sm:top-[72px] z-40 bg-gray-50/95 backdrop-blur-xl py-4 mb-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 transition-all duration-300 border-b border-transparent shadow-none">
           <div className="max-w-7xl mx-auto">
             {/* Search Bar */}
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="max-w-2xl mx-auto relative mb-6"
+              className="max-w-2xl mx-auto relative"
             >
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
@@ -168,30 +168,30 @@ export function BlogsPage() {
                 placeholder="Search articles, topics, or keywords..."
               />
             </motion.div>
-
-            {/* Categories */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="flex flex-wrap items-center justify-center gap-2.5"
-            >
-              {CATEGORIES.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setActiveCategory(category)}
-                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                    activeCategory === category
-                      ? "bg-gray-900 text-white shadow-lg scale-105"
-                      : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-900 shadow-sm"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </motion.div>
           </div>
         </div>
+
+        {/* Categories Section (Scrolls away) */}
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex flex-wrap items-center justify-center gap-2.5 mb-12"
+        >
+          {CATEGORIES.map((category) => (
+            <button
+              key={category}
+              onClick={() => setActiveCategory(category)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                activeCategory === category
+                  ? "bg-gray-900 text-white shadow-lg scale-105"
+                  : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 hover:text-gray-900 shadow-sm"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </motion.div>
 
         {/* Blog Grid */}
         {loading ? (
