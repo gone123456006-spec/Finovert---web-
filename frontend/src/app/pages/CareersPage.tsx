@@ -69,6 +69,8 @@ export function CareersPage() {
       });
       if (response.ok) {
         setStatus("success");
+        // Refresh immediately/go home after short delay
+        setTimeout(() => window.location.href = "/", 2000);
       } else {
         setStatus("error");
         setErrorMsg("Failed to submit application.");

@@ -19,6 +19,7 @@ export function AdminDashboard() {
   const [userCaptcha, setUserCaptcha] = useState("");
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Dashboard States
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "fetching">("idle");
@@ -108,16 +109,24 @@ export function AdminDashboard() {
 
   const handleMainLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== "admin123") {
-      setError("Incorrect password.");
-      generateCaptcha(); return;
-    }
-    if (userCaptcha.toUpperCase() !== captcha.q) {
-      setError("CAPTCHA verification failed.");
-      generateCaptcha(); setUserCaptcha(""); return;
-    }
-    setAuthRole("main_admin");
-    setError("");
+    setIsSubmitting(true);
+    setTimeout(() => {
+      if (password !== "admin123") {
+        setError("Incorrect password.");
+        generateCaptcha(); 
+        setIsSubmitting(false);
+        return;
+      }
+      if (userCaptcha.toUpperCase() !== captcha.q) {
+        setError("CAPTCHA verification failed.");
+        generateCaptcha(); setUserCaptcha(""); 
+        setIsSubmitting(false);
+        return;
+      }
+      setAuthRole("main_admin");
+      setError("");
+      setIsSubmitting(false);
+    }, 500); // Simulate network delay for UX
   };
 
   const handleSubAdminRequest = async (e: React.FormEvent) => {
@@ -125,6 +134,7 @@ export function AdminDashboard() {
     if (subUsername.length > 16) return setError("Username must be max 16 characters.");
     if (subPassword.length < 8) return setError("Password must be at least 8 characters.");
     
+    setIsSubmitting(true);
     try {
       const res = await fetch(`${API_BASE}/api/subadmins/request`, {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -135,16 +145,21 @@ export function AdminDashboard() {
         setSuccessMsg("Request sent! Wait for main admin approval.");
         setError("");
         setSubName(""); setSubUsername(""); setSubPassword(""); setSubEmail("");
+        // Refresh immediately in same page as requested
+        setTimeout(() => window.location.reload(), 1500);
       } else {
         setError(data.message || "Failed to request access.");
       }
     } catch {
       setError("Server error.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleSubAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const res = await fetch(`${API_BASE}/api/subadmins/login`, {
         method: "POST", headers: { "Content-Type": "application/json" },
@@ -162,6 +177,8 @@ export function AdminDashboard() {
       }
     } catch {
       setError("Server error.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -295,7 +312,9 @@ export function AdminDashboard() {
                 <div className="font-bold tracking-widest text-lg italic text-gray-700 bg-white px-4 py-2 rounded select-none shadow-inner border border-gray-100">{captcha.q}</div>
                 <input type="text" value={userCaptcha} onChange={(e) => setUserCaptcha(e.target.value)} placeholder="Type CAPTCHA" className="w-full px-3 py-2 bg-white border border-gray-300 rounded outline-none" required />
               </div>
-              <button type="submit" className="w-full bg-gray-900 text-white font-semibold py-3 rounded-xl hover:bg-gray-800">Unlock Dashboard</button>
+              <button disabled={isSubmitting} type="submit" className="w-full bg-gray-900 text-white font-semibold py-3 rounded-xl hover:bg-gray-800 disabled:opacity-70">
+                {isSubmitting ? "Unlocking..." : "Unlock Dashboard"}
+              </button>
             </form>
           )}
 
@@ -310,7 +329,9 @@ export function AdminDashboard() {
                 <form onSubmit={handleSubAdminLogin} className="space-y-4">
                   <input type="text" value={subUsername} onChange={(e) => setSubUsername(e.target.value)} placeholder="Username" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none" required />
                   <input type="password" value={subPassword} onChange={(e) => setSubPassword(e.target.value)} placeholder="Password" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none" required />
-                  <button type="submit" className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700">Login</button>
+                  <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 disabled:opacity-70">
+                    {isSubmitting ? "Logging in..." : "Login"}
+                  </button>
                 </form>
               ) : (
                 <form onSubmit={handleSubAdminRequest} className="space-y-4">
@@ -318,7 +339,9 @@ export function AdminDashboard() {
                   <input type="email" value={subEmail} onChange={(e) => setSubEmail(e.target.value)} placeholder="Your Email Address" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none" required />
                   <input type="text" value={subUsername} onChange={(e) => setSubUsername(e.target.value.replace(/\s/g, ''))} maxLength={16} placeholder="Username (max 16 chars)" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none" required />
                   <input type="password" value={subPassword} onChange={(e) => setSubPassword(e.target.value)} placeholder="Password (min 8 chars)" minLength={8} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 outline-none" required />
-                  <button type="submit" className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700">Send Request to Admin</button>
+                  <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 disabled:opacity-70">
+                    {isSubmitting ? "Sending Request..." : "Send Request to Admin"}
+                  </button>
                 </form>
               )}
             </div>
