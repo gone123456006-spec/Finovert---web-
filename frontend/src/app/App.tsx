@@ -9,11 +9,14 @@ import { BlogPostPage } from "./pages/BlogPostPage";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { CareersPage } from "./pages/CareersPage";
 
+import { AboutPage } from "./pages/AboutPage";
+
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
+        <Route path="about" element={<AboutPage />} />
         <Route path="privacy" element={<PrivacyPolicy />} />
         <Route path="verify" element={<VerificationPage />} />
         <Route path="contributors" element={<ContributorsPage />} />

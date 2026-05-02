@@ -58,7 +58,7 @@ export function Navbar() {
   const navLinks = useMemo(
     () => [
       { name: "Home", hash: "#home" },
-      { name: "About", hash: "#about" },
+      { name: "About", path: "/about" },
       { name: "Services", hash: "#services" },
       { name: "Features", hash: "#features" },
       { 
@@ -144,11 +144,11 @@ export function Navbar() {
               ) : (
                 <a
                   key={link.name}
-                  href={getHref(link.hash)}
+                  href={link.path || getHref(link.hash)}
                   className={
                     link.hash === "#contact"
                       ? getContactButtonClasses(activeHash === link.hash)
-                      : getLinkClasses(link.hash!)
+                      : getLinkClasses(link.path || link.hash!)
                   }
                 >
                   {link.name}
@@ -198,7 +198,7 @@ export function Navbar() {
                 ) : (
                   <a
                     key={link.name}
-                    href={getHref(link.hash)}
+                    href={link.path || getHref(link.hash)}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={
                       link.hash === "#contact"
@@ -208,7 +208,7 @@ export function Navbar() {
                               : "bg-blue-600 text-white hover:bg-blue-700"
                           }`
                         : `text-base font-medium py-2.5 px-3 rounded-lg transition-colors ${
-                            activeHash === link.hash
+                            activeHash === (link.path || link.hash)
                               ? "text-purple-700 bg-purple-50"
                               : "text-gray-700 hover:text-purple-600 hover:bg-purple-50"
                           }`
