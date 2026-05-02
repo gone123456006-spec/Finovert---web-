@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Users, Target, Shield, Award, Linkedin, Twitter, Mail } from "lucide-react";
+import { Target, Shield, Award, Linkedin, Twitter } from "lucide-react";
 import { SEO } from "../components/SEO";
 
 // Images generated for the team
