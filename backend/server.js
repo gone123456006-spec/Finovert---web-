@@ -17,6 +17,7 @@ import subadminRoutes from './routes/subadminRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import internshipRoutes from './routes/internshipRoutes.js';
 import emailRoutes from './routes/emailRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 dotenv.config();
@@ -130,6 +131,7 @@ app.use('/uploads', (req, res) => {
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api', apiLimiter);
+app.use('/api/auth', authRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/verifications', verificationRoutes);
 app.use('/api/subadmins', subadminRoutes);

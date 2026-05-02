@@ -180,26 +180,40 @@ export function AdminDashboard() {
     }
   };
 
-  const handleMainLogin = (e: React.FormEvent) => {
+  const handleMainLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      if (password !== "Ar@v1234") {
-        setError("Incorrect password.");
-        generateCaptcha(); 
-        setIsSubmitting(false);
-        return;
-      }
-      if (userCaptcha.toUpperCase() !== captcha.q) {
-        setError("CAPTCHA verification failed.");
-        generateCaptcha(); setUserCaptcha(""); 
-        setIsSubmitting(false);
-        return;
-      }
-      setAuthRole("main_admin");
-      setError("");
+    setError("");
+
+    if (userCaptcha.toUpperCase() !== captcha.q) {
+      setError("CAPTCHA verification failed.");
+      generateCaptcha();
+      setUserCaptcha("");
       setIsSubmitting(false);
-    }, 500); // Simulate network delay for UX
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/auth/main-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setAuthRole("main_admin");
+        setError("");
+      } else {
+        setError(data.message || "Login failed.");
+        generateCaptcha();
+      }
+    } catch (err) {
+      setError("Server connection failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSubAdminRequest = async (e: React.FormEvent) => {
