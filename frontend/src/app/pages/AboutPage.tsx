@@ -5,7 +5,7 @@ import { SEO } from "../components/SEO";
 // Images for the team
 import shreeRamImg from "@/assets/FOUNDER .jpeg";
 import yuvrajImg from "@/assets/CO -FOUNDER .jpeg";
-import shyamImg from "@/assets/cto_shyam_kumar_1777739015230.png";
+import shyamImg from "@/assets/CTO.PNG";
 
 const LEADERSHIP = [
   {
