@@ -16,6 +16,152 @@ const parser = new Parser({
   },
 });
 
+// ─── SEO Title Rewriting Engine ──────────────────────────────────────────────
+// Implements: SEO Title Rewriting | Dynamic Heading Optimization
+//             AI SEO Heading Generation | Duplicate Title Avoidance
+// Target: 50–70 characters, high CTR, Google-friendly, no duplicate headings.
+
+const TITLE_STOP_WORDS = new Set([
+  "the", "a", "an", "and", "or", "for", "to", "of", "in", "on", "with",
+  "from", "by", "at", "is", "are", "be", "this", "that", "these", "those",
+  "your", "you", "how", "what", "why", "when", "best", "top", "its", "has",
+  "have", "will", "was", "were", "can", "could", "do", "did", "not", "but",
+  "after", "over", "all", "new", "two", "more", "crore", "lakh", "rs",
+]);
+
+// Each template receives: { topic, year }
+// Templates are kept 50–70 chars when topic is ~25 chars.
+const SEO_TITLE_TEMPLATES = [
+  ({ topic, year }) => `Best ${topic} Strategies to Grow Faster in ${year}`,
+  ({ topic, year }) => `Top ${topic} Tips for Beginners and Experts in ${year}`,
+  ({ topic, year }) => `How to Use ${topic} Effectively: Complete Guide ${year}`,
+  ({ topic, year }) => `Latest ${topic} Trends and Strategies in ${year}`,
+  ({ topic, year }) => `Advanced ${topic} Guide to Rank Higher on Google ${year}`,
+  ({ topic, year }) => `Complete Guide to ${topic} for Better Results in ${year}`,
+  ({ topic, year }) => `${topic}: Top Strategies That Work in ${year}`,
+  ({ topic, year }) => `How to Master ${topic} and Grow Your Business in ${year}`,
+  ({ topic, year }) => `Best ${topic} Methods for Beginners in ${year}`,
+  ({ topic, year }) => `Top ${topic} Insights and Strategies for ${year}`,
+  ({ topic, year }) => `${topic} Strategies: Complete Beginner Guide for ${year}`,
+  ({ topic, year }) => `Latest ${topic} Tips to Boost Growth in ${year}`,
+];
+
+function toSlug(value) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+}
+
+function toTitleCase(value) {
+  const alwaysLower = new Set(["and", "or", "to", "of", "in", "on", "for", "the", "a", "an"]);
+  return value
+    .split(" ")
+    .filter(Boolean)
+    .map((word, i) =>
+      i === 0 || !alwaysLower.has(word.toLowerCase())
+        ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        : word.toLowerCase()
+    )
+    .join(" ");
+}
+
+function normalizeHeadlineInput(rawTitle) {
+  return (rawTitle || "")
+    .replace(/\s+/g, " ")
+    .replace(/\|.*$/g, "")
+    .replace(/\(.*?\)/g, "")
+    .replace(/[-–:]\s*(breaking|live|update[s]?|exclusive)[\s.]*$/i, "")
+    .replace(/\brs\.?\s*[\d,]+\s*(crore|lakh|billion|million)?\b/gi, "")
+    .trim();
+}
+
+function extractTopicKeywords(rawTitle) {
+  const cleaned = normalizeHeadlineInput(rawTitle)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ");
+
+  const words = cleaned
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !TITLE_STOP_WORDS.has(w));
+
+  // Deduplicate while preserving order
+  const seen = new Set();
+  const unique = [];
+  for (const w of words) {
+    if (!seen.has(w)) { seen.add(w); unique.push(w); }
+  }
+
+  // Prefer 3 keywords; use 2 if 3 makes topic too long
+  const keywords = unique.slice(0, 3);
+  return keywords.length ? keywords : ["Business", "Growth"];
+}
+
+function buildTopicPhrase(rawTitle) {
+  const keywords = extractTopicKeywords(rawTitle);
+  const phrase = toTitleCase(keywords.join(" "));
+  // Keep topic phrase within ~30 chars so total title stays 50–70 chars
+  return phrase.length > 30 ? toTitleCase(keywords.slice(0, 2).join(" ")) : phrase;
+}
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function buildSeoHeading(rawTitle) {
+  const topic = buildTopicPhrase(rawTitle);
+  const year  = new Date().getFullYear();
+
+  let title = pick(SEO_TITLE_TEMPLATES)({ topic, year });
+
+  // Enforce 50–70 char sweet spot by trimming or padding with year if needed
+  if (title.length > 70) {
+    const shorterTopic = toTitleCase(extractTopicKeywords(rawTitle).slice(0, 2).join(" "));
+    title = pick(SEO_TITLE_TEMPLATES)({ topic: shorterTopic, year });
+  }
+
+  return title.replace(/\s+/g, " ").trim();
+}
+
+
+async function buildUniqueSeoTitle(rawTitle) {
+  const baseSeoHeading = buildSeoHeading(rawTitle);
+
+  // Retry with a different template if exact title already exists in DB
+  let candidate = baseSeoHeading;
+  const year = new Date().getFullYear();
+  const topic = buildTopicPhrase(rawTitle);
+  let attempts = 0;
+
+  while (await Blog.findOne({ title: candidate })) {
+    attempts++;
+    if (attempts <= SEO_TITLE_TEMPLATES.length) {
+      candidate = SEO_TITLE_TEMPLATES[attempts % SEO_TITLE_TEMPLATES.length]({ topic, year });
+    } else {
+      // All templates exhausted — append a small unique suffix
+      candidate = `${baseSeoHeading} (${attempts - SEO_TITLE_TEMPLATES.length + 1})`;
+    }
+  }
+
+  return candidate;
+}
+
+async function createUniqueSlugFromTitle(title, sourceName) {
+  const sourceSlug = toSlug(sourceName || "source");
+  const base = `${toSlug(title)}-${sourceSlug}`.replace(/(^-|-$)+/g, '');
+  let candidate = base;
+  let counter = 2;
+
+  // Ensure Mongo unique slug index is respected.
+  // eslint-disable-next-line no-await-in-loop
+  while (await Blog.findOne({ slug: candidate })) {
+    candidate = `${base}-${counter}`;
+    counter += 1;
+  }
+
+  return candidate;
+}
+
 // Extract the best available image URL from an RSS item
 function extractImage(item) {
   // 1. media:content (most common in NDTV, Hindu, Al Jazeera)
@@ -101,13 +247,15 @@ async function fetchAndSaveNews() {
 
       for (const item of feed.items.slice(0, 3)) {
         if (!item.title) continue;
-        const slug = item.title
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)+/g, '');
-
-        const existing = await Blog.findOne({ slug });
+        const finovertTitle = await buildUniqueSeoTitle(item.title);
+        const existing = await Blog.findOne({
+          $or: [
+            { sourceLink: item.link || '' },
+          ],
+        });
         if (!existing) {
+          const slug = await createUniqueSlugFromTitle(finovertTitle, source.name);
+
           // Prefer full article HTML from content:encoded, then item.content, then snippet
           const richContent  = item.contentEncoded || item.content || '';
           const cleanContent = richContent.replace(/<[^>]*>/g, ' ').replace(/&[a-z]+;/g, ' ').replace(/\s{2,}/g, ' ').trim();
@@ -116,7 +264,7 @@ async function fetchAndSaveNews() {
             : `Read the latest news from ${source.name}.`;
 
           const blog = new Blog({
-            title:      item.title,
+            title:      finovertTitle,
             slug,
             excerpt:    cleanExcerpt,
             content:    cleanContent || cleanExcerpt,
@@ -193,17 +341,19 @@ router.put('/:id', async (req, res) => {
 
 // POST a new blog manually
 router.post('/', async (req, res) => {
-  const blog = new Blog({
-    title:    req.body.title,
-    slug:     req.body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
-    excerpt:  req.body.excerpt,
-    content:  req.body.content,
-    category: req.body.category,
-    author:   req.body.author,
-    image:    req.body.image,
-    readTime: req.body.readTime || '5 min read',
-  });
   try {
+    const seoTitle = await buildUniqueSeoTitle(req.body.title);
+    const blog = new Blog({
+      title: seoTitle,
+      slug: await createUniqueSlugFromTitle(seoTitle, req.body.author || "finovert"),
+      excerpt: req.body.excerpt,
+      content: req.body.content,
+      category: req.body.category,
+      author: req.body.author,
+      image: req.body.image,
+      readTime: req.body.readTime || '5 min read',
+    });
+
     const newBlog = await blog.save();
     res.status(201).json(newBlog);
   } catch (error) {
