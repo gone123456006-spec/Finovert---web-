@@ -126,10 +126,31 @@ export function BlogsPage() {
   return (
     <div className="min-h-screen bg-gray-50 pt-24 pb-20">
       <SEO 
-        title="Blog & Insights" 
-        description="Explore the latest insights, tutorials, and news about finance, technology, and engineering from the Finovert team."
-        keywords="fintech blog, finance articles, engineering insights, finovert news"
+        title="Finovert Blog - Finance, Compliance and Technology Insights"
+        description="Read the latest Finovert blog posts on finance, compliance, startup growth, and technology insights for modern businesses."
+        keywords={[
+          "finovert blog",
+          "finance blog",
+          "compliance insights",
+          "startup finance tips",
+          "technology articles",
+          "business growth blog",
+        ]}
         type="website"
+        path="/blog"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "Blog",
+          name: "Finovert Blog",
+          description:
+            "Finance, compliance, and technology insights from the Finovert team.",
+          url: "https://finovert.com/blog",
+          publisher: {
+            "@type": "Organization",
+            name: "Finovert",
+            url: "https://finovert.com",
+          },
+        }}
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -140,10 +161,10 @@ export function BlogsPage() {
           className="text-center mb-12"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Insights & <span className="text-blue-600">Resources</span>
+            Finovert <span className="text-blue-600">Blog</span>
           </h1>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Expert articles on FinTech, software engineering, business scaling, and modern product design.
+            Latest updates, news, and practical guides on finance, compliance, and technology.
           </p>
         </motion.div>
 

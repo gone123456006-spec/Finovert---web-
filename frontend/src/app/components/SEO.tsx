@@ -1,113 +1,144 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
+import {
+  normalizeKeywords,
+  SEO_SITE,
+  toAbsoluteUrl,
+  type JsonLd,
+} from "../config/seo";
 
 interface SEOProps {
   title: string;
   description: string;
-  keywords?: string;
-  type?: 'website' | 'article';
+  keywords?: string | string[];
+  type?: "website" | "article";
   image?: string;
-  url?: string;
+  path?: string;
+  canonicalUrl?: string;
   author?: string;
-  datePublished?: string;
-  schemaType?: 'WebPage' | 'BlogPosting' | 'Organization';
+  publishedTime?: string;
+  modifiedTime?: string;
+  noindex?: boolean;
+  structuredData?: JsonLd | JsonLd[];
 }
 
 export function SEO({
   title,
   description,
-  keywords = 'finovert, fintech, finance, technology',
-  type = 'website',
-  image = 'https://finovert.com/default-og-image.jpg', // Replace with your actual default image URL
-  url = typeof window !== 'undefined' ? window.location.href : '',
-  author = 'Finovert Team',
-  datePublished,
-  schemaType = 'WebPage',
+  keywords,
+  type = "website",
+  image = SEO_SITE.defaultImage,
+  path = "",
+  canonicalUrl,
+  author = SEO_SITE.defaultAuthor,
+  publishedTime,
+  modifiedTime,
+  noindex = false,
+  structuredData,
 }: SEOProps) {
   useEffect(() => {
-    // 1. Update Title
-    document.title = `${title} | Finovert`;
+    document.title = title.includes(SEO_SITE.name) ? title : `${title} | ${SEO_SITE.name}`;
+    const currentUrl = canonicalUrl || toAbsoluteUrl(path || window.location.pathname);
+    const keywordContent = normalizeKeywords(keywords);
 
-    // 2. Helper function to update or create meta tags
-    const setMetaTag = (attrName: string, attrValue: string, content: string) => {
-      let element = document.querySelector(`meta[${attrName}="${attrValue}"]`);
+    const setMetaTag = (attrName: "name" | "property", attrValue: string, content: string) => {
+      let element = document.querySelector(`meta[${attrName}="${attrValue}"]`) as HTMLMetaElement | null;
       if (!element) {
-        element = document.createElement('meta');
+        element = document.createElement("meta");
         element.setAttribute(attrName, attrValue);
         document.head.appendChild(element);
       }
-      element.setAttribute('content', content);
+      element.setAttribute("content", content);
     };
 
-    // Standard Meta Tags
-    setMetaTag('name', 'description', description);
-    setMetaTag('name', 'keywords', keywords);
-    setMetaTag('name', 'author', author);
+    const setCanonical = (href: string) => {
+      let link = document.querySelector("link[rel='canonical']") as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "canonical";
+        document.head.appendChild(link);
+      }
+      link.href = href;
+    };
 
-    // Open Graph (Facebook/LinkedIn/WhatsApp)
-    setMetaTag('property', 'og:title', title);
-    setMetaTag('property', 'og:description', description);
-    setMetaTag('property', 'og:type', type);
-    setMetaTag('property', 'og:url', url);
-    setMetaTag('property', 'og:image', image);
-    setMetaTag('property', 'og:site_name', 'Finovert');
+    setMetaTag("name", "description", description);
+    setMetaTag("name", "keywords", keywordContent);
+    setMetaTag("name", "author", author);
+    setMetaTag("name", "robots", noindex ? "noindex, nofollow" : "index, follow");
 
-    // Twitter Cards
-    setMetaTag('name', 'twitter:card', 'summary_large_image');
-    setMetaTag('name', 'twitter:title', title);
-    setMetaTag('name', 'twitter:description', description);
-    setMetaTag('name', 'twitter:image', image);
+    setMetaTag("property", "og:title", title);
+    setMetaTag("property", "og:description", description);
+    setMetaTag("property", "og:type", type);
+    setMetaTag("property", "og:url", currentUrl);
+    setMetaTag("property", "og:image", image);
+    setMetaTag("property", "og:site_name", SEO_SITE.name);
 
-    // 3. Schema.org JSON-LD (Rich Snippets for Google)
-    let schemaObj: any = {
+    setMetaTag("name", "twitter:card", "summary_large_image");
+    setMetaTag("name", "twitter:title", title);
+    setMetaTag("name", "twitter:description", description);
+    setMetaTag("name", "twitter:image", image);
+
+    if (type === "article") {
+      if (publishedTime) {
+        setMetaTag("property", "article:published_time", publishedTime);
+      }
+      if (modifiedTime) {
+        setMetaTag("property", "article:modified_time", modifiedTime);
+      }
+      setMetaTag("property", "article:author", author);
+    }
+
+    setCanonical(currentUrl);
+
+    document
+      .querySelectorAll('script[type="application/ld+json"][data-seo="dynamic"]')
+      .forEach((node) => node.remove());
+
+    const defaultPageSchema: JsonLd = {
       "@context": "https://schema.org",
-      "@type": schemaType,
-      "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": url
-      },
-      "headline": title,
-      "description": description,
-      "image": image,
-      "publisher": {
+      "@type": type === "article" ? "Article" : "WebPage",
+      name: title,
+      description,
+      url: currentUrl,
+      image,
+      author: {
         "@type": "Organization",
-        "name": "Finovert",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://finovert.com/logo.png" // Replace with your actual logo URL
-        }
-      }
+        name: SEO_SITE.name,
+      },
     };
 
-    // Add specific schema properties if it's an article/blog post
-    if (schemaType === 'BlogPosting') {
-      schemaObj.author = {
-        "@type": "Person",
-        "name": author
-      };
-      if (datePublished) {
-        schemaObj.datePublished = datePublished;
-        schemaObj.dateModified = datePublished; // Or pass a separate dateModified if you track updates
-      }
-    }
+    const schemaPayloads = structuredData
+      ? Array.isArray(structuredData)
+        ? structuredData
+        : [structuredData]
+      : [defaultPageSchema];
 
-    let schemaScript = document.querySelector('#seo-schema-script') as HTMLScriptElement;
-    if (!schemaScript) {
-      schemaScript = document.createElement('script');
-      schemaScript.id = 'seo-schema-script';
-      schemaScript.type = 'application/ld+json';
+    schemaPayloads.forEach((payload) => {
+      const schemaScript = document.createElement("script");
+      schemaScript.type = "application/ld+json";
+      schemaScript.dataset.seo = "dynamic";
+      schemaScript.text = JSON.stringify(payload);
       document.head.appendChild(schemaScript);
-    }
-    schemaScript.text = JSON.stringify(schemaObj);
+    });
 
-    // Cleanup function when component unmounts
     return () => {
-      // Optional: You could clean up the meta tags here if you want a completely clean slate between routes,
-      // but usually replacing the content on the next route is sufficient.
-      if (document.head.contains(schemaScript)) {
-        document.head.removeChild(schemaScript);
-      }
+      document
+        .querySelectorAll('script[type="application/ld+json"][data-seo="dynamic"]')
+        .forEach((node) => node.remove());
     };
-  }, [title, description, keywords, type, image, url, author, datePublished, schemaType]);
+  }, [
+    title,
+    description,
+    keywords,
+    type,
+    image,
+    path,
+    canonicalUrl,
+    author,
+    publishedTime,
+    modifiedTime,
+    noindex,
+    structuredData,
+  ]);
 
-  return null; // This component doesn't render anything visible
+  return null;
 }

@@ -4,6 +4,10 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "generate:sitemap": "node scripts/generate-sitemap.mjs",
+    "ping:sitemap": "node scripts/ping-google-sitemap.mjs",
+    "postbuild:seo": "npm run ping:sitemap",
+    "prebuild": "npm run generate:sitemap",
     "build": "vite build",
     "dev": "vite"
   },

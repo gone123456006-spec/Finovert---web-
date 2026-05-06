@@ -3,6 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
 import API_BASE from "../../config/api";
+import { SEO } from "../components/SEO";
+import { buildBlogPostMetadata } from "../config/seo";
 
 // Hardcoded fallback posts matching BlogsPage local data
 const LOCAL_POSTS: Record<string, { title: string; author: string; category: string; date: string; readTime: string; image: string; content: string }> = {
@@ -83,12 +85,6 @@ export function BlogPostPage() {
     fetchPost();
   }, [slug]);
 
-  useEffect(() => {
-    if (post) {
-      document.title = `${post.title} | Finovert Blog`;
-    }
-  }, [post]);
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-24">
@@ -119,8 +115,31 @@ export function BlogPostPage() {
     .map(p => p.trim())
     .filter(Boolean);
 
+  const seoMeta = buildBlogPostMetadata({
+    title: post.title,
+    excerpt: post.excerpt || post.content.slice(0, 160),
+    slug: slug || "",
+    image: post.image,
+    author: post.author || "Finovert Team",
+    publishedTime: post.createdAt,
+    modifiedTime: post.createdAt,
+    category: post.category,
+  });
+
   return (
     <div className="min-h-screen bg-gray-50 pt-24 pb-20">
+      <SEO
+        title={seoMeta.title}
+        description={seoMeta.description}
+        type={seoMeta.type}
+        image={seoMeta.image}
+        path={seoMeta.path}
+        author={seoMeta.author}
+        publishedTime={seoMeta.publishedTime}
+        modifiedTime={seoMeta.modifiedTime}
+        keywords={seoMeta.keywords}
+        structuredData={seoMeta.structuredData}
+      />
       {/* Hero Image */}
       <div className="w-full h-72 md:h-96 overflow-hidden relative">
         <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
