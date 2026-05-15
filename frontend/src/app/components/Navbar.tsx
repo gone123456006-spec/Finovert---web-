@@ -58,9 +58,14 @@ export function Navbar() {
   const navLinks = useMemo(
     () => [
       { name: "Home", hash: "#home" },
-      { name: "About", path: "/about" },
-      { name: "Services", hash: "#services" },
-      { name: "Features", hash: "#features" },
+      {
+        name: "Explore",
+        dropdown: [
+          { name: "About", path: "/about" },
+          { name: "Services", hash: "#services" },
+          { name: "Features", hash: "#features" },
+        ],
+      },
       { 
         name: "Company", 
         dropdown: [
@@ -69,6 +74,8 @@ export function Navbar() {
           { name: "Blog & Insights", path: "/blog" }
         ]
       },
+      { name: "My App", path: "/my-app" },
+      { name: "Join Our Team", path: "/careers" },
       { name: "Get In Touch", hash: "#contact" },
     ],
     [],
@@ -132,7 +139,7 @@ export function Navbar() {
                       {link.dropdown.map(item => (
                         <a 
                           key={item.name} 
-                          href={item.path} 
+                          href={item.path || getHref(item.hash)} 
                           className="flex items-center px-4 py-3 text-[14px] font-medium text-gray-600 hover:bg-purple-50/80 hover:text-purple-700 rounded-xl transition-all duration-200"
                         >
                           {item.name}
@@ -169,58 +176,79 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Right Sidebar Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="md:hidden bg-white border-t border-gray-100 overflow-hidden"
-          >
-            <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
-              {navLinks.map((link) => (
-                link.dropdown ? (
-                  <div key={link.name} className="flex flex-col gap-1 py-2">
-                    <div className="text-sm font-semibold px-3 text-gray-500 uppercase tracking-wider mb-1">{link.name}</div>
-                    {link.dropdown.map(item => (
-                      <a
-                        key={item.name}
-                        href={item.path}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className="text-base font-medium py-2.5 px-4 mx-2 rounded-lg text-gray-700 hover:text-purple-700 hover:bg-purple-50 transition-colors"
-                      >
-                        {item.name}
-                      </a>
-                    ))}
-                  </div>
-                ) : (
-                  <a
-                    key={link.name}
-                    href={link.path || getHref(link.hash)}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={
-                      link.hash === "#contact"
-                        ? `mt-2 text-base font-semibold py-2.5 px-3 rounded-lg text-center transition-colors ${
-                            activeHash === link.hash
-                              ? "bg-blue-700 text-white"
-                              : "bg-blue-600 text-white hover:bg-blue-700"
-                          }`
-                        : `text-base font-medium py-2.5 px-3 rounded-lg transition-colors ${
-                            activeHash === (link.path || link.hash)
-                              ? "text-purple-700 bg-purple-50"
-                              : "text-gray-700 hover:text-purple-600 hover:bg-purple-50"
-                          }`
-                    }
-                  >
-                    {link.name}
-                  </a>
-                )
-              ))}
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden fixed inset-0 bg-black/35 z-[90]"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
 
-            </div>
-          </motion.div>
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="md:hidden fixed top-0 right-0 h-dvh w-[82%] max-w-[340px] bg-white shadow-2xl z-[100] border-l border-gray-200 flex flex-col"
+            >
+              <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Menu</div>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-1.5 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+                  aria-label="Close menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="px-4 py-3 flex-1 overflow-y-auto flex flex-col gap-1">
+                {navLinks.map((link) => (
+                  link.dropdown ? (
+                    <div key={link.name} className="flex flex-col gap-1 py-2 border-b border-gray-100 last:border-b-0">
+                      <div className="text-[11px] font-semibold px-3 text-gray-500 uppercase tracking-wider mb-1">{link.name}</div>
+                      {link.dropdown.map((item) => (
+                        <a
+                          key={item.name}
+                          href={item.path || getHref(item.hash)}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="text-[15px] font-medium py-2 px-3 rounded-lg text-gray-700 hover:text-purple-700 hover:bg-purple-50 transition-colors"
+                        >
+                          {item.name}
+                        </a>
+                      ))}
+                    </div>
+                  ) : (
+                    <a
+                      key={link.name}
+                      href={link.path || getHref(link.hash)}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={
+                        link.hash === "#contact"
+                          ? `mt-3 text-[15px] font-semibold py-2.5 px-3 rounded-lg text-center transition-colors ${
+                              activeHash === link.hash
+                                ? "bg-blue-700 text-white"
+                                : "bg-blue-600 text-white hover:bg-blue-700"
+                            }`
+                          : `text-[15px] font-medium py-2.5 px-3 rounded-lg transition-colors ${
+                              activeHash === (link.path || link.hash)
+                                ? "text-purple-700 bg-purple-50"
+                                : "text-gray-700 hover:text-purple-600 hover:bg-purple-50"
+                            }`
+                      }
+                    >
+                      {link.name}
+                    </a>
+                  )
+                ))}
+              </div>
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
     </nav>

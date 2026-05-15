@@ -1,9 +1,40 @@
 import { motion } from "motion/react";
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import homeImg from "@/assets/home ng no.PNG";
 import leftImg from "@/assets/comrerh Com reg no bg .PNG";
 import rightImg from "@/assets/tracking no bg .PNG";
 
 export function Hero() {
+  const [shouldAnimate, setShouldAnimate] = useState(true);
+
+  useEffect(() => {
+    const preload = document.createElement("link");
+    preload.rel = "preload";
+    preload.as = "image";
+    preload.href = homeImg;
+    document.head.appendChild(preload);
+
+    return () => {
+      document.head.removeChild(preload);
+    };
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateAnimationPref = () => {
+      const lowPowerMobile = window.innerWidth < 768;
+      setShouldAnimate(!mediaQuery.matches && !lowPowerMobile);
+    };
+    updateAnimationPref();
+    mediaQuery.addEventListener("change", updateAnimationPref);
+    window.addEventListener("resize", updateAnimationPref);
+    return () => {
+      mediaQuery.removeEventListener("change", updateAnimationPref);
+      window.removeEventListener("resize", updateAnimationPref);
+    };
+  }, []);
+
   return (
     <section
       id="home"
@@ -27,7 +58,7 @@ export function Hero() {
         xmlns="http://www.w3.org/2000/svg"
       >
         {/* Single S-curve wave bundle: top-right → center → bottom-right */}
-        {Array.from({ length: 28 }, (_, i) => {
+        {Array.from({ length: 16 }, (_, i) => {
           const o = i * 5; // 5px spacing between lines
           return (
             <path
@@ -53,10 +84,10 @@ export function Hero() {
               className="text-3xl sm:text-5xl lg:text-[4.15rem] font-extrabold leading-[1.08] text-[#0F2A5F] mb-5 sm:mb-6 tracking-[-0.02em]"
             >
               <span className="bg-gradient-to-r from-[#0F2A5F] via-[#1E3A8A] to-[#2563EB] bg-clip-text text-transparent sm:whitespace-nowrap">
-                Finovert: Your Virtual
+                Finance and compliance
               </span>
               <br />
-              <span className="text-[#0B1220]">CFO Platform</span>
+              <span className="text-[#0B1220]">for startups in one platform.</span>
             </motion.h1>
 
             {/* Subheading */}
@@ -64,39 +95,38 @@ export function Hero() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="text-base sm:text-2xl lg:text-[2rem] text-gray-700 italic mb-8 sm:mb-10 leading-snug font-medium"
+              className="text-base sm:text-2xl lg:text-[2rem] text-gray-700 mb-8 sm:mb-10 leading-snug font-medium"
             >
-              Control and grow your entire business
+              Built for founders and growing teams.
               <br />
-              with professional expertise.
+              Faster decisions, cleaner compliance, and expert-backed execution.
             </motion.p>
 
-            {/* Google Play Button Only */}
+            {/* Primary + Secondary CTA */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.25 }}
-              className="flex items-center justify-center lg:justify-start gap-4 flex-wrap mb-10 lg:pl-40"
+              className="flex items-center justify-center lg:justify-start gap-4 flex-wrap mb-4"
             >
+              <Link
+                to="/careers"
+                className="inline-flex w-full max-w-[260px] sm:w-auto items-center justify-center bg-[#0F2A5F] hover:bg-[#0b1f47] text-white px-8 py-3.5 rounded-2xl transition-all duration-200 hover:shadow-lg font-semibold"
+              >
+                Get Started
+              </Link>
               <a
-                href="https://play.google.com/store/apps/details?id=com.brandovert.finovert&pcampaignid=web_share"
+                href="https://wa.me/916205425499"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-full max-w-[320px] sm:w-auto items-center justify-center gap-3 sm:gap-4 bg-black hover:bg-gray-900 text-white px-8 sm:px-11 py-3.5 sm:py-4 rounded-3xl transition-all duration-200 hover:shadow-xl active:scale-95 border border-gray-800"
+                className="inline-flex w-full max-w-[260px] sm:w-auto items-center justify-center bg-white hover:bg-gray-50 text-[#0F2A5F] px-8 py-3.5 rounded-2xl transition-all duration-200 border border-gray-300 font-semibold"
               >
-                {/* Official Google Play multicolor icon */}
-                <svg className="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                  <path fill="#4CAF50" d="M 8.4394531 6.078125 L 26.972656 24 L 8.4394531 41.921875 C 7.5554531 41.483875 7 40.578 7 39.556 L 7 8.4440001 C 7 7.422 7.5554531 6.516125 8.4394531 6.078125 z"/>
-                  <path fill="#F44336" d="M 34.123047 16.707031 L 26.972656 24 L 8.4394531 6.078125 C 8.6084531 5.994125 8.793 5.946 8.984 5.946 C 9.445 5.946 9.874 6.108 10.228 6.408 L 34.123047 16.707031 z"/>
-                  <path fill="#FFC107" d="M 41 24 C 41 25.385 40.245875 26.587 39.046875 27.212 L 34.123047 29.707031 L 26.972656 24 L 34.123047 16.707031 L 39.046875 20.788 C 40.245875 21.413 41 22.615 41 24 z"/>
-                  <path fill="#2196F3" d="M 34.123047 29.707031 L 10.228 41.592 C 9.874 41.892 9.445 42.054 8.984 42.054 C 8.793 42.054 8.6084531 42.005875 8.4394531 41.921875 L 26.972656 24 L 34.123047 29.707031 z"/>
-                </svg>
-                <div className="text-left leading-none">
-                  <div className="text-[10px] sm:text-xs font-normal text-gray-400 tracking-widest uppercase mb-1">Get it on</div>
-                  <div className="text-2xl sm:text-[1.7rem] font-semibold tracking-tight leading-none">Google Play</div>
-                </div>
+                Talk to Expert
               </a>
             </motion.div>
+            <p className="text-sm text-gray-600 text-center lg:text-left">
+              Trusted by 500+ startups across finance, tax, and compliance workflows.
+            </p>
           </div>
 
 
@@ -115,14 +145,15 @@ export function Hero() {
               style={{ marginRight: "-40px", marginBottom: "0px" }}
             >
               <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                animate={shouldAnimate ? { y: [0, -10, 0] } : undefined}
+                transition={shouldAnimate ? { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 } : undefined}
               >
                 <img
                   src={leftImg}
                   alt="Company Registration"
                   className="w-auto object-contain drop-shadow-xl"
                   style={{ height: 340 }}
+                  loading="lazy"
                 />
               </motion.div>
             </motion.div>
@@ -136,13 +167,15 @@ export function Hero() {
               className="relative z-20"
             >
               <motion.div
-                animate={{ y: [0, -14, 0] }}
-                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                animate={shouldAnimate ? { y: [0, -14, 0] } : undefined}
+                transition={shouldAnimate ? { duration: 4.5, repeat: Infinity, ease: "easeInOut" } : undefined}
               >
                 <img
                   src={homeImg}
                   alt="App Home"
                   className="h-[340px] sm:h-[440px] w-auto object-contain drop-shadow-2xl"
+                  loading="eager"
+                  fetchPriority="high"
                 />
               </motion.div>
             </motion.div>
@@ -157,14 +190,15 @@ export function Hero() {
               style={{ marginLeft: "-40px", marginBottom: "0px" }}
             >
               <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                animate={shouldAnimate ? { y: [0, -10, 0] } : undefined}
+                transition={shouldAnimate ? { duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1 } : undefined}
               >
                 <img
                   src={rightImg}
                   alt="Tracking"
                   className="w-auto object-contain drop-shadow-xl"
                   style={{ height: 340 }}
+                  loading="lazy"
                 />
 
               </motion.div>

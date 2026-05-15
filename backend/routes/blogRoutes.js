@@ -293,7 +293,7 @@ async function fetchAndSaveNews() {
 // GET all blogs
 router.get('/', async (req, res) => {
   try {
-    const blogs = await Blog.find().sort({ createdAt: -1 });
+    const blogs = await Blog.find({}, { content: 0 }).sort({ createdAt: -1 }).lean();
     res.json(blogs);
   } catch (error) {
     res.status(500).json({ message: error.message });

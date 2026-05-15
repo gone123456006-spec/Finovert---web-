@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Target, Shield, Award, Linkedin, Twitter } from "lucide-react";
+import { Linkedin, Twitter } from "lucide-react";
 import { SEO } from "../components/SEO";
 
 // Images for the team
@@ -65,9 +65,6 @@ export function AboutPage() {
               whileHover={{ y: -5 }}
               className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100"
             >
-              <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-                <Target className="w-7 h-7 text-blue-600" />
-              </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Our Mission</h3>
               <p className="text-gray-600 leading-relaxed text-lg">
                 To empower businesses with professional financial expertise through a seamless, automated digital platform.
@@ -78,9 +75,6 @@ export function AboutPage() {
               whileHover={{ y: -5 }}
               className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100"
             >
-              <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center mb-6">
-                <Shield className="w-7 h-7 text-purple-600" />
-              </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Our Vision</h3>
               <p className="text-gray-600 leading-relaxed text-lg">
                 To become the global standard for full-stack financial compliance and virtual CFO services.
@@ -91,9 +85,6 @@ export function AboutPage() {
               whileHover={{ y: -5 }}
               className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100"
             >
-              <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mb-6">
-                <Award className="w-7 h-7 text-green-600" />
-              </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Our Values</h3>
               <p className="text-gray-600 leading-relaxed text-lg">
                 Integrity, innovation, and absolute transparency in every financial transaction we handle.

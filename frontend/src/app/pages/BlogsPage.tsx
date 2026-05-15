@@ -86,6 +86,7 @@ const BLOG_POSTS = [
 ];
 
 const CATEGORIES = ["All", "Finance", "Technology", "SEO", "Engineering", "Company", "Security"];
+const BLOG_CACHE_KEY = "finovert_blogs_cache_v1";
 
 export function BlogsPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -94,24 +95,45 @@ export function BlogsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch blogs from backend
+    const controller = new AbortController();
+
+    // Show cached blogs immediately for faster first paint.
+    try {
+      const cached = localStorage.getItem(BLOG_CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setBlogs(parsed);
+          setLoading(false);
+        }
+      }
+    } catch (_error) {
+      // Ignore cache parsing errors.
+    }
+
+    // Fetch latest blogs from backend
     const fetchBlogs = async () => {
       try {
-        const response = await fetch(`${API_BASE}/api/blogs`);
+        const response = await fetch(`${API_BASE}/api/blogs`, { signal: controller.signal });
         if (response.ok) {
           const data = await response.json();
           if (data.length > 0) {
             setBlogs(data);
+            localStorage.setItem(BLOG_CACHE_KEY, JSON.stringify(data));
           }
         }
       } catch (error) {
-        console.error("Failed to fetch blogs from backend, using default fallback data.");
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          console.error("Failed to fetch blogs from backend, using fallback/cached data.");
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchBlogs();
+
+    return () => controller.abort();
   }, []);
 
   const filteredPosts = useMemo(() => {

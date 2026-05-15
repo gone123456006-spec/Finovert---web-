@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Lock, FileText, CheckCircle, AlertCircle, BadgeCheck, Users, Clock, Briefcase, Trash2, Download, XCircle, Check, Mail, Building, Calendar, RefreshCw } from "lucide-react";
+import { Lock, FileText, CheckCircle, AlertCircle, BadgeCheck, Users, Clock, Briefcase, Trash2, Download, XCircle, Check, Mail, Building, Calendar, RefreshCw, PhoneCall } from "lucide-react";
 import API_BASE from "../../config/api";
 
 export function AdminDashboard() {
@@ -24,10 +24,11 @@ export function AdminDashboard() {
   // Dashboard States
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "fetching">("idle");
   const [fetchMessage, setFetchMessage] = useState("");
-  const [activeTab, setActiveTab] = useState<"blog" | "verification" | "requests" | "interns" | "email">("blog");
+  const [activeTab, setActiveTab] = useState<"blog" | "verification" | "requests" | "interns" | "consultations" | "email">("blog");
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [allBlogs, setAllBlogs] = useState<any[]>([]);
   const [interns, setInterns] = useState<any[]>([]);
+  const [consultations, setConsultations] = useState<any[]>([]);
   const [allVerifications, setAllVerifications] = useState<any[]>([]);
   const [expandedSubAdmin, setExpandedSubAdmin] = useState<string | null>(null);
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
@@ -104,6 +105,15 @@ export function AdminDashboard() {
     }
   };
 
+  const fetchConsultations = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/consultations`);
+      if (res.ok) setConsultations(await res.json());
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   useEffect(() => {
     if (authRole) {
       fetchAllBlogs();
@@ -111,6 +121,7 @@ export function AdminDashboard() {
     if (authRole === "main_admin") {
       if (activeTab === "requests") fetchPendingRequests();
       if (activeTab === "interns") fetchInterns();
+      if (activeTab === "consultations") fetchConsultations();
       if (activeTab === "verification") {
         fetchVerifications(); // ID auto-updated inside fetchVerifications
       }
@@ -464,6 +475,7 @@ export function AdminDashboard() {
               <button onClick={() => setActiveTab("verification")} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === "verification" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}><BadgeCheck className="w-4 h-4" /> Verify</button>
               <button onClick={() => setActiveTab("requests")} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === "requests" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}><Users className="w-4 h-4" /> Team</button>
               <button onClick={() => setActiveTab("interns")} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === "interns" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}><Briefcase className="w-4 h-4" /> Intern Apps</button>
+              <button onClick={() => setActiveTab("consultations")} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === "consultations" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}><PhoneCall className="w-4 h-4" /> Consultations</button>
               <button onClick={() => setActiveTab("email")} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === "email" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}><Mail className="w-4 h-4" /> Email</button>
             </div>
           )}
@@ -747,6 +759,55 @@ export function AdminDashboard() {
                                 <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {authRole === "main_admin" && activeTab === "consultations" && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-100 pb-4"><PhoneCall className="w-5 h-5 text-blue-600" /> Consultation Requests</h2>
+              {consultations.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No consultation requests found.</p>
+              ) : (
+                <div className="overflow-x-auto rounded-xl shadow-sm">
+                  <table className="w-full min-w-max text-left border-collapse whitespace-nowrap border border-gray-200 bg-white">
+                    <thead>
+                      <tr className="bg-gray-100 text-gray-700 text-sm">
+                        <th className="w-12 px-4 py-3 font-semibold border border-gray-200 text-center">S.No.</th>
+                        <th className="px-4 py-3 font-semibold border border-gray-200">Name</th>
+                        <th className="px-4 py-3 font-semibold border border-gray-200">Contact</th>
+                        <th className="px-4 py-3 font-semibold border border-gray-200">Business Type</th>
+                        <th className="px-4 py-3 font-semibold border border-gray-200">Date</th>
+                        <th className="px-4 py-3 font-semibold text-right border border-gray-200">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {consultations.map((lead, index) => (
+                        <tr key={lead._id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-3 text-sm text-gray-500 font-medium border border-gray-200 text-center">{index + 1}</td>
+                          <td className="px-4 py-3 text-sm font-semibold text-gray-900 border border-gray-200">{lead.name}</td>
+                          <td className="px-4 py-3 text-sm text-gray-700 border border-gray-200">{lead.contact}</td>
+                          <td className="px-4 py-3 text-sm text-gray-700 border border-gray-200">{lead.businessType}</td>
+                          <td className="px-4 py-3 text-sm text-gray-500 border border-gray-200">{new Date(lead.createdAt).toLocaleDateString()}</td>
+                          <td className="px-4 py-3 text-right border border-gray-200">
+                            <button
+                              onClick={async () => {
+                                if (confirm("Delete this consultation request?")) {
+                                  const res = await fetch(`${API_BASE}/api/consultations/${lead._id}`, { method: "DELETE" });
+                                  if (res.ok) fetchConsultations();
+                                }
+                              }}
+                              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors inline-flex"
+                              title="Delete Request"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </td>
                         </tr>
                       ))}

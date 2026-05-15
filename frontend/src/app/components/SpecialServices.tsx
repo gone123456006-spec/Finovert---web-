@@ -93,6 +93,7 @@ export function SpecialServices() {
                   src={servicesImg}
                   alt="Finovert Services Grid"
                   className="w-full max-w-[500px] h-auto object-contain"
+                  loading="lazy"
                 />
               </div>
 

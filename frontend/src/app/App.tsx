@@ -8,6 +8,8 @@ import { BlogsPage } from "./pages/BlogsPage";
 import { BlogPostPage } from "./pages/BlogPostPage";
 import { AdminDashboard } from "./pages/AdminDashboard";
 import { CareersPage } from "./pages/CareersPage";
+import { FinanceGuidesPage } from "./pages/FinanceGuidesPage";
+import { MyAppPage } from "./pages/MyAppPage";
 
 import { AboutPage } from "./pages/AboutPage";
 
@@ -24,6 +26,8 @@ export default function App() {
         <Route path="blog/:slug" element={<BlogPostPage />} />
         <Route path="admin" element={<AdminDashboard />} />
         <Route path="careers" element={<CareersPage />} />
+        <Route path="finance-guides" element={<FinanceGuidesPage />} />
+        <Route path="my-app" element={<MyAppPage />} />
       </Route>
     </Routes>
   );
