@@ -1,6 +1,11 @@
 import { motion } from "motion/react";
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+
+const WHATSAPP_GET_STARTED =
+  "https://wa.me/919153832948?text=" +
+  encodeURIComponent(
+    "Hi Finovert! I visited your website and would like to get started with finance and compliance services for my startup. Please guide me on the next steps."
+  );
 import homeImg from "@/assets/home ng no.PNG";
 import leftImg from "@/assets/comrerh Com reg no bg .PNG";
 import rightImg from "@/assets/tracking no bg .PNG";
@@ -9,6 +14,8 @@ export function Hero() {
   const [shouldAnimate, setShouldAnimate] = useState(true);
 
   useEffect(() => {
+    if (window.innerWidth < 768) return;
+
     const preload = document.createElement("link");
     preload.rel = "preload";
     preload.as = "image";
@@ -38,7 +45,7 @@ export function Hero() {
   return (
     <section
       id="home"
-      className="relative overflow-hidden min-h-[640px] lg:min-h-[800px] pt-20"
+      className="relative overflow-hidden min-h-0 md:min-h-[640px] lg:min-h-[800px] pt-20 pb-8 md:pb-0"
       style={{ background: "linear-gradient(135deg, #f8f4ff 0%, #fce8f8 30%, #f5f0ff 60%, #ede8ff 100%)" }}
     >
       {/* Purple/lavender blob — top left */}
@@ -107,19 +114,21 @@ export function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.25 }}
-              className="flex items-center justify-center lg:justify-start gap-4 flex-wrap mb-4"
+              className="flex flex-nowrap items-center justify-center lg:justify-start gap-2 sm:gap-4 mb-4 w-full overflow-x-auto scrollbar-hide"
             >
-              <Link
-                to="/careers"
-                className="inline-flex w-full max-w-[260px] sm:w-auto items-center justify-center bg-[#0F2A5F] hover:bg-[#0b1f47] text-white px-8 py-3.5 rounded-2xl transition-all duration-200 hover:shadow-lg font-semibold"
+              <a
+                href={WHATSAPP_GET_STARTED}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex shrink-0 whitespace-nowrap items-center justify-center bg-[#0F2A5F] hover:bg-[#0b1f47] text-white px-5 py-3 sm:px-8 sm:py-3.5 text-sm sm:text-base rounded-2xl transition-all duration-200 hover:shadow-lg font-semibold"
               >
                 Get Started
-              </Link>
+              </a>
               <a
                 href="https://wa.me/916205425499"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex w-full max-w-[260px] sm:w-auto items-center justify-center bg-white hover:bg-gray-50 text-[#0F2A5F] px-8 py-3.5 rounded-2xl transition-all duration-200 border border-gray-300 font-semibold"
+                className="inline-flex shrink-0 whitespace-nowrap items-center justify-center bg-white hover:bg-gray-50 text-[#0F2A5F] px-5 py-3 sm:px-8 sm:py-3.5 text-sm sm:text-base rounded-2xl transition-all duration-200 border border-gray-300 font-semibold"
               >
                 Talk to Expert
               </a>
@@ -130,8 +139,8 @@ export function Hero() {
           </div>
 
 
-          {/* Right Side: Phone Mockups */}
-          <div className="relative flex items-end justify-center lg:justify-end overflow-visible min-h-[340px] sm:min-h-[450px]">
+          {/* Phone mockups — desktop/tablet only (hidden on mobile) */}
+          <div className="relative hidden md:flex items-end justify-center lg:justify-end overflow-visible min-h-[450px]">
             {/* Subtle glow under phones */}
             <div className="absolute bottom-0 right-0 lg:right-20 w-[400px] h-24 bg-purple-100 blur-3xl opacity-40 rounded-full -z-10" />
 

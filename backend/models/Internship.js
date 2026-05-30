@@ -8,9 +8,11 @@ const InternshipSchema = new mongoose.Schema({
   course: { type: String, required: true },
   branch: { type: String, required: true },
   yearOfStudy: { type: String, required: true },
+  preferredRole: { type: String, required: true },
+  eligibilityReason: { type: String, default: '' },
   resumeUrl: { type: String, required: true },
-  idProofUrl: { type: String, required: true },
-  collegeIdUrl: { type: String, required: true },
+  idProofUrl: { type: String, default: '' },
+  collegeIdUrl: { type: String, default: '' },
   status: { type: String, enum: ['pending', 'selected', 'rejected'], default: 'pending' },
   createdAt: { type: Date, default: Date.now }
 });

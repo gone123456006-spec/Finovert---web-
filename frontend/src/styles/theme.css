@@ -191,3 +191,50 @@
     font-family: inherit;
   }
 }
+
+/* Hide scrollbars on horizontal scroll areas; touch/swipe scrolling still works */
+.scrollbar-hide,
+.overflow-x-auto {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar,
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
+@keyframes marquee-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee-x {
+  animation: marquee-x var(--marquee-duration, 42s) linear infinite;
+  width: max-content;
+}
+
+.animate-marquee-x:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-x {
+    animation: none;
+  }
+}
+
+/* iOS Safari auto-zooms focused fields below 16px — keep inputs at 16px on mobile */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}

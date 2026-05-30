@@ -1,10 +1,124 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
-import { Lock, FileText, CheckCircle, AlertCircle, BadgeCheck, Users, Clock, Briefcase, Trash2, Download, XCircle, Check, Mail, Building, Calendar, RefreshCw, PhoneCall } from "lucide-react";
+import { Lock, FileText, CheckCircle, AlertCircle, BadgeCheck, Users, Clock, Briefcase, Trash2, Download, XCircle, Check, Mail, Building, Calendar, RefreshCw, PhoneCall, Filter, Search, LogOut, FileSpreadsheet, Receipt } from "lucide-react";
+
+const AUTH_STORAGE_KEY = "finovert_admin_session";
+const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+
+type AdminSession = {
+  role: "main_admin" | "sub_admin";
+  user: { name: string; username: string };
+  loggedInAt: number;
+};
+
+function readAdminSession(): AdminSession | null {
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    if (!raw) return null;
+    const session = JSON.parse(raw) as AdminSession;
+    if (!session?.role || !session?.loggedInAt || !session?.user) return null;
+    if (Date.now() - session.loggedInAt > SESSION_MAX_AGE_MS) {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      return null;
+    }
+    return session;
+  } catch {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    return null;
+  }
+}
+
+function saveAdminSession(role: AdminSession["role"], user: AdminSession["user"]) {
+  const session: AdminSession = { role, user, loggedInAt: Date.now() };
+  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
+}
+
+function clearAdminSession() {
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+}
+
+function escapeCsvCell(value: unknown) {
+  const s = String(value ?? "").replace(/"/g, '""');
+  return /[",\n\r]/.test(s) ? `"${s}"` : s;
+}
+
+function exportInternsToExcel(interns: {
+  fullName?: string;
+  phone?: string;
+  email?: string;
+  collegeName?: string;
+  course?: string;
+  branch?: string;
+  yearOfStudy?: string;
+  preferredRole?: string;
+  eligibilityReason?: string;
+  status?: string;
+  createdAt?: string;
+  resumeUrl?: string;
+}[]) {
+  const headers = [
+    "S.No.",
+    "Full Name",
+    "Phone",
+    "Email",
+    "College",
+    "Course",
+    "Branch",
+    "Year of Study",
+    "Preferred Role",
+    "Why Eligible",
+    "Status",
+    "Applied Date",
+    "Resume Uploaded",
+  ];
+  const rows = interns.map((intern, index) => [
+    index + 1,
+    intern.fullName ?? "",
+    intern.phone ?? "",
+    intern.email ?? "",
+    intern.collegeName ?? "",
+    intern.course ?? "",
+    intern.branch ?? "",
+    intern.yearOfStudy ?? "",
+    intern.preferredRole ?? "",
+    intern.eligibilityReason ?? "",
+    intern.status || "pending",
+    intern.createdAt ? new Date(intern.createdAt).toLocaleString() : "",
+    intern.resumeUrl ? "Yes" : "No",
+  ]);
+  const csv = [headers, ...rows]
+    .map((row) => row.map(escapeCsvCell).join(","))
+    .join("\r\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `join-our-team-applications-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+const INTERN_PREFERRED_ROLES = [
+  "Marketing",
+  "Tech",
+  "Business and Sales",
+  "Finance and Accounting",
+  "Human Resources",
+  "Operations",
+  "Design and Creative",
+  "Content and Social Media",
+  "Product Management",
+  "Data and Analytics",
+  "Customer Support",
+  "Marketing and Tech",
+] as const;
 import API_BASE from "../../config/api";
 
 export function AdminDashboard() {
   const [authRole, setAuthRole] = useState<"main_admin" | "sub_admin" | null>(null);
+  const [authRestored, setAuthRestored] = useState(false);
   const [currentUser, setCurrentUser] = useState<{name: string, username: string} | null>(null);
   const [loginMode, setLoginMode] = useState<"main" | "sub_login" | "sub_request">("main");
   
@@ -24,11 +138,18 @@ export function AdminDashboard() {
   // Dashboard States
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "fetching">("idle");
   const [fetchMessage, setFetchMessage] = useState("");
-  const [activeTab, setActiveTab] = useState<"blog" | "verification" | "requests" | "interns" | "consultations" | "email">("blog");
+  const [activeTab, setActiveTab] = useState<
+    "blog" | "verification" | "requests" | "interns" | "consultations" | "taxFilings" | "email"
+  >("blog");
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [allBlogs, setAllBlogs] = useState<any[]>([]);
   const [interns, setInterns] = useState<any[]>([]);
+  const [internSearch, setInternSearch] = useState("");
+  const [internFilterStatus, setInternFilterStatus] = useState<"all" | "pending" | "selected" | "rejected">("all");
+  const [internFilterRole, setInternFilterRole] = useState("all");
+  const [internFilterCourse, setInternFilterCourse] = useState("all");
   const [consultations, setConsultations] = useState<any[]>([]);
+  const [taxFilings, setTaxFilings] = useState<any[]>([]);
   const [allVerifications, setAllVerifications] = useState<any[]>([]);
   const [expandedSubAdmin, setExpandedSubAdmin] = useState<string | null>(null);
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
@@ -57,7 +178,32 @@ export function AdminDashboard() {
   useEffect(() => {
     document.title = "Admin Dashboard | Finovert";
     generateCaptcha();
+
+    const session = readAdminSession();
+    if (session) {
+      setAuthRole(session.role);
+      setCurrentUser(session.user);
+      if (session.role === "sub_admin") {
+        setFormData((prev) => ({ ...prev, author: session.user.name }));
+        setActiveTab("blog");
+      }
+    }
+    setAuthRestored(true);
   }, []);
+
+  const handleLogout = () => {
+    clearAdminSession();
+    setAuthRole(null);
+    setCurrentUser(null);
+    setPassword("");
+    setSubUsername("");
+    setSubPassword("");
+    setUserCaptcha("");
+    setError("");
+    setSuccessMsg("");
+    setLoginMode("main");
+    generateCaptcha();
+  };
 
   const fetchPendingRequests = async () => {
     try {
@@ -114,6 +260,15 @@ export function AdminDashboard() {
     }
   };
 
+  const fetchTaxFilings = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/tax-filings`);
+      if (res.ok) setTaxFilings(await res.json());
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   useEffect(() => {
     if (authRole) {
       fetchAllBlogs();
@@ -122,11 +277,60 @@ export function AdminDashboard() {
       if (activeTab === "requests") fetchPendingRequests();
       if (activeTab === "interns") fetchInterns();
       if (activeTab === "consultations") fetchConsultations();
+      if (activeTab === "taxFilings") fetchTaxFilings();
       if (activeTab === "verification") {
         fetchVerifications(); // ID auto-updated inside fetchVerifications
       }
     }
   }, [authRole, activeTab]);
+
+  const internCourseOptions = useMemo(() => {
+    const courses = new Set<string>();
+    interns.forEach((i) => {
+      if (i.course) courses.add(i.course);
+    });
+    return Array.from(courses).sort();
+  }, [interns]);
+
+  const filteredInterns = useMemo(() => {
+    const q = internSearch.trim().toLowerCase();
+    return interns.filter((intern) => {
+      const status = intern.status || "pending";
+      if (internFilterStatus !== "all" && status !== internFilterStatus) return false;
+      if (internFilterRole !== "all" && intern.preferredRole !== internFilterRole) return false;
+      if (internFilterCourse !== "all" && intern.course !== internFilterCourse) return false;
+      if (!q) return true;
+      const haystack = [
+        intern.fullName,
+        intern.email,
+        intern.phone,
+        intern.collegeName,
+        intern.course,
+        intern.branch,
+        intern.preferredRole,
+        intern.eligibilityReason,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [interns, internSearch, internFilterStatus, internFilterRole, internFilterCourse]);
+
+  const clearInternFilters = () => {
+    setInternSearch("");
+    setInternFilterStatus("all");
+    setInternFilterRole("all");
+    setInternFilterCourse("all");
+  };
+
+  const handleExportInterns = () => {
+    if (interns.length === 0) {
+      alert("No applications to export.");
+      return;
+    }
+    exportInternsToExcel(interns);
+  };
 
   const handleInternStatus = async (id: string, newStatus: 'selected' | 'rejected') => {
     try {
@@ -214,7 +418,12 @@ export function AdminDashboard() {
       const data = await response.json();
 
       if (response.ok) {
+        const user = { name: "Main Admin", username: "admin" };
         setAuthRole("main_admin");
+        setCurrentUser(user);
+        saveAdminSession("main_admin", user);
+        setPassword("");
+        setUserCaptcha("");
         setError("");
       } else {
         setError(data.message || "Login failed.");
@@ -267,8 +476,10 @@ export function AdminDashboard() {
       if (res.ok) {
         setAuthRole("sub_admin");
         setCurrentUser(data.user);
+        saveAdminSession("sub_admin", data.user);
         setFormData(prev => ({ ...prev, author: data.user.name }));
         setActiveTab("blog"); // Sub-admins only see blogs
+        setSubPassword("");
         setError("");
       } else {
         setError(data.message);
@@ -395,6 +606,14 @@ export function AdminDashboard() {
     }
   };
 
+  if (!authRestored) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   if (!authRole) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -458,33 +677,69 @@ export function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24 pb-20">
-      <div className="max-w-[80%] mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 pt-6 pb-12">
+      <div className={`w-full max-w-full ${activeTab === "interns" ? "px-2 sm:px-3" : "px-3 sm:px-4 lg:px-6"}`}>
         
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <Lock className="w-8 h-8 text-blue-600" />
-              {authRole === "main_admin" ? "Master Portal" : `Writer Portal - Welcome, ${currentUser?.name}`}
+        <div className="sticky top-0 z-40 -mx-3 sm:-mx-4 lg:-mx-6 px-3 sm:px-4 lg:px-6 py-2.5 mb-4 bg-gray-50/95 backdrop-blur-md border-b border-gray-200/80">
+          <div className="flex items-center gap-3 min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2 shrink-0 whitespace-nowrap">
+              <Lock className="w-5 h-5 text-blue-600 shrink-0" />
+              <span className="hidden sm:inline">
+                {authRole === "main_admin" ? "Master Portal" : `Writer Portal — ${currentUser?.name}`}
+              </span>
+              <span className="sm:hidden">{authRole === "main_admin" ? "Portal" : "Writer"}</span>
             </h1>
-          </div>
-          
-          {authRole === "main_admin" && (
-            <div className="flex gap-2 bg-white p-1.5 rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
-              <button onClick={() => setActiveTab("blog")} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === "blog" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}><FileText className="w-4 h-4" /> Blogs</button>
-              <button onClick={() => setActiveTab("verification")} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === "verification" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}><BadgeCheck className="w-4 h-4" /> Verify</button>
-              <button onClick={() => setActiveTab("requests")} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === "requests" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}><Users className="w-4 h-4" /> Team</button>
-              <button onClick={() => setActiveTab("interns")} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === "interns" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}><Briefcase className="w-4 h-4" /> Intern Apps</button>
-              <button onClick={() => setActiveTab("consultations")} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === "consultations" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}><PhoneCall className="w-4 h-4" /> Consultations</button>
-              <button onClick={() => setActiveTab("email")} className={`px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 whitespace-nowrap ${activeTab === "email" ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-50"}`}><Mail className="w-4 h-4" /> Email</button>
+
+            <div className="flex items-center gap-2 min-w-0 flex-1 justify-end overflow-x-auto">
+              {authRole === "main_admin" && (
+                <div className="flex gap-1 bg-white p-1 rounded-lg shadow-sm border border-gray-200 shrink-0">
+                  {([
+                    ["blog", FileText, "Blogs"],
+                    ["verification", BadgeCheck, "Verify"],
+                    ["requests", Users, "Team"],
+                    ["interns", Briefcase, "Join Our Team"],
+                    ["consultations", PhoneCall, "Consultations"],
+                    ["taxFilings", Receipt, "Tax Filing"],
+                    ["email", Mail, "Email"],
+                  ] as const).map(([tab, Icon, label]) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-2.5 py-1.5 rounded-md font-medium text-xs flex items-center gap-1.5 whitespace-nowrap transition-colors ${
+                        activeTab === tab
+                          ? "bg-blue-600 text-white shadow-sm"
+                          : "text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5 shrink-0" />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-semibold hover:bg-red-100 transition-colors whitespace-nowrap shrink-0"
+              >
+                <LogOut className="w-3.5 h-3.5" /> Logout
+              </button>
             </div>
-          )}
+          </div>
         </div>
 
         {status === "success" && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-700 font-medium"><CheckCircle className="w-6 h-6" /> {fetchMessage}</motion.div>}
         {status === "error" && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700 font-medium"><AlertCircle className="w-6 h-6" /> {fetchMessage || "An error occurred."}</motion.div>}
 
-        <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`bg-white shadow-sm border border-gray-200 w-full ${
+            activeTab === "interns" ? "rounded-2xl p-3 sm:p-4" : "rounded-3xl p-8"
+          }`}
+        >
           
           {activeTab === "blog" && (
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -692,73 +947,266 @@ export function AdminDashboard() {
 
           {authRole === "main_admin" && activeTab === "interns" && (
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-100 pb-4"><Briefcase className="w-5 h-5 text-blue-600" /> Internship Applications</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 border-b border-gray-100 pb-4">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <Briefcase className="w-5 h-5 text-blue-600" /> Join Our Team Applications
+                </h2>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleExportInterns}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-green-700 bg-green-50 border border-green-200 rounded-xl hover:bg-green-100 transition-colors"
+                  >
+                    <FileSpreadsheet className="w-4 h-4" /> Export Excel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={fetchInterns}
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
+                  >
+                    <RefreshCw className="w-4 h-4" /> Refresh
+                  </button>
+                </div>
+              </div>
+
+              {/* Filters — single row */}
+              <div className="mb-6 p-4 bg-gray-50 rounded-2xl border border-gray-200">
+                <div className="flex flex-wrap items-end gap-3">
+                  <div className="flex items-center gap-2 shrink-0 pb-2.5 pr-1">
+                    <Filter className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-bold text-gray-800 whitespace-nowrap">Filter</span>
+                  </div>
+                  <div className="flex-1 min-w-[200px]">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">Search</label>
+                    <div className="relative">
+                      <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={internSearch}
+                        onChange={(e) => setInternSearch(e.target.value)}
+                        placeholder="Name, email, phone, college, role..."
+                        className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm outline-none focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="w-[130px] shrink-0">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">Status</label>
+                    <select
+                      value={internFilterStatus}
+                      onChange={(e) => setInternFilterStatus(e.target.value as typeof internFilterStatus)}
+                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm outline-none focus:border-blue-500"
+                    >
+                      <option value="all">All statuses</option>
+                      <option value="pending">Pending</option>
+                      <option value="selected">Selected</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+                  <div className="w-[150px] shrink-0">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">Preferred role</label>
+                    <select
+                      value={internFilterRole}
+                      onChange={(e) => setInternFilterRole(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm outline-none focus:border-blue-500"
+                    >
+                      <option value="all">All roles</option>
+                      {INTERN_PREFERRED_ROLES.map((role) => (
+                        <option key={role} value={role}>{role}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-[130px] shrink-0">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">Course</label>
+                    <select
+                      value={internFilterCourse}
+                      onChange={(e) => setInternFilterCourse(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm outline-none focus:border-blue-500"
+                    >
+                      <option value="all">All courses</option>
+                      {internCourseOptions.map((course) => (
+                        <option key={course} value={course}>{course}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={clearInternFilters}
+                    className="shrink-0 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors whitespace-nowrap"
+                  >
+                    Clear filters
+                  </button>
+                  <span className="shrink-0 text-sm text-gray-500 pb-2.5 whitespace-nowrap">
+                    Showing <strong className="text-gray-800">{filteredInterns.length}</strong> of <strong className="text-gray-800">{interns.length}</strong>
+                  </span>
+                </div>
+              </div>
+
               {interns.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No internship applications found.</p>
+                <p className="text-gray-500 text-center py-8">No Join Our Team applications yet.</p>
+              ) : filteredInterns.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No applications match your filters.</p>
+              ) : (
+                <div className="w-full rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <table className="w-full table-fixed border-collapse text-xs sm:text-sm bg-white">
+                    <thead>
+                      <tr className="bg-gray-100 text-gray-700">
+                        <th className="w-[3%] px-1.5 py-2 font-semibold border border-gray-200 text-center">S.No.</th>
+                        <th className="w-[8%] px-1.5 py-2 font-semibold border border-gray-200">Full Name</th>
+                        <th className="w-[7%] px-1.5 py-2 font-semibold border border-gray-200">Phone</th>
+                        <th className="w-[10%] px-1.5 py-2 font-semibold border border-gray-200">Email</th>
+                        <th className="w-[9%] px-1.5 py-2 font-semibold border border-gray-200">College</th>
+                        <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200">Course</th>
+                        <th className="w-[8%] px-1.5 py-2 font-semibold border border-gray-200">Branch</th>
+                        <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200">Year</th>
+                        <th className="w-[8%] px-1.5 py-2 font-semibold border border-gray-200">Role</th>
+                        <th className="w-[12%] px-1.5 py-2 font-semibold border border-gray-200">Why eligible</th>
+                        <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200">Resume</th>
+                        <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200 text-center">Status</th>
+                        <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200">Applied</th>
+                        <th className="w-[5%] px-1.5 py-2 font-semibold border border-gray-200 text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredInterns.map((intern, index) => (
+                        <tr key={intern._id} className="hover:bg-gray-50 transition-colors align-top">
+                          <td className="px-1.5 py-2 text-gray-500 font-medium border border-gray-200 text-center">{index + 1}</td>
+                          <td className="px-1.5 py-2 font-semibold text-gray-900 border border-gray-200 break-words">{intern.fullName}</td>
+                          <td className="px-1.5 py-2 text-gray-700 border border-gray-200 break-words">{intern.phone}</td>
+                          <td className="px-1.5 py-2 text-gray-700 border border-gray-200 break-all">{intern.email}</td>
+                          <td className="px-1.5 py-2 text-gray-700 border border-gray-200 break-words">{intern.collegeName || "—"}</td>
+                          <td className="px-1.5 py-2 text-gray-700 border border-gray-200 break-words">{intern.course || "—"}</td>
+                          <td className="px-1.5 py-2 text-gray-700 border border-gray-200 break-words">{intern.branch || "—"}</td>
+                          <td className="px-1.5 py-2 text-blue-700 font-medium border border-gray-200 break-words">{intern.yearOfStudy || "—"}</td>
+                          <td className="px-1.5 py-2 border border-gray-200 break-words">
+                            {intern.preferredRole ? (
+                              <span className="inline-block px-1.5 py-0.5 rounded-lg bg-blue-50 text-blue-800 text-[10px] sm:text-xs font-semibold leading-tight">{intern.preferredRole}</span>
+                            ) : (
+                              <span className="text-gray-400">—</span>
+                            )}
+                          </td>
+                          <td className="px-1.5 py-2 text-gray-600 border border-gray-200 break-words">
+                            {intern.eligibilityReason ? (
+                              <p className="line-clamp-3" title={intern.eligibilityReason}>{intern.eligibilityReason}</p>
+                            ) : (
+                              <span className="text-gray-400 italic text-[10px]">Not provided</span>
+                            )}
+                          </td>
+                          <td className="px-1.5 py-2 border border-gray-200">
+                            {intern.resumeUrl ? (
+                              <button onClick={(e) => handleDownload(e, intern.resumeUrl, `${intern.fullName.replace(/\s+/g, '_')}_Resume`)} className="flex items-center gap-0.5 text-[10px] sm:text-xs font-semibold text-blue-600 hover:underline bg-transparent border-none p-0 cursor-pointer break-words text-left">
+                                <Download className="w-3 h-3 shrink-0" /> DL
+                              </button>
+                            ) : (
+                              <span className="text-gray-400">—</span>
+                            )}
+                          </td>
+                          <td className="px-1.5 py-2 border border-gray-200 text-center">
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase ${intern.status === 'selected' ? 'bg-green-100 text-green-700' : intern.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                              {intern.status || 'pending'}
+                            </span>
+                          </td>
+                          <td className="px-1.5 py-2 text-gray-500 border border-gray-200 break-words text-[10px] sm:text-xs">
+                            {intern.createdAt ? new Date(intern.createdAt).toLocaleDateString() : "—"}
+                          </td>
+                          <td className="px-1 py-2 border border-gray-200">
+                            <div className="flex justify-end gap-1">
+                              {intern.status !== 'selected' && (
+                                <button onClick={() => handleInternStatus(intern._id, 'selected')} className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Select">
+                                  <Check className="w-4 h-4" />
+                                </button>
+                              )}
+                              {intern.status !== 'rejected' && (
+                                <button onClick={() => handleInternStatus(intern._id, 'rejected')} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Reject">
+                                  <XCircle className="w-4 h-4" />
+                                </button>
+                              )}
+                              <button onClick={async () => {
+                                if (confirm("Delete this application permanently?")) {
+                                  await fetch(`${API_BASE}/api/internships/${intern._id}`, { method: "DELETE" });
+                                  fetchInterns();
+                                }
+                              }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {authRole === "main_admin" && activeTab === "taxFilings" && (
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 border-b border-gray-100 pb-4">
+                <Receipt className="w-5 h-5 text-blue-600" /> Tax Filing (Chat)
+              </h2>
+              {taxFilings.length === 0 ? (
+                <p className="text-gray-500 text-center py-8">No tax filing submissions yet.</p>
               ) : (
                 <div className="overflow-x-auto rounded-xl shadow-sm">
                   <table className="w-full min-w-max text-left border-collapse whitespace-nowrap border border-gray-200 bg-white">
                     <thead>
                       <tr className="bg-gray-100 text-gray-700 text-sm">
                         <th className="w-12 px-4 py-3 font-semibold border border-gray-200 text-center">S.No.</th>
-                        <th className="px-4 py-3 font-semibold border border-gray-200">Candidate</th>
-                        <th className="px-4 py-3 font-semibold border border-gray-200">Education</th>
-                        <th className="px-4 py-3 font-semibold border border-gray-200">Documents</th>
-                        <th className="px-4 py-3 font-semibold border border-gray-200 text-center">Status</th>
+                        <th className="px-4 py-3 font-semibold border border-gray-200">PAN</th>
+                        <th className="px-4 py-3 font-semibold border border-gray-200">Email</th>
+                        <th className="px-4 py-3 font-semibold border border-gray-200">Income Sources</th>
+                        <th className="px-4 py-3 font-semibold border border-gray-200">Plan</th>
+                        <th className="px-4 py-3 font-semibold border border-gray-200">Total (Rs)</th>
+                        <th className="px-4 py-3 font-semibold border border-gray-200">Payment</th>
                         <th className="px-4 py-3 font-semibold border border-gray-200">Date</th>
                         <th className="px-4 py-3 font-semibold text-right border border-gray-200">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {interns.map((intern, index) => (
-                        <tr key={intern._id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 py-3 text-sm text-gray-500 font-medium border border-gray-200 text-center">{index + 1}</td>
-                          <td className="px-4 py-3 border border-gray-200">
-                            <p className="font-bold text-gray-900 text-sm">{intern.fullName}</p>
-                            <p className="text-xs text-gray-500">{intern.email}</p>
-                            <p className="text-xs text-gray-500">{intern.phone}</p>
+                      {taxFilings.map((row, index) => (
+                        <tr key={row._id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-3 text-sm text-gray-500 font-medium border border-gray-200 text-center">
+                            {index + 1}
                           </td>
-                          <td className="px-4 py-3 border border-gray-200">
-                            <p className="font-semibold text-gray-800 text-sm">{intern.course} - {intern.branch}</p>
-                            <p className="text-xs text-gray-500">{intern.collegeName}</p>
-                            <p className="text-xs text-blue-600 font-medium">{intern.yearOfStudy}</p>
+                          <td className="px-4 py-3 text-sm font-semibold text-gray-900 border border-gray-200">
+                            {row.pan}
                           </td>
-                          <td className="px-4 py-3 border border-gray-200">
-                            <div className="flex flex-col gap-1.5">
-                              <button onClick={(e) => handleDownload(e, intern.resumeUrl, `${intern.fullName.replace(/\s+/g, '_')}_Resume`)} className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline bg-transparent border-none p-0 cursor-pointer text-left"><Download className="w-3 h-3" /> Resume</button>
-                              <button onClick={(e) => handleDownload(e, intern.idProofUrl, `${intern.fullName.replace(/\s+/g, '_')}_ID_Proof`)} className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline bg-transparent border-none p-0 cursor-pointer text-left"><Download className="w-3 h-3" /> ID Proof</button>
-                              <button onClick={(e) => handleDownload(e, intern.collegeIdUrl, `${intern.fullName.replace(/\s+/g, '_')}_College_ID`)} className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline bg-transparent border-none p-0 cursor-pointer text-left"><Download className="w-3 h-3" /> College ID</button>
-                            </div>
+                          <td className="px-4 py-3 text-sm text-gray-700 border border-gray-200">{row.email}</td>
+                          <td className="px-4 py-3 text-sm text-gray-700 border border-gray-200 max-w-[220px] whitespace-normal">
+                            {Array.isArray(row.incomeSources) ? row.incomeSources.join(", ") : "—"}
                           </td>
-                          <td className="px-4 py-3 border border-gray-200 text-center">
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${intern.status === 'selected' ? 'bg-green-100 text-green-700' : intern.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                              {intern.status || 'pending'}
+                          <td className="px-4 py-3 text-sm text-gray-700 border border-gray-200">{row.planName}</td>
+                          <td className="px-4 py-3 text-sm text-gray-700 border border-gray-200">{row.totalAmount}</td>
+                          <td className="px-4 py-3 text-sm border border-gray-200">
+                            <span
+                              className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                row.paymentStatus === "paid"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-amber-100 text-amber-800"
+                              }`}
+                            >
+                              {row.paymentStatus === "paid" ? "Paid" : "Pending"}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-500 border border-gray-200 text-center">
-                            {new Date(intern.createdAt).toLocaleDateString()}
+                          <td className="px-4 py-3 text-sm text-gray-500 border border-gray-200">
+                            {new Date(row.createdAt).toLocaleDateString()}
                           </td>
                           <td className="px-4 py-3 text-right border border-gray-200">
-                            <div className="flex justify-end gap-2">
-                              {intern.status !== 'selected' && (
-                                <button onClick={() => handleInternStatus(intern._id, 'selected')} className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors inline-flex" title="Select Candidate">
-                                  <Check className="w-4 h-4" />
-                                </button>
-                              )}
-                              {intern.status !== 'rejected' && (
-                                <button onClick={() => handleInternStatus(intern._id, 'rejected')} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors inline-flex" title="Reject Candidate">
-                                  <XCircle className="w-4 h-4" />
-                                </button>
-                              )}
-                              <button onClick={async () => {
-                                if(confirm("Are you sure you want to permanently delete this application?")) {
-                                  await fetch(`${API_BASE}/api/internships/${intern._id}`, { method: "DELETE" });
-                                  fetchInterns();
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (confirm("Delete this tax filing record?")) {
+                                  const res = await fetch(`${API_BASE}/api/tax-filings/${row._id}`, {
+                                    method: "DELETE",
+                                  });
+                                  if (res.ok) fetchTaxFilings();
                                 }
-                              }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors inline-flex" title="Delete Application">
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
+                              }}
+                              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors inline-flex"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </td>
                         </tr>
                       ))}

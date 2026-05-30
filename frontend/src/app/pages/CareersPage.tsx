@@ -1,16 +1,41 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Send, CheckCircle, AlertCircle, UploadCloud, GraduationCap, FileCheck, User } from "lucide-react";
+import { Send, CheckCircle, AlertCircle, UploadCloud, GraduationCap, FileCheck, User, Briefcase, X } from "lucide-react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { SEO } from "../components/SEO";
 import API_BASE from "../../config/api";
 
+const PREFERRED_ROLES = [
+  "Marketing",
+  "Tech",
+  "Business and Sales",
+  "Finance and Accounting",
+  "Human Resources",
+  "Operations",
+  "Design and Creative",
+  "Content and Social Media",
+  "Product Management",
+  "Data and Analytics",
+  "Customer Support",
+] as const;
+
+const INDIAN_MOBILE_REGEX = /^[6-9]\d{9}$/;
+
+function sanitizePhoneDigits(value: string) {
+  return value.replace(/\D/g, "").slice(0, 10);
+}
+
+function isValidIndianMobile(phone: string) {
+  return INDIAN_MOBILE_REGEX.test(phone);
+}
+
 export function CareersPage() {
   const [formData, setFormData] = useState({
     fullName: "", phone: "", email: "",
     collegeName: "", course: "", branch: "", yearOfStudy: "1st Year",
-    resumeUrl: "", idProofUrl: "", collegeIdUrl: "",
+    preferredRole: "", eligibilityReason: "",
+    resumeUrl: "",
     declared: false
   });
   
@@ -50,10 +75,22 @@ export function CareersPage() {
     }
   };
 
+  const handlePhoneChange = (value: string) => {
+    setFormData({ ...formData, phone: sanitizePhoneDigits(value) });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.resumeUrl || !formData.idProofUrl || !formData.collegeIdUrl) {
-      setErrorMsg("Please upload all required documents.");
+    if (!isValidIndianMobile(formData.phone)) {
+      setErrorMsg("Enter a valid 10-digit Indian mobile number (starts with 6, 7, 8, or 9).");
+      return;
+    }
+    if (!formData.resumeUrl) {
+      setErrorMsg("Please upload your resume.");
+      return;
+    }
+    if (!formData.preferredRole) {
+      setErrorMsg("Please select a preferred role.");
       return;
     }
     if (!formData.declared) {
@@ -68,9 +105,14 @@ export function CareersPage() {
         body: JSON.stringify(formData)
       });
       if (response.ok) {
+        setFormData({
+          fullName: "", phone: "", email: "",
+          collegeName: "", course: "", branch: "", yearOfStudy: "1st Year",
+          preferredRole: "", eligibilityReason: "",
+          resumeUrl: "",
+          declared: false
+        });
         setStatus("success");
-        // Refresh immediately/go home after short delay
-        setTimeout(() => window.location.href = "/", 2000);
       } else {
         setStatus("error");
         setErrorMsg("Failed to submit application.");
@@ -96,16 +138,35 @@ export function CareersPage() {
             <p className="text-xl text-gray-600">Apply for our internship program and start your career at Finovert.</p>
           </div>
 
-          {status === "success" ? (
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-10 rounded-3xl shadow-xl border border-gray-100 text-center">
-              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-10 h-10" />
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Application Submitted!</h2>
-              <p className="text-lg text-gray-600 mb-8">Thank you for your interest in Finovert. Our team will review your application and get back to you shortly.</p>
-              <a href="/" className="inline-flex items-center justify-center px-8 py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-colors">Return to Home</a>
-            </motion.div>
-          ) : (
+          {status === "success" && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white p-8 md:p-10 rounded-3xl shadow-2xl border border-gray-100 text-center max-w-md w-full relative"
+              >
+                <button
+                  type="button"
+                  onClick={() => setStatus("idle")}
+                  className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle className="w-10 h-10" />
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Application Submitted!</h2>
+                <p className="text-gray-600 mb-2">Your application has been submitted successfully.</p>
+                <p className="text-sm text-gray-500 mb-8">It will appear on our admin dashboard for review. We will get back to you shortly.</p>
+                <a href="/" className="inline-flex items-center justify-center px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors w-full sm:w-auto">
+                  Return to Home
+                </a>
+              </motion.div>
+            </div>
+          )}
+
+          {status !== "success" && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="p-8 md:p-10">
                 <form onSubmit={handleSubmit} className="space-y-8">
@@ -116,11 +177,24 @@ export function CareersPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="col-span-1 md:col-span-2">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
-                        <input required type="text" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors" placeholder="John Doe" />
+                        <input required type="text" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors" placeholder="shyam" />
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
-                        <input required type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors" placeholder="+91 9876543210" />
+                        <input
+                          required
+                          type="tel"
+                          inputMode="numeric"
+                          autoComplete="tel-national"
+                          value={formData.phone}
+                          onChange={e => handlePhoneChange(e.target.value)}
+                          maxLength={10}
+                          pattern="[6-9][0-9]{9}"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors"
+                          placeholder="9876543210"
+                          title="10-digit Indian mobile number starting with 6, 7, 8, or 9"
+                        />
+                        <p className="mt-1.5 text-xs text-gray-500">10 digits only · Indian mobile (6–9XXXXXXXXX)</p>
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
@@ -135,7 +209,7 @@ export function CareersPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="col-span-1 md:col-span-2">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">College/University Name *</label>
-                        <input required type="text" value={formData.collegeName} onChange={e => setFormData({...formData, collegeName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors" placeholder="Indian Institute of Technology" />
+                        <input required type="text" value={formData.collegeName} onChange={e => setFormData({...formData, collegeName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors" placeholder="Enter your college or university name" />
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Course *</label>
@@ -166,58 +240,62 @@ export function CareersPage() {
                     </div>
                   </section>
 
-                  {/* 3. Documents Upload */}
+                  {/* 3. Preferred Role */}
                   <section>
-                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3 mb-6 mt-10"><FileCheck className="w-5 h-5 text-blue-600" /> 3. Documents Upload</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      
-                      {/* Resume */}
-                      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col items-center justify-center text-center relative group">
-                        <UploadCloud className="w-8 h-8 text-gray-400 mb-2 group-hover:text-blue-500 transition-colors" />
-                        <span className="text-sm font-bold text-gray-900 mb-1">Resume / CV</span>
+                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3 mb-6 mt-10"><Briefcase className="w-5 h-5 text-blue-600" /> 3. Preferred Role</h3>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Select your preferred role *</label>
+                    <select
+                      required
+                      value={formData.preferredRole}
+                      onChange={e => setFormData({ ...formData, preferredRole: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors"
+                    >
+                      <option value="">Select a role</option>
+                      {PREFERRED_ROLES.map((role, index) => (
+                        <option key={role} value={role}>
+                          {index + 1}. {role}
+                        </option>
+                      ))}
+                    </select>
+                  </section>
+
+                  {/* 4. Why eligible */}
+                  <section>
+                    <h3 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-3 mb-6 mt-10">4. Why are you eligible for this job?</h3>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Tell us why you are a good fit <span className="text-gray-400 font-normal">(optional)</span></label>
+                    <textarea
+                      rows={5}
+                      value={formData.eligibilityReason}
+                      onChange={e => setFormData({ ...formData, eligibilityReason: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors resize-none"
+                      placeholder="Share your skills, experience, and why you want to join Finovert..."
+                    />
+                  </section>
+
+                  {/* 5. Documents Upload */}
+                  <section>
+                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3 mb-6 mt-10"><FileCheck className="w-5 h-5 text-blue-600" /> 5. Documents Upload</h3>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Resume / CV *</label>
+                    <div className="w-full bg-gray-50 px-4 py-4 rounded-xl border border-gray-200 flex items-center gap-4 relative group hover:border-blue-400 focus-within:border-blue-500 transition-colors min-h-[56px]">
+                      <UploadCloud className="w-8 h-8 shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                      <div className="flex-1 min-w-0 text-left">
                         {uploadingField === 'resumeUrl' ? (
-                          <span className="text-xs text-blue-600 font-semibold">Uploading...</span>
+                          <p className="text-sm text-blue-600 font-semibold">Uploading...</p>
                         ) : formData.resumeUrl ? (
-                          <span className="text-xs text-green-600 font-semibold truncate w-full px-2">Uploaded!</span>
+                          <p className="text-sm text-green-600 font-semibold">Resume uploaded successfully</p>
                         ) : (
-                          <span className="text-xs text-gray-500">PDF, DOC, IMG</span>
+                          <>
+                            <p className="text-sm font-bold text-gray-900">Click or drag to upload your resume</p>
+                            <p className="text-xs text-gray-500 mt-0.5">PDF, DOC, DOCX, or image</p>
+                          </>
                         )}
-                        <input type="file" required={!formData.resumeUrl} onChange={e => handleFileUpload(e, 'resumeUrl')} accept=".pdf,.doc,.docx,image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                       </div>
-
-                      {/* ID Proof */}
-                      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col items-center justify-center text-center relative group">
-                        <UploadCloud className="w-8 h-8 text-gray-400 mb-2 group-hover:text-blue-500 transition-colors" />
-                        <span className="text-sm font-bold text-gray-900 mb-1">ID Proof</span>
-                        {uploadingField === 'idProofUrl' ? (
-                          <span className="text-xs text-blue-600 font-semibold">Uploading...</span>
-                        ) : formData.idProofUrl ? (
-                          <span className="text-xs text-green-600 font-semibold truncate w-full px-2">Uploaded!</span>
-                        ) : (
-                          <span className="text-xs text-gray-500">Aadhaar/PAN</span>
-                        )}
-                        <input type="file" required={!formData.idProofUrl} onChange={e => handleFileUpload(e, 'idProofUrl')} accept=".pdf,.doc,.docx,image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                      </div>
-
-                      {/* College ID */}
-                      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col items-center justify-center text-center relative group">
-                        <UploadCloud className="w-8 h-8 text-gray-400 mb-2 group-hover:text-blue-500 transition-colors" />
-                        <span className="text-sm font-bold text-gray-900 mb-1">College ID Card</span>
-                        {uploadingField === 'collegeIdUrl' ? (
-                          <span className="text-xs text-blue-600 font-semibold">Uploading...</span>
-                        ) : formData.collegeIdUrl ? (
-                          <span className="text-xs text-green-600 font-semibold truncate w-full px-2">Uploaded!</span>
-                        ) : (
-                          <span className="text-xs text-gray-500">Front/Back</span>
-                        )}
-                        <input type="file" required={!formData.collegeIdUrl} onChange={e => handleFileUpload(e, 'collegeIdUrl')} accept=".pdf,.doc,.docx,image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                      </div>
-
+                      <input type="file" required={!formData.resumeUrl} onChange={e => handleFileUpload(e, 'resumeUrl')} accept=".pdf,.doc,.docx,image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                     </div>
                   </section>
 
-                  {/* 4. Declaration */}
-                  <section className="mt-10 bg-blue-50 p-6 rounded-xl border border-blue-100">
+                  {/* 6. Declaration */}
+                  <section className="mt-10">
                     <label className="flex items-start gap-3 cursor-pointer">
                       <div className="mt-1">
                         <input type="checkbox" required checked={formData.declared} onChange={e => setFormData({...formData, declared: e.target.checked})} className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />

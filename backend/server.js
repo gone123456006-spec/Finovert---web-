@@ -19,6 +19,7 @@ import internshipRoutes from './routes/internshipRoutes.js';
 import emailRoutes from './routes/emailRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import consultationRoutes from './routes/consultationRoutes.js';
+import taxFilingRoutes from './routes/taxFilingRoutes.js';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 dotenv.config();
@@ -140,6 +141,7 @@ app.use('/api/upload', uploadLimiter, uploadRoutes);
 app.use('/api/internships', internshipRoutes);
 app.use('/api/email', emailLimiter, emailRoutes);
 app.use('/api/consultations', consultationRoutes);
+app.use('/api/tax-filings', taxFilingRoutes);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {

@@ -6,8 +6,12 @@ import { About } from "../components/About";
 import { SpecialServices } from "../components/SpecialServices";
 import { Features } from "../components/Features";
 import { WhyFinovert } from "../components/WhyFinovert";
-import { UseCases } from "../components/UseCases";
 import { SEO } from "../components/SEO";
+import { LatestBlogSection } from "../components/LatestBlogSection";
+import { TrustImpactSection } from "../components/TrustImpactSection";
+import { WaveDivider } from "../components/WaveDivider";
+import { AutoHorizontalScroll } from "../components/AutoHorizontalScroll";
+import { FinanceChatBoard } from "../components/FinanceChatBoard";
 
 export function HomePage() {
   const [leadForm, setLeadForm] = useState({
@@ -35,6 +39,21 @@ export function HomePage() {
       question: "How is Finovert different?",
       answer:
         "You get AI-driven insights, expert-led support, and execution workflows in one place instead of managing multiple disconnected tools.",
+    },
+    {
+      question: "Does Finovert support GST and ITR filing?",
+      answer:
+        "Yes. Finovert supports GST registration, monthly or quarterly returns, and business ITR filing with expert review and deadline tracking.",
+    },
+    {
+      question: "How fast can we get started?",
+      answer:
+        "Most teams onboard within a few days. We collect your business details, set up workflows, and assign a finance expert for your company stage.",
+    },
+    {
+      question: "Can Finovert replace our accountant or CFO?",
+      answer:
+        "Finovert complements your team with software plus expert execution. Many startups use it as a virtual finance and compliance layer before hiring full-time finance leaders.",
     },
   ];
 
@@ -135,22 +154,27 @@ export function HomePage() {
 
       <Hero />
 
-      <section className="py-16 bg-white">
+      <FinanceChatBoard />
+
+      <section className="pt-4 pb-4 sm:pt-10 sm:pb-16 bg-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
             One platform for finance, compliance, and growth execution
           </h2>
-          <p className="text-gray-600 text-lg mb-8">
+          <p className="text-gray-600 text-lg mb-6 sm:mb-8">
             Most startups use multiple tools for accounting, compliance, and reporting. Finovert combines everything with expert support so your team moves faster with fewer errors.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link to="/finance-guides" className="px-5 py-2.5 rounded-xl bg-gray-900 text-white font-medium hover:bg-gray-800 transition-colors">
+          <div className="flex flex-nowrap items-center justify-center gap-2 sm:gap-3 w-full overflow-x-auto scrollbar-hide">
+            <Link
+              to="/finance-guides"
+              className="shrink-0 whitespace-nowrap text-sm px-3.5 py-2.5 sm:text-base sm:px-5 rounded-xl bg-gray-900 text-white font-medium hover:bg-gray-800 transition-colors"
+            >
               Read Finance Guides
             </Link>
-            <Link to="/my-app" className="px-5 py-2.5 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors">
-              My App
-            </Link>
-            <a href="#services" className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">
+            <a
+              href="#services"
+              className="shrink-0 whitespace-nowrap text-sm px-3.5 py-2.5 sm:text-base sm:px-5 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+            >
               Explore Services
             </a>
           </div>
@@ -158,94 +182,18 @@ export function HomePage() {
       </section>
 
       <SpecialServices />
+      <WaveDivider />
       <WhyFinovert />
+      <WaveDivider topColor="#f4f6f9" fill="#ffffff" className="!h-6 sm:!h-20" />
       <Features />
-      <UseCases />
 
-      <section className="py-16 bg-gray-50">
+      <section id="consultation" className="pt-2 pb-10 sm:pt-4 sm:pb-14 bg-white scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            {[
-              { label: "Startups supported", value: "500+" },
-              { label: "Compliance workflows", value: "20+" },
-              { label: "Avg reporting speed-up", value: "3x" },
-              { label: "Client satisfaction", value: "98%" },
-            ].map((stat) => (
-              <div key={stat.label} className="rounded-2xl border border-gray-200 bg-white p-5 text-center">
-                <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                <div className="text-sm text-gray-600 mt-1">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="rounded-2xl border border-gray-200 bg-white p-6">
-              <p className="text-gray-700">
-                "Finovert helped us reduce compliance stress and improve investor reporting quality within weeks."
-              </p>
-              <p className="mt-3 text-sm font-semibold text-gray-900">Founder, SaaS Startup</p>
-            </div>
-            <div className="rounded-2xl border border-gray-200 bg-white p-6">
-              <p className="text-gray-700">
-                "We now run monthly finance ops in one place. Faster close cycles and better decision visibility."
-              </p>
-              <p className="mt-3 text-sm font-semibold text-gray-900">Operations Lead, D2C Brand</p>
-            </div>
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <span className="px-3 py-1.5 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-100">CA-led advisory</span>
-            <span className="px-3 py-1.5 text-xs font-semibold rounded-full bg-green-50 text-green-700 border border-green-100">Compliance-focused workflows</span>
-            <span className="px-3 py-1.5 text-xs font-semibold rounded-full bg-purple-50 text-purple-700 border border-purple-100">Startup-first finance stack</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900">Latest from our blog</h3>
-            <Link to="/blog" className="text-blue-700 font-medium hover:underline">
-              View all
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              "Best Startup Finance Strategies to Grow Faster in 2026",
-              "Top Compliance Checklist for Early-Stage Startups",
-              "How to Build Investor-Ready Financial Reports",
-            ].map((title) => (
-              <Link
-                key={title}
-                to="/blog"
-                className="rounded-2xl border border-gray-200 p-5 hover:shadow-sm transition-shadow"
-              >
-                <p className="font-semibold text-gray-900 leading-snug">{title}</p>
-                <p className="text-sm text-gray-500 mt-2">Read article</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 text-center">Frequently asked questions</h3>
-          <div className="space-y-4">
-            {faqItems.map((item) => (
-              <div key={item.question} className="rounded-2xl border border-gray-200 bg-white p-5">
-                <h4 className="font-semibold text-gray-900">{item.question}</h4>
-                <p className="text-gray-600 mt-2">{item.answer}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-3xl border border-gray-200 p-6 sm:p-8 bg-gray-50">
-            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Book a free consultation</h3>
+          <div className="w-full rounded-3xl border border-gray-200 p-6 sm:p-8 lg:p-10 bg-gray-50 shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+            <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+              Book a{" "}
+              <span className="text-emerald-600 font-bold">free</span> consultation
+            </h3>
             <p className="text-gray-600 mb-6">
               Share your details and our team will connect with you.
             </p>
@@ -256,7 +204,7 @@ export function HomePage() {
                 placeholder="Name"
                 value={leadForm.name}
                 onChange={(e) => setLeadForm((prev) => ({ ...prev, name: e.target.value }))}
-                className="rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
+                className="rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-blue-500 bg-white"
               />
               <input
                 required
@@ -264,7 +212,7 @@ export function HomePage() {
                 placeholder="Phone or email"
                 value={leadForm.contact}
                 onChange={(e) => setLeadForm((prev) => ({ ...prev, contact: e.target.value }))}
-                className="rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
+                className="rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-blue-500 bg-white"
               />
               <select
                 value={leadForm.businessType}
@@ -287,11 +235,49 @@ export function HomePage() {
         </div>
       </section>
 
+      <TrustImpactSection />
+
+      <LatestBlogSection />
+
+      <section className="pt-4 pb-10 sm:pt-8 sm:pb-14 md:py-16 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">Frequently asked questions</h3>
+
+          {/* Mobile: auto-scroll FAQ cards */}
+          <div className="lg:hidden -mx-4 mb-0">
+            <AutoHorizontalScroll durationSec={55} trackClassName="gap-3 px-4">
+              {faqItems.map((item) => (
+                <div
+                  key={item.question}
+                  className="w-[min(85vw,300px)] shrink-0 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm min-h-[140px] flex flex-col"
+                >
+                  <h4 className="font-semibold text-gray-900 text-sm leading-snug">{item.question}</h4>
+                  <p className="text-gray-600 mt-2 text-sm leading-relaxed">{item.answer}</p>
+                </div>
+              ))}
+            </AutoHorizontalScroll>
+          </div>
+
+          {/* Desktop: stacked list */}
+          <div className="hidden lg:flex lg:flex-col lg:gap-4">
+            {faqItems.map((item) => (
+              <div
+                key={item.question}
+                className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm flex flex-col"
+              >
+                <h4 className="font-semibold text-gray-900">{item.question}</h4>
+                <p className="text-gray-600 mt-2 text-sm leading-relaxed">{item.answer}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <About />
 
       <Link
         to="/my-app"
-        className={`fixed right-4 bottom-36 sm:bottom-20 z-50 inline-flex items-center gap-2 px-4 h-12 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 border border-blue-500 transition-all duration-200 ${
+        className={`fixed right-4 bottom-20 z-50 hidden md:inline-flex items-center gap-2 px-4 h-12 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 border border-blue-500 transition-all duration-200 ${
           showFloatingButtons ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
         }`}
         aria-label="Open My App page"
@@ -307,7 +293,7 @@ export function HomePage() {
         href="https://wa.me/916205425499"
         target="_blank"
         rel="noopener noreferrer"
-        className={`fixed right-4 bottom-20 sm:bottom-6 z-50 inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition-all duration-200 ${
+        className={`fixed right-4 bottom-6 z-50 hidden md:inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition-all duration-200 ${
           showFloatingButtons ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
         }`}
         aria-label="Chat on WhatsApp"

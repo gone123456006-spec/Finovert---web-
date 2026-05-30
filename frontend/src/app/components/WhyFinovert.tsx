@@ -1,91 +1,176 @@
 import { motion } from "motion/react";
 import { useInView } from "motion/react";
-import { useRef } from "react";
-import { ShieldCheck, Zap, Globe, Lock, TrendingUp } from "lucide-react";
+import { useRef, useState } from "react";
+import { ShieldCheck, Zap, Globe, Lock, TrendingUp, type LucideIcon } from "lucide-react";
+import { AutoHorizontalScroll } from "./AutoHorizontalScroll";
 
-const reasons = [
+const reasons: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  accent: string;
+  image: string;
+  imageAlt: string;
+}[] = [
   {
     icon: Globe,
     title: "Built for Modern India",
     description: "Designed specifically for Indian market regulations and tax compliance frameworks.",
-    tag: "Native"
+    accent: "from-[#1428A0] to-[#3b5bdb]",
+    image:
+      "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&q=80&w=800",
+    imageAlt: "India skyline and modern business district",
   },
   {
     icon: ShieldCheck,
     title: "AI Decision Intelligence",
     description: "Leverage advanced AI to transform raw data into actionable financial strategies.",
-    tag: "Smart"
+    accent: "from-[#0d9488] to-[#2dd4bf]",
+    image:
+      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800",
+    imageAlt: "Financial analytics and AI dashboards",
   },
   {
     icon: Zap,
     title: "Zero Learning Curve",
     description: "An intuitive interface designed for business owners, not just accountants.",
-    tag: "Easy"
+    accent: "from-[#7c3aed] to-[#a78bfa]",
+    image:
+      "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&q=80&w=800",
+    imageAlt: "Team using intuitive business software",
   },
   {
     icon: Lock,
     title: "Bank-Grade Security",
     description: "Enterprise-level encryption and security protocols to keep your data safe.",
-    tag: "Secure"
+    accent: "from-[#ea580c] to-[#fb923c]",
+    image:
+      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&q=80&w=800",
+    imageAlt: "Secure digital finance and data protection",
   },
   {
     icon: TrendingUp,
     title: "Scalable Growth",
     description: "Automate repetitive tasks and reduce overhead as your business expands.",
-    tag: "Global"
+    accent: "from-[#db2777] to-[#f472b6]",
+    image:
+      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800",
+    imageAlt: "Business team planning scalable growth",
   },
 ];
+
+function ReasonCardImage({
+  src,
+  alt,
+  fallbackSrc,
+}: {
+  src: string;
+  alt: string;
+  fallbackSrc: string;
+}) {
+  const [imgSrc, setImgSrc] = useState(src);
+
+  return (
+    <img
+      src={imgSrc}
+      alt={alt}
+      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+      loading="lazy"
+      onError={() => {
+        if (imgSrc !== fallbackSrc) setImgSrc(fallbackSrc);
+      }}
+    />
+  );
+}
+
+function ReasonCard({
+  reason,
+  scrollLayout = false,
+}: {
+  reason: (typeof reasons)[number];
+  scrollLayout?: boolean;
+}) {
+  const Icon = reason.icon;
+  return (
+    <div
+      className={`group h-full bg-white rounded-[24px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.05)] border border-white/90 hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 flex flex-col ${
+        scrollLayout ? "w-[min(88vw,300px)] shrink-0" : "w-full"
+      }`}
+    >
+      <div className="relative aspect-[16/10] overflow-hidden bg-[#eef0f4]">
+        <ReasonCardImage
+          src={reason.image}
+          alt={reason.imageAlt}
+          fallbackSrc="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=800"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+        <div
+          className={`absolute top-3 left-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${reason.accent} text-white shadow-lg`}
+          aria-hidden
+        >
+          <Icon className="w-5 h-5" strokeWidth={2.2} />
+        </div>
+      </div>
+      <div className="p-5 sm:p-6 flex flex-col flex-1">
+        <h3 className="text-lg font-bold text-[#0B1220] mb-2 group-hover:text-[#1428A0] transition-colors">
+          {reason.title}
+        </h3>
+        <p className="text-sm text-gray-500 leading-relaxed">{reason.description}</p>
+      </div>
+    </div>
+  );
+}
 
 export function WhyFinovert() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="why-finovert" ref={ref} className="py-24 bg-[#F0F9FF] relative overflow-hidden">
-      {/* Dynamic Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-100/50 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-sky-200/30 rounded-full blur-[100px]" />
-      </div>
+    <section
+      id="why-finovert"
+      ref={ref}
+      className="relative bg-[#f4f6f9] pb-2 sm:pb-24 overflow-hidden"
+    >
+      <div className="relative z-10 pt-3 sm:pt-14 md:pt-16">
+        <div className="absolute top-24 right-0 w-[420px] h-[420px] bg-[#1428A0]/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[320px] h-[320px] bg-[#3b5bdb]/5 rounded-full blur-[80px] pointer-events-none" />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-4xl sm:text-5xl font-black text-gray-900 mb-6 uppercase tracking-tighter">
-            Why Choose <span className="text-blue-600">Finovert?</span>
-          </h2>
-        </motion.div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-6 sm:mb-14"
+          >
+            <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-[#0B1220] tracking-tight leading-tight">
+              Why choose{" "}
+              <span className="text-[#1428A0]">Finovert?</span>
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-gray-500 max-w-2xl mx-auto">
+              Everything you need to run finance and compliance with confidence.
+            </p>
+          </motion.div>
 
-        <div className="max-w-3xl mx-auto space-y-4">
-          {reasons.map((reason, index) => (
-            <motion.div
-              key={reason.title}
-              initial={{ opacity: 0, x: -20 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group bg-white p-6 sm:p-8 rounded-[24px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgb(0,0,0,0.06)] transition-all duration-300 border border-gray-100"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 tracking-tight group-hover:text-blue-600 transition-colors">
-                    {reason.title}
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-                    {reason.description}
-                  </p>
-                </div>
-                <div className="shrink-0">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100 group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
-                    {reason.tag}
-                  </span>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+          <div className="md:hidden -mx-4">
+            <AutoHorizontalScroll durationSec={50} trackClassName="gap-3 px-4">
+              {reasons.map((reason) => (
+                <ReasonCard key={reason.title} reason={reason} scrollLayout />
+              ))}
+            </AutoHorizontalScroll>
+          </div>
+
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-5">
+            {reasons.map((reason, index) => (
+              <motion.div
+                key={reason.title}
+                initial={{ opacity: 0, y: 28 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 }}
+                transition={{ duration: 0.45, delay: index * 0.08 }}
+              >
+                <ReasonCard reason={reason} />
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

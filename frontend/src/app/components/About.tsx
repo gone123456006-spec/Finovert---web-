@@ -42,54 +42,6 @@ export function About() {
             Whether it's forecasting, compliance, or expense tracking — Finovert becomes your digital finance head.
           </p>
 
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0.8, opacity: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="mt-10 sm:mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6"
-          >
-            {[
-              {
-                label: "AI-Powered",
-                iconSrc: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f9e0.png",
-                iconAlt: "AI icon",
-              },
-              {
-                label: "Real-Time",
-                iconSrc: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/23f1.png",
-                iconAlt: "Real-time icon",
-              },
-              {
-                label: "Automated",
-                iconSrc: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2699.png",
-                iconAlt: "Automation icon",
-              },
-              {
-                label: "Scalable",
-                iconSrc: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c8.png",
-                iconAlt: "Scalable growth icon",
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={item.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-                className="p-4 sm:p-6 bg-gray-50 rounded-2xl flex flex-col items-center group hover:bg-[#EAF4FF] hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[#C7E3FF]"
-              >
-                <div className="mb-4 w-11 h-11 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
-                  <img
-                    src={item.iconSrc}
-                    alt={item.iconAlt}
-                    className="w-11 h-11 object-contain"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="font-semibold text-gray-900 group-hover:text-sky-800 transition-colors">{item.label}</div>
-              </motion.div>
-            ))}
-          </motion.div>
-
         </motion.div>
       </div>
     </section>

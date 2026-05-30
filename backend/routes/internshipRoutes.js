@@ -4,6 +4,8 @@ import { sendEmail, emails } from '../utils/emailService.js';
 
 const router = express.Router();
 
+const INDIAN_MOBILE_REGEX = /^[6-9]\d{9}$/;
+
 router.get('/', async (req, res) => {
   try {
     const records = await Internship.find().sort({ createdAt: -1 });
@@ -15,7 +17,13 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const internship = new Internship(req.body);
+    const phone = String(req.body.phone || '').replace(/\D/g, '');
+    if (!INDIAN_MOBILE_REGEX.test(phone)) {
+      return res.status(400).json({
+        message: 'Enter a valid 10-digit Indian mobile number (starts with 6, 7, 8, or 9).',
+      });
+    }
+    const internship = new Internship({ ...req.body, phone });
     const newInternship = await internship.save();
 
     // Send confirmation email
