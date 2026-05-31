@@ -35,7 +35,7 @@ export function CareersPage() {
     fullName: "", phone: "", email: "",
     collegeName: "", course: "", branch: "", yearOfStudy: "1st Year",
     preferredRole: "", eligibilityReason: "",
-    resumeUrl: "",
+    resumeUrl: "", idProofUrl: "", collegeIdUrl: "",
     declared: false
   });
   
@@ -102,20 +102,25 @@ export function CareersPage() {
     try {
       const response = await fetch(`${API_BASE}/api/internships`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          idProofUrl: formData.idProofUrl || "",
+          collegeIdUrl: formData.collegeIdUrl || "",
+        })
       });
       if (response.ok) {
         setFormData({
           fullName: "", phone: "", email: "",
           collegeName: "", course: "", branch: "", yearOfStudy: "1st Year",
           preferredRole: "", eligibilityReason: "",
-          resumeUrl: "",
+          resumeUrl: "", idProofUrl: "", collegeIdUrl: "",
           declared: false
         });
         setStatus("success");
       } else {
+        const data = await response.json().catch(() => ({}));
         setStatus("error");
-        setErrorMsg("Failed to submit application.");
+        setErrorMsg(data.message || "Failed to submit application.");
       }
     } catch (error) {
       setStatus("error");

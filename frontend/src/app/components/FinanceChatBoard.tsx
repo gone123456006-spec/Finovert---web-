@@ -306,15 +306,16 @@ export function FinanceChatBoard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(leadForm),
       });
+      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error("Failed to submit consultation request.");
+        throw new Error(data.message || "Failed to submit consultation request.");
       }
       setLeadForm({ name: "", contact: "", businessType: "Startup" });
       setConsultationOpen(false);
       setLockedFeature(null);
       appendAssistantMessage("Your free consultation is booked. Our team will contact you shortly.");
-    } catch {
-      alert("Could not submit right now. Please try again.");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Could not submit right now. Please try again.");
     } finally {
       setLeadSubmitting(false);
     }
@@ -368,7 +369,7 @@ export function FinanceChatBoard() {
           }`}
         >
           <div
-            className="rounded-xl sm:rounded-[1.75rem] border-2 border-dashed border-black bg-white overflow-hidden flex flex-col shadow-[0_16px_56px_rgba(15,42,95,0.18)] transition-shadow"
+            className="rounded-xl sm:rounded-[1.75rem] bg-white overflow-hidden flex flex-col shadow-[0_16px_56px_rgba(15,42,95,0.18)] transition-shadow"
           >
             <div
               ref={chatScrollRef}

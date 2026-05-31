@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import Internship from '../models/Internship.js';
 import { sendEmail, emails } from '../utils/emailService.js';
 
@@ -17,22 +18,58 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1 || !mongoose.connection.db) {
+      return res.status(503).json({ message: 'Database unavailable. Please try again shortly.' });
+    }
+
     const phone = String(req.body.phone || '').replace(/\D/g, '');
     if (!INDIAN_MOBILE_REGEX.test(phone)) {
       return res.status(400).json({
         message: 'Enter a valid 10-digit Indian mobile number (starts with 6, 7, 8, or 9).',
       });
     }
-    const internship = new Internship({ ...req.body, phone });
-    const newInternship = await internship.save();
 
-    // Send confirmation email
-    if (newInternship.email) {
-      const { subject, html } = emails.internshipReceived(newInternship.fullName);
-      await sendEmail({ to: newInternship.email, subject, html });
+    const {
+      fullName,
+      email,
+      collegeName,
+      course,
+      branch,
+      yearOfStudy,
+      preferredRole,
+      eligibilityReason = '',
+      resumeUrl,
+      idProofUrl = '',
+      collegeIdUrl = '',
+    } = req.body;
+
+    if (!fullName?.trim() || !email?.trim() || !collegeName?.trim() || !course?.trim() || !branch?.trim() || !yearOfStudy?.trim() || !preferredRole?.trim() || !resumeUrl?.trim()) {
+      return res.status(400).json({ message: 'Please fill in all required fields and upload your resume.' });
     }
 
+    const internship = new Internship({
+      fullName: fullName.trim(),
+      phone,
+      email: email.trim(),
+      collegeName: collegeName.trim(),
+      course: course.trim(),
+      branch: branch.trim(),
+      yearOfStudy: yearOfStudy.trim(),
+      preferredRole: preferredRole.trim(),
+      eligibilityReason: String(eligibilityReason || '').trim(),
+      resumeUrl: resumeUrl.trim(),
+      idProofUrl: String(idProofUrl || '').trim(),
+      collegeIdUrl: String(collegeIdUrl || '').trim(),
+    });
+    const newInternship = await internship.save();
+
+    // Respond immediately; send confirmation email in the background.
     res.status(201).json(newInternship);
+
+    if (newInternship.email) {
+      const { subject, html } = emails.internshipReceived(newInternship.fullName);
+      void sendEmail({ to: newInternship.email, subject, html });
+    }
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

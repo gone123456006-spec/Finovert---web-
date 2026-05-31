@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import ConsultationLead from '../models/ConsultationLead.js';
 
 const router = express.Router();
@@ -14,12 +15,20 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1 || !mongoose.connection.db) {
+      return res.status(503).json({ message: 'Database unavailable. Please try again shortly.' });
+    }
+
     const { name, contact, businessType } = req.body;
-    if (!name || !contact || !businessType) {
+    if (!name?.trim() || !contact?.trim() || !businessType?.trim()) {
       return res.status(400).json({ message: 'Name, contact and business type are required.' });
     }
 
-    const lead = new ConsultationLead({ name, contact, businessType });
+    const lead = new ConsultationLead({
+      name: name.trim(),
+      contact: contact.trim(),
+      businessType: businessType.trim(),
+    });
     const created = await lead.save();
     return res.status(201).json(created);
   } catch (error) {

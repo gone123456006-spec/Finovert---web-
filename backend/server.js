@@ -61,6 +61,9 @@ const allowedOrigins = IS_PROD
 
 app.use(cors({
   origin: (origin, callback) => {
+    if (!IS_PROD) {
+      return callback(null, true);
+    }
     if (
       !origin ||
       allowedOrigins.includes(origin) ||
@@ -163,7 +166,12 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server listening on port ${PORT} [${process.env.NODE_ENV || 'development'}]`);
 });
 
-mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 15000 })
+// Fail fast when MongoDB is not connected (avoid 10s buffer timeouts).
+mongoose.set('bufferCommands', false);
+
+mongoose.connect(MONGODB_URI, {
+  serverSelectionTimeoutMS: 8000,
+})
   .then(() => {
     console.log('✅ Connected to MongoDB');
   })

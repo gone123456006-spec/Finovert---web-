@@ -79,13 +79,14 @@ export function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(leadForm),
       });
+      const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error("Failed to submit consultation request.");
+        throw new Error(data.message || "Failed to submit consultation request.");
       }
       setLeadForm({ name: "", contact: "", businessType: "Startup" });
       alert("Consultation request submitted successfully.");
     } catch (error) {
-      alert("Could not submit right now. Please try again.");
+      alert(error instanceof Error ? error.message : "Could not submit right now. Please try again.");
     } finally {
       setLeadSubmitting(false);
     }
