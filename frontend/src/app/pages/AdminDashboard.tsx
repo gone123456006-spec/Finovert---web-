@@ -137,6 +137,7 @@ export function AdminDashboard() {
   
   // Dashboard States
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "fetching">("idle");
+  const [isFetchingData, setIsFetchingData] = useState(false);
   const [fetchMessage, setFetchMessage] = useState("");
   const [activeTab, setActiveTab] = useState<
     "blog" | "verification" | "requests" | "interns" | "consultations" | "taxFilings" | "email"
@@ -270,18 +271,24 @@ export function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (authRole) {
-      fetchAllBlogs();
-    }
-    if (authRole === "main_admin") {
-      if (activeTab === "requests") fetchPendingRequests();
-      if (activeTab === "interns") fetchInterns();
-      if (activeTab === "consultations") fetchConsultations();
-      if (activeTab === "taxFilings") fetchTaxFilings();
-      if (activeTab === "verification") {
-        fetchVerifications(); // ID auto-updated inside fetchVerifications
+    const loadData = async () => {
+      setIsFetchingData(true);
+      try {
+        const promises = [];
+        if (authRole) promises.push(fetchAllBlogs());
+        if (authRole === "main_admin") {
+          if (activeTab === "requests") promises.push(fetchPendingRequests());
+          if (activeTab === "interns") promises.push(fetchInterns());
+          if (activeTab === "consultations") promises.push(fetchConsultations());
+          if (activeTab === "taxFilings") promises.push(fetchTaxFilings());
+          if (activeTab === "verification") promises.push(fetchVerifications());
+        }
+        await Promise.all(promises);
+      } finally {
+        setIsFetchingData(false);
       }
-    }
+    };
+    if (authRole) loadData();
   }, [authRole, activeTab]);
 
   const internCourseOptions = useMemo(() => {
@@ -731,6 +738,13 @@ export function AdminDashboard() {
 
         {status === "success" && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-700 font-medium"><CheckCircle className="w-6 h-6" /> {fetchMessage}</motion.div>}
         {status === "error" && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700 font-medium"><AlertCircle className="w-6 h-6" /> {fetchMessage || "An error occurred."}</motion.div>}
+
+        {isFetchingData && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-center gap-3 text-blue-700 font-medium shadow-sm">
+            <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+            Loading latest data...
+          </motion.div>
+        )}
 
         <motion.div
           key={activeTab}
