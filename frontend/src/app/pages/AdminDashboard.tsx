@@ -1087,12 +1087,12 @@ export function AdminDashboard() {
                         <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200">Course</th>
                         <th className="w-[8%] px-1.5 py-2 font-semibold border border-gray-200">Branch</th>
                         <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200">Year</th>
-                        <th className="w-[8%] px-1.5 py-2 font-semibold border border-gray-200">Role</th>
+                        <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200">Role</th>
                         <th className="w-[12%] px-1.5 py-2 font-semibold border border-gray-200">Why eligible</th>
-                        <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200">Resume</th>
-                        <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200 text-center">Status</th>
+                        <th className="w-[4%] px-1.5 py-2 font-semibold border border-gray-200 text-center">Resume</th>
+                        <th className="w-[4%] px-1.5 py-2 font-semibold border border-gray-200 text-center">Status</th>
                         <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200">Applied</th>
-                        <th className="w-[7%] px-1.5 py-2 font-semibold border border-gray-200 text-center">Action</th>
+                        <th className="w-[11%] px-1.5 py-2 font-semibold border border-gray-200 text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1120,21 +1120,21 @@ export function AdminDashboard() {
                               <span className="text-gray-400 italic text-[10px]">Not provided</span>
                             )}
                           </td>
-                          <td className="px-1.5 py-2 border border-gray-200">
-                              <button onClick={(e) => handleDownloadResume(e, intern._id, intern.fullName)} className="flex items-center gap-0.5 text-[10px] sm:text-xs font-semibold text-blue-600 hover:underline bg-transparent border-none p-0 cursor-pointer break-words text-left">
-                                <Download className="w-3 h-3 shrink-0" /> DL
+                          <td className="px-1.5 py-2 border border-gray-200 text-center">
+                              <button onClick={(e) => handleDownloadResume(e, intern._id, intern.fullName)} className="inline-flex items-center justify-center text-blue-600 hover:bg-blue-50 rounded-lg p-1 transition-colors" title="Download Resume">
+                                <Download className="w-4 h-4" />
                               </button>
                           </td>
                           <td className="px-1.5 py-2 border border-gray-200 text-center">
-                            <span className={`w-5 h-5 inline-flex items-center justify-center text-[10px] rounded-full font-bold uppercase ${intern.status === 'selected' ? 'bg-green-100 text-green-700' : intern.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                              {(intern.status || 'pending').charAt(0).toUpperCase()}
+                            <span className={`w-6 h-6 inline-flex items-center justify-center rounded-full ${intern.status === 'selected' ? 'bg-green-100 text-green-700' : intern.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`} title={intern.status || 'pending'}>
+                              {intern.status === 'selected' ? <Check className="w-3.5 h-3.5" /> : intern.status === 'rejected' ? <XCircle className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
                             </span>
                           </td>
                           <td className="px-1.5 py-2 text-gray-500 border border-gray-200 break-words text-[10px] sm:text-xs">
                             {intern.createdAt ? new Date(intern.createdAt).toLocaleDateString() : "—"}
                           </td>
                           <td className="px-1 py-2 border border-gray-200">
-                            <div className="flex justify-end gap-1">
+                            <div className="flex justify-center flex-wrap gap-1">
                               <button onClick={() => setSelectedIntern(intern)} className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Details">
                                 <Eye className="w-3.5 h-3.5" />
                               </button>
