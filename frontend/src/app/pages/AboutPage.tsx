@@ -35,8 +35,10 @@ export function AboutPage() {
   return (
     <div className="min-h-screen bg-white pt-24 pb-20 overflow-hidden">
       <SEO 
-        title="About Us | Our Story & Leadership" 
-        description="Meet the visionaries behind Finovert. Learn about our mission to simplify financial compliance and business management through technology."
+        title="Finovert - About Us | Corporate Finance & Compliance Experts"
+        description="Learn about Finovert's mission to simplify GST filing, ITR compliance, ROC filings, and startup finance through technology and expert-led support."
+        path="/about"
+        keywords={["about finovert", "finovert team", "compliance experts india", "startup finance company"]}
       />
 
       {/* Hero Section - Google Style */}

@@ -19,7 +19,7 @@ export function Footer() {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": "Finovert",
-      "image": "https://finovert.com/logo.png",
+      "image": "https://www.finovert.com/app-logo.png",
       "email": "Fintaxcoach@gmail.com",
       "telephone": "+91 9153832948",
       "address": {
@@ -29,7 +29,7 @@ export function Footer() {
         "postalCode": "110096",
         "addressCountry": "IN"
       },
-      "url": "https://finovert.com"
+      "url": "https://www.finovert.com"
     });
     return () => {
       if (document.head.contains(script)) {

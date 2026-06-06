@@ -7,6 +7,12 @@ import { SpecialServices } from "../components/SpecialServices";
 import { Features } from "../components/Features";
 import { WhyFinovert } from "../components/WhyFinovert";
 import { SEO } from "../components/SEO";
+import {
+  buildHomePageStructuredData,
+  DEFAULT_SEO_KEYWORDS,
+  HOME_PAGE_DESCRIPTION,
+  HOME_PAGE_TITLE,
+} from "../config/seo";
 import { LatestBlogSection } from "../components/LatestBlogSection";
 import { TrustImpactSection } from "../components/TrustImpactSection";
 import { WaveDivider } from "../components/WaveDivider";
@@ -127,30 +133,11 @@ export function HomePage() {
   return (
     <>
       <SEO
-        title="Virtual CFO Platform for Startup Finance and Compliance"
-        description="Finovert helps startups manage finance, accounting, tax, and compliance with AI-powered workflows and expert virtual CFO support."
+        title={HOME_PAGE_TITLE}
+        description={HOME_PAGE_DESCRIPTION}
         path="/"
-        keywords={[
-          "finovert",
-          "virtual cfo platform",
-          "startup finance",
-          "business compliance services",
-          "accounting and compliance",
-          "finance automation",
-          "startup growth solutions",
-        ]}
-        structuredData={[
-          {
-            "@context": "https://schema.org",
-            "@type": "Organization",
-            name: "Finovert",
-            url: "https://finovert.com",
-            description:
-              "Virtual CFO, finance, and compliance platform for startups and growing businesses.",
-            sameAs: ["https://www.linkedin.com"],
-          },
-          faqSchema,
-        ]}
+        keywords={DEFAULT_SEO_KEYWORDS}
+        structuredData={buildHomePageStructuredData(faqSchema)}
       />
 
       <Hero />

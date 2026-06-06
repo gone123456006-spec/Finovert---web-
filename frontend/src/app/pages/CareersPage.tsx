@@ -131,8 +131,10 @@ export function CareersPage() {
   return (
     <>
       <SEO 
-        title="Careers | Finovert"
-        description="Join Finovert. We are looking for talented individuals to help us build the future of finance."
+        title="Finovert - Careers | Join Our Team"
+        description="Build your career at Finovert. Apply for internships and roles in finance, compliance, technology, marketing, and operations across India."
+        path="/careers"
+        keywords={["finovert careers", "join finovert", "finance internship india", "compliance jobs", "fintech careers"]}
       />
       <Navbar />
       <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-4">

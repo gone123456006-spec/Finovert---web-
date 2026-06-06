@@ -25,8 +25,8 @@ export function FinanceGuidesPage() {
   return (
     <div className="min-h-screen bg-white pt-24 pb-16">
       <SEO
-        title="Read Finance Guides"
-        description="Read practical finance and compliance guides for startups, SMEs, and growing businesses."
+        title="Finovert - Finance Guides | GST, ITR & Compliance Resources"
+        description="Read practical finance and compliance guides for startups and SMEs — GST filing, income tax returns, ROC compliance, cash flow, and virtual CFO insights."
         path="/finance-guides"
         keywords={[
           "finance guides",

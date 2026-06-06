@@ -71,8 +71,10 @@ export function SEO({
     setMetaTag("property", "og:url", currentUrl);
     setMetaTag("property", "og:image", image);
     setMetaTag("property", "og:site_name", SEO_SITE.name);
+    setMetaTag("property", "og:locale", "en_IN");
 
     setMetaTag("name", "twitter:card", "summary_large_image");
+    setMetaTag("name", "twitter:site", "@finovert");
     setMetaTag("name", "twitter:title", title);
     setMetaTag("name", "twitter:description", description);
     setMetaTag("name", "twitter:image", image);

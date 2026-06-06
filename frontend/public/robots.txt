@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /admin/
 
-Sitemap: https://finovert.com/sitemap.xml
+Sitemap: https://www.finovert.com/sitemap.xml
