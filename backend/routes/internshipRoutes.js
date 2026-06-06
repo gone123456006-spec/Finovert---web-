@@ -9,8 +9,18 @@ const INDIAN_MOBILE_REGEX = /^[6-9]\d{9}$/;
 
 router.get('/', async (req, res) => {
   try {
-    const records = await Internship.find().sort({ createdAt: -1 });
+    const records = await Internship.find().select('-resumeUrl -idProofUrl -collegeIdUrl').sort({ createdAt: -1 });
     res.json(records);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/:id/resume', async (req, res) => {
+  try {
+    const record = await Internship.findById(req.params.id).select('resumeUrl');
+    if (!record) return res.status(404).json({ message: 'Record not found' });
+    res.json({ resumeUrl: record.resumeUrl });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

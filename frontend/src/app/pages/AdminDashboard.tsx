@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
-import { Lock, FileText, CheckCircle, AlertCircle, BadgeCheck, Users, Clock, Briefcase, Trash2, Download, XCircle, Check, Mail, Building, Calendar, RefreshCw, PhoneCall, Filter, Search, LogOut, FileSpreadsheet, Receipt } from "lucide-react";
+import { Lock, FileText, CheckCircle, AlertCircle, BadgeCheck, Users, Clock, Briefcase, Trash2, Download, XCircle, Check, Mail, Building, Calendar, RefreshCw, PhoneCall, Filter, Search, LogOut, FileSpreadsheet, Receipt, Eye } from "lucide-react";
 
 const AUTH_STORAGE_KEY = "finovert_admin_session";
 const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
@@ -84,7 +84,7 @@ function exportInternsToExcel(interns: {
     intern.eligibilityReason ?? "",
     intern.status || "pending",
     intern.createdAt ? new Date(intern.createdAt).toLocaleString() : "",
-    intern.resumeUrl ? "Yes" : "No",
+    "Yes", // Resume is a required field
   ]);
   const csv = [headers, ...rows]
     .map((row) => row.map(escapeCsvCell).join(","))
@@ -154,6 +154,7 @@ export function AdminDashboard() {
   const [allVerifications, setAllVerifications] = useState<any[]>([]);
   const [expandedSubAdmin, setExpandedSubAdmin] = useState<string | null>(null);
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
+  const [selectedIntern, setSelectedIntern] = useState<any | null>(null);
 
   // Email Broadcaster
   const [emailTo, setEmailTo] = useState("");
@@ -399,6 +400,20 @@ export function AdminDashboard() {
     } catch (err) {
       console.error("Download failed:", err);
       window.open(url, '_blank');
+    }
+  };
+
+  const handleDownloadResume = async (e: React.MouseEvent, internId: string, internName: string) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_BASE}/api/internships/${internId}/resume`);
+      if (!res.ok) throw new Error("Failed to fetch resume");
+      const data = await res.json();
+      const url = data.resumeUrl;
+      handleDownload(e, url, `${internName.replace(/\s+/g, '_')}_Resume`);
+    } catch (err) {
+      console.error(err);
+      alert("Could not download resume.");
     }
   };
 
@@ -1077,7 +1092,7 @@ export function AdminDashboard() {
                         <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200">Resume</th>
                         <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200 text-center">Status</th>
                         <th className="w-[6%] px-1.5 py-2 font-semibold border border-gray-200">Applied</th>
-                        <th className="w-[5%] px-1.5 py-2 font-semibold border border-gray-200 text-center">Action</th>
+                        <th className="w-[7%] px-1.5 py-2 font-semibold border border-gray-200 text-center">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1106,17 +1121,13 @@ export function AdminDashboard() {
                             )}
                           </td>
                           <td className="px-1.5 py-2 border border-gray-200">
-                            {intern.resumeUrl ? (
-                              <button onClick={(e) => handleDownload(e, intern.resumeUrl, `${intern.fullName.replace(/\s+/g, '_')}_Resume`)} className="flex items-center gap-0.5 text-[10px] sm:text-xs font-semibold text-blue-600 hover:underline bg-transparent border-none p-0 cursor-pointer break-words text-left">
+                              <button onClick={(e) => handleDownloadResume(e, intern._id, intern.fullName)} className="flex items-center gap-0.5 text-[10px] sm:text-xs font-semibold text-blue-600 hover:underline bg-transparent border-none p-0 cursor-pointer break-words text-left">
                                 <Download className="w-3 h-3 shrink-0" /> DL
                               </button>
-                            ) : (
-                              <span className="text-gray-400">—</span>
-                            )}
                           </td>
                           <td className="px-1.5 py-2 border border-gray-200 text-center">
-                            <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase ${intern.status === 'selected' ? 'bg-green-100 text-green-700' : intern.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
-                              {intern.status || 'pending'}
+                            <span className={`w-5 h-5 inline-flex items-center justify-center text-[10px] rounded-full font-bold uppercase ${intern.status === 'selected' ? 'bg-green-100 text-green-700' : intern.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+                              {(intern.status || 'pending').charAt(0).toUpperCase()}
                             </span>
                           </td>
                           <td className="px-1.5 py-2 text-gray-500 border border-gray-200 break-words text-[10px] sm:text-xs">
@@ -1124,14 +1135,17 @@ export function AdminDashboard() {
                           </td>
                           <td className="px-1 py-2 border border-gray-200">
                             <div className="flex justify-end gap-1">
+                              <button onClick={() => setSelectedIntern(intern)} className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Details">
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
                               {intern.status !== 'selected' && (
-                                <button onClick={() => handleInternStatus(intern._id, 'selected')} className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Select">
-                                  <Check className="w-4 h-4" />
+                                <button onClick={() => handleInternStatus(intern._id, 'selected')} className="p-1 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Select">
+                                  <Check className="w-3.5 h-3.5" />
                                 </button>
                               )}
                               {intern.status !== 'rejected' && (
-                                <button onClick={() => handleInternStatus(intern._id, 'rejected')} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Reject">
-                                  <XCircle className="w-4 h-4" />
+                                <button onClick={() => handleInternStatus(intern._id, 'rejected')} className="p-1 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Reject">
+                                  <XCircle className="w-3.5 h-3.5" />
                                 </button>
                               )}
                               <button onClick={async () => {
@@ -1139,8 +1153,8 @@ export function AdminDashboard() {
                                   await fetch(`${API_BASE}/api/internships/${intern._id}`, { method: "DELETE" });
                                   fetchInterns();
                                 }
-                              }} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
-                                <Trash2 className="w-4 h-4" />
+                              }} className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                                <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </td>
@@ -1148,6 +1162,40 @@ export function AdminDashboard() {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              )}
+
+              {selectedIntern && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                  <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
+                    <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                      <h3 className="text-xl font-bold text-gray-900">Application Details</h3>
+                      <button onClick={() => setSelectedIntern(null)} className="text-gray-400 hover:text-gray-600"><XCircle className="w-6 h-6" /></button>
+                    </div>
+                    <div className="p-6 overflow-y-auto space-y-4 text-sm text-gray-700">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div><span className="font-semibold text-gray-900">Full Name:</span> {selectedIntern.fullName}</div>
+                        <div><span className="font-semibold text-gray-900">Phone:</span> {selectedIntern.phone}</div>
+                        <div><span className="font-semibold text-gray-900">Email:</span> {selectedIntern.email}</div>
+                        <div><span className="font-semibold text-gray-900">College:</span> {selectedIntern.collegeName || "—"}</div>
+                        <div><span className="font-semibold text-gray-900">Course:</span> {selectedIntern.course || "—"}</div>
+                        <div><span className="font-semibold text-gray-900">Branch:</span> {selectedIntern.branch || "—"}</div>
+                        <div><span className="font-semibold text-gray-900">Year of Study:</span> {selectedIntern.yearOfStudy || "—"}</div>
+                        <div><span className="font-semibold text-gray-900">Preferred Role:</span> {selectedIntern.preferredRole || "—"}</div>
+                        <div><span className="font-semibold text-gray-900">Status:</span> {selectedIntern.status || "pending"}</div>
+                        <div><span className="font-semibold text-gray-900">Applied Date:</span> {selectedIntern.createdAt ? new Date(selectedIntern.createdAt).toLocaleString() : "—"}</div>
+                      </div>
+                      <div>
+                        <span className="font-semibold text-gray-900 block mb-1">Why eligible:</span>
+                        <p className="bg-gray-50 p-3 rounded-lg border border-gray-200">{selectedIntern.eligibilityReason || "Not provided"}</p>
+                      </div>
+                      <div>
+                        <button onClick={(e) => handleDownloadResume(e, selectedIntern._id, selectedIntern.fullName)} className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 font-semibold rounded-xl hover:bg-blue-100 transition-colors">
+                          <Download className="w-4 h-4" /> Download Resume
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
