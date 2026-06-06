@@ -15,7 +15,9 @@ const taxFilingLeadSchema = new mongoose.Schema(
       enum: ['pending', 'paid'],
       default: 'pending',
     },
-    paidAt: { type: Date },
+    paidAt:            { type: Date },
+    razorpayOrderId:   { type: String, default: '' },
+    razorpayPaymentId: { type: String, default: '' },
   },
   { timestamps: true },
 );

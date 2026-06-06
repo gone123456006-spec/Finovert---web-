@@ -20,6 +20,7 @@ import emailRoutes from './routes/emailRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import consultationRoutes from './routes/consultationRoutes.js';
 import taxFilingRoutes from './routes/taxFilingRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 dotenv.config();
@@ -145,6 +146,7 @@ app.use('/api/internships', internshipRoutes);
 app.use('/api/email', emailLimiter, emailRoutes);
 app.use('/api/consultations', consultationRoutes);
 app.use('/api/tax-filings', taxFilingRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {
@@ -171,6 +173,7 @@ mongoose.set('bufferCommands', false);
 
 mongoose.connect(MONGODB_URI, {
   serverSelectionTimeoutMS: 8000,
+  family: 4, // Forces IPv4 DNS resolution to fix querySrv ECONNREFUSED on some networks
 })
   .then(() => {
     console.log('✅ Connected to MongoDB');
