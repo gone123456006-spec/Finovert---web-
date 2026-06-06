@@ -1,4 +1,4 @@
-const SITE_URL = (process.env.SITE_URL || "https://finovert.com").replace(/\/+$/, "");
+const SITE_URL = (process.env.SITE_URL || "https://www.finovert.com").replace(/\/+$/, "");
 const SITEMAP_URL = `${SITE_URL}/sitemap.xml`;
 const PING_URL = `https://www.google.com/ping?sitemap=${encodeURIComponent(SITEMAP_URL)}`;
 

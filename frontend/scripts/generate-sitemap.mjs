@@ -1,7 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const SITE_URL = (process.env.SITE_URL || "https://finovert.com").replace(/\/+$/, "");
+const SITE_URL = (process.env.SITE_URL || "https://www.finovert.com").replace(/\/+$/, "");
 const API_URL = (process.env.SITEMAP_API_URL || process.env.VITE_API_URL || "https://finovert-web-1.onrender.com").replace(/\/+$/, "");
 const OUTPUT_PATH = resolve(process.cwd(), "public", "sitemap.xml");
 

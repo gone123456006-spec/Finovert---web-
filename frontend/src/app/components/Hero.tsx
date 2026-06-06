@@ -83,6 +83,14 @@ export function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
           {/* Left Side: Content */}
           <div className="text-center lg:text-left">
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-sm sm:text-base font-bold text-[#1428A0] mb-3 sm:mb-4 tracking-tight"
+            >
+              Finovert — Corporate Services & Compliance Platform
+            </motion.p>
             {/* Main headline */}
             <motion.h1
               initial={{ opacity: 0, x: -30 }}
