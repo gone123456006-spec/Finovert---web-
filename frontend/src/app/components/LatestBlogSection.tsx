@@ -96,24 +96,15 @@ export function LatestBlogSection() {
   }, []);
 
   return (
-    <section className="pt-12 pb-6 sm:pt-16 sm:pb-8 md:py-20 bg-gradient-to-b from-[#f7f8fa] via-[#f4f5f8] to-gray-50">
+    <section className="pt-12 pb-6 sm:pt-16 sm:pb-8 md:py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
-          <div>
-            <h3 className="text-3xl sm:text-4xl font-bold text-[#0B1220] tracking-tight">
-              Latest from our blog
-            </h3>
-            <p className="text-gray-500 mt-2 text-base max-w-xl">
-              Finance, compliance, and growth tips — curated for founders and teams.
-            </p>
-          </div>
-          <Link
-            to="/blog"
-            className="inline-flex items-center justify-center gap-2 self-start sm:self-auto px-6 py-3 rounded-full bg-[#0B1220] text-white text-sm font-semibold shadow-lg shadow-gray-900/10 hover:bg-[#1428A0] transition-colors"
-          >
-            View all
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+        <div className="mb-10">
+          <h3 className="text-3xl sm:text-[2.2rem] font-bold text-[#1d1d1f] tracking-tight">
+            Latest from our blog
+          </h3>
+          <p className="text-[#86868b] mt-3 text-[1.1rem] max-w-xl font-medium">
+            Finance, compliance, and growth tips — curated for founders and teams.
+          </p>
         </div>
 
         {loading ? (
@@ -162,23 +153,23 @@ export function LatestBlogSection() {
                   >
                     <Link
                       to={postHref(post)}
-                      className="group flex flex-col h-full bg-white rounded-[28px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.06)] border border-white/80"
+                      className="group flex flex-col h-full bg-[#fbfbfd] rounded-[24px] overflow-hidden border border-gray-100/60 shadow-sm hover:shadow-[0_12px_40px_rgba(0,0,0,0.06)] transition-all duration-300"
                     >
-                      <div className="relative aspect-[16/10] overflow-hidden bg-[#eef0f4]">
+                      <div className="relative aspect-[16/10] overflow-hidden bg-gray-100 border-b border-gray-100/50">
                         <img
                           src={blogImageSrc(post.image)}
                           alt={post.title}
                           className="w-full h-full object-cover"
                           loading="lazy"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
-                        <span className="absolute bottom-4 left-4 px-3.5 py-1.5 rounded-full bg-white/95 text-[11px] font-bold uppercase tracking-wide text-[#0B1220]">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                        <span className="absolute bottom-4 left-4 px-3 py-1.5 rounded-full bg-white text-[11px] font-semibold tracking-wide text-[#1d1d1f] shadow-sm">
                           {post.category}
                         </span>
                       </div>
                       <div className="p-5 flex flex-col flex-1">
-                        <h4 className="text-lg font-bold text-[#0B1220] leading-snug line-clamp-2">{post.title}</h4>
-                        <p className="mt-2 text-sm text-gray-500 line-clamp-2">{post.excerpt}</p>
+                        <h4 className="text-[17px] font-semibold text-[#1d1d1f] leading-snug line-clamp-2 tracking-tight">{post.title}</h4>
+                        <p className="mt-2 text-[14px] text-[#86868b] font-medium line-clamp-2">{post.excerpt}</p>
                       </div>
                     </Link>
                   </article>
@@ -197,23 +188,23 @@ export function LatestBlogSection() {
                 >
                   <Link
                     to={postHref(post)}
-                    className="group flex flex-col h-full bg-white rounded-[28px] overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.12)] transition-all duration-300 hover:-translate-y-1.5 border border-white/80"
+                    className="group flex flex-col h-full bg-[#fbfbfd] rounded-[24px] overflow-hidden border border-gray-100/60 shadow-sm hover:shadow-[0_12px_40px_rgba(0,0,0,0.06)] hover:bg-white transition-all duration-300"
                   >
-                    <div className="relative aspect-[16/10] overflow-hidden bg-[#eef0f4]">
+                    <div className="relative aspect-[16/10] overflow-hidden bg-gray-100 border-b border-gray-100/50">
                       <img
                         src={blogImageSrc(post.image)}
                         alt={post.title}
                         className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                         loading="lazy"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
-                      <span className="absolute bottom-4 left-4 px-3.5 py-1.5 rounded-full bg-white/95 backdrop-blur-md text-[11px] font-bold uppercase tracking-wide text-[#0B1220] shadow-sm">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      <span className="absolute bottom-4 left-4 px-3 py-1.5 rounded-full bg-white text-[11px] font-semibold tracking-wide text-[#1d1d1f] shadow-sm">
                         {post.category}
                       </span>
                     </div>
 
-                    <div className="p-6 sm:p-7 flex flex-col flex-1">
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 mb-3">
+                    <div className="p-6 flex flex-col flex-1">
+                      <div className="flex flex-wrap items-center gap-3 text-[13px] text-[#86868b] mb-3 font-medium">
                         <span className="inline-flex items-center gap-1.5">
                           <Calendar className="w-3.5 h-3.5" />
                           {formatBlogDate(post)}
@@ -224,11 +215,11 @@ export function LatestBlogSection() {
                         </span>
                       </div>
 
-                      <h4 className="text-lg sm:text-xl font-bold text-[#0B1220] leading-snug line-clamp-2 group-hover:text-[#1428A0] transition-colors">
+                      <h4 className="text-[18px] sm:text-[20px] font-semibold text-[#1d1d1f] leading-snug line-clamp-2 tracking-tight group-hover:text-black transition-colors">
                         {post.title}
                       </h4>
 
-                      <p className="mt-3 text-sm text-gray-500 leading-relaxed line-clamp-2 flex-1">
+                      <p className="mt-3 text-[14px] text-[#86868b] leading-relaxed font-medium line-clamp-2 flex-1">
                         {post.excerpt}
                       </p>
 
@@ -245,6 +236,16 @@ export function LatestBlogSection() {
             </div>
           </>
         )}
+
+        <div className="flex justify-end mt-8">
+          <Link
+            to="/blog"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1428A0] hover:text-[#0f1d75] transition-colors group/viewall"
+          >
+            View all
+            <ArrowRight className="w-4 h-4 group-hover/viewall:translate-x-1 transition-transform" />
+          </Link>
+        </div>
       </div>
     </section>
   );

@@ -1,5 +1,4 @@
 import { motion } from "motion/react";
-import { useState } from "react";
 import { Rocket, ShieldCheck, Zap, Star, Quote } from "lucide-react";
 import { AutoHorizontalScroll } from "./AutoHorizontalScroll";
 
@@ -79,25 +78,6 @@ const TAGS = [
   { label: "Startup-first finance stack", className: "bg-violet-500/10 text-violet-700 border-violet-500/15" },
 ] as const;
 
-const FALLBACK_AVATAR =
-  "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=200&h=200";
-
-function TestimonialAvatar({ src, alt }: { src: string; alt: string }) {
-  const [imgSrc, setImgSrc] = useState(src);
-
-  return (
-    <img
-      src={imgSrc}
-      alt={alt}
-      className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-white shadow-sm"
-      loading="lazy"
-      onError={() => {
-        if (imgSrc !== FALLBACK_AVATAR) setImgSrc(FALLBACK_AVATAR);
-      }}
-    />
-  );
-}
-
 function TestimonialCard({
   item,
   layout = "scroll",
@@ -116,7 +96,6 @@ function TestimonialCard({
         &ldquo;{item.quote}&rdquo;
       </p>
       <footer className="mt-5 flex items-center gap-3">
-        <TestimonialAvatar src={item.image} alt={item.imageAlt} />
         <div>
           <cite className="not-italic text-sm font-bold text-[#0B1220]">{item.role}</cite>
           <p className="text-sm text-gray-500">{item.company}</p>
@@ -135,12 +114,13 @@ export function TrustImpactSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.45 }}
-          className="text-center mb-12"
+          className="text-center mb-10 sm:mb-12"
         >
-          <h2 className="text-3xl sm:text-4xl font-bold text-[#0B1220] tracking-tight">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-gray-100 text-[#1d1d1f] text-[13px] font-semibold tracking-wide mb-4 border border-gray-200/50">Trusted by Startups</span>
+          <h2 className="text-3xl sm:text-[2.5rem] font-bold text-[#1d1d1f] tracking-tight sm:tracking-tighter">
             Built for speed, clarity, and compliance
           </h2>
-          <p className="text-gray-500 mt-3 text-base max-w-2xl mx-auto">
+          <p className="text-[#86868b] mt-3 text-[1.1rem] max-w-2xl mx-auto font-medium">
             Real outcomes from founders and operators who run finance on Finovert.
           </p>
         </motion.div>
@@ -155,10 +135,10 @@ export function TrustImpactSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.06 }}
-                className="group relative bg-white rounded-[24px] p-5 sm:p-6 text-center shadow-[0_8px_30px_rgba(0,0,0,0.05)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-1 border border-white/80 overflow-hidden"
+                className="group relative bg-[#fbfbfd] rounded-[24px] p-6 text-center hover:bg-white hover:shadow-[0_12px_40px_rgba(0,0,0,0.06)] transition-all duration-300 border border-gray-100/60 overflow-hidden"
               >
                 <div
-                  className={`mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${stat.accent} text-white shadow-lg`}
+                  className={`mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${stat.accent} text-white shadow-sm`}
                   aria-hidden
                 >
                   <Icon
@@ -166,8 +146,8 @@ export function TrustImpactSection() {
                     strokeWidth={2.25}
                   />
                 </div>
-                <div className="text-3xl sm:text-4xl font-bold text-[#0B1220] tracking-tight">{stat.value}</div>
-                <div className="text-xs sm:text-sm text-gray-500 mt-2 leading-snug font-medium">{stat.label}</div>
+                <div className="text-[2rem] sm:text-[2.25rem] font-bold text-[#1d1d1f] tracking-tight leading-none mb-2">{stat.value}</div>
+                <div className="text-[14px] text-[#86868b] leading-snug font-medium">{stat.label}</div>
               </motion.div>
             );
           })}

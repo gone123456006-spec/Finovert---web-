@@ -130,7 +130,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", Helvetica, Ubuntu, Roboto, Noto, "Segoe UI", Arial, sans-serif;
   }
 
   /**
@@ -140,6 +140,10 @@
 
   html {
     font-size: var(--font-size);
+  }
+
+  p {
+    text-align: justify;
   }
 
   h1 {
@@ -210,6 +214,7 @@
   from {
     transform: translateX(0);
   }
+
   to {
     transform: translateX(-50%);
   }
@@ -232,6 +237,7 @@
 
 /* iOS Safari auto-zooms focused fields below 16px — keep inputs at 16px on mobile */
 @media (max-width: 767px) {
+
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
   textarea,
   select {

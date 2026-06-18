@@ -44,6 +44,8 @@ export type TaxFlowStep =
   | "awaiting_income"
   | "awaiting_proceed"
   | "awaiting_payment"
+  | "awaiting_consultation_form"
+  | "consultation_booked"
   | "completed"
   | "declined";
 

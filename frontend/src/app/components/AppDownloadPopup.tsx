@@ -64,7 +64,7 @@ export function AppDownloadPopup() {
 
               <div className="space-y-3">
                 <a 
-                  href="https://play.google.com/store/apps/details?id=com.finovert.app" 
+                  href="https://play.google.com/store/apps/details?id=com.brandovert.finovert&pcampaignid=web_share" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-3 bg-black text-white py-3.5 px-6 rounded-2xl hover:bg-gray-800 transition-all group w-full"

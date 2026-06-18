@@ -7,7 +7,7 @@ export function About() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="about" ref={ref} className="relative py-16 sm:py-24 bg-white overflow-hidden">
+    <section id="about" ref={ref} className="relative py-16 sm:py-24 bg-[#fbfbfd] overflow-hidden">
       {/* Curved Top Decor */}
       <div className="absolute top-0 left-0 w-full overflow-hidden leading-[0]">
         <svg
@@ -18,7 +18,7 @@ export function About() {
         >
           <path
             d="M0,0 C300,120 900,120 1200,0 L1200,120 L0,120 Z"
-            className="fill-white"
+            className="fill-[#fbfbfd]"
           ></path>
         </svg>
       </div>
@@ -29,16 +29,16 @@ export function About() {
           transition={{ duration: 0.8 }}
           className="max-w-4xl mx-auto text-center"
         >
-          <h2 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-6 sm:mb-8">
-            What is <span className="text-black">Finovert</span>?
+          <h2 className="text-3xl sm:text-[3rem] font-bold text-[#1d1d1f] mb-6 sm:mb-8 tracking-tight">
+            What is Finovert?
           </h2>
 
-          <p className="text-base sm:text-lg text-gray-600 mb-5 sm:mb-6 leading-relaxed">
+          <p className="text-base sm:text-[1.2rem] text-[#86868b] mb-5 sm:mb-6 leading-relaxed font-medium">
             Finovert is a next-generation Virtual CFO platform designed to simplify and automate financial management.
             It combines AI, analytics, and automation to help businesses make smarter financial decisions in real time.
           </p>
 
-          <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+          <p className="text-base sm:text-[1.2rem] text-[#86868b] leading-relaxed font-medium">
             Whether it's forecasting, compliance, or expense tracking — Finovert becomes your digital finance head.
           </p>
 

@@ -14,14 +14,11 @@ export function Hero() {
   const [shouldAnimate, setShouldAnimate] = useState(true);
 
   useEffect(() => {
-    if (window.innerWidth < 768) return;
-
     const preload = document.createElement("link");
     preload.rel = "preload";
     preload.as = "image";
     preload.href = homeImg;
     document.head.appendChild(preload);
-
     return () => {
       document.head.removeChild(preload);
     };
@@ -29,106 +26,75 @@ export function Hero() {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const updateAnimationPref = () => {
-      const lowPowerMobile = window.innerWidth < 768;
-      setShouldAnimate(!mediaQuery.matches && !lowPowerMobile);
+    const update = () => {
+      setShouldAnimate(!mediaQuery.matches);
     };
-    updateAnimationPref();
-    mediaQuery.addEventListener("change", updateAnimationPref);
-    window.addEventListener("resize", updateAnimationPref);
-    return () => {
-      mediaQuery.removeEventListener("change", updateAnimationPref);
-      window.removeEventListener("resize", updateAnimationPref);
-    };
+    update();
+    mediaQuery.addEventListener("change", update);
+    return () => mediaQuery.removeEventListener("change", update);
   }, []);
 
   return (
     <section
       id="home"
-      className="relative overflow-hidden min-h-0 md:min-h-[640px] lg:min-h-[800px] pt-20 pb-8 md:pb-0"
-      style={{ background: "linear-gradient(135deg, #f8f4ff 0%, #fce8f8 30%, #f5f0ff 60%, #ede8ff 100%)" }}
+      className="relative overflow-hidden pt-20 pb-10 md:pb-16 md:min-h-[680px] lg:min-h-[820px] bg-[#fbfbfd]"
     >
-      {/* Purple/lavender blob — top left */}
-      <div className="absolute -top-20 -left-20 w-[380px] h-[380px] rounded-full pointer-events-none" style={{ background: "radial-gradient(circle, rgba(180,140,255,0.35) 0%, rgba(200,170,255,0.08) 70%, transparent 100%)" }} />
+      {/* Subtle top blur for depth */}
+      <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-white to-transparent pointer-events-none" />
 
-      {/* Pink blob — center */}
-      <div className="absolute top-1/2 left-1/3 -translate-y-1/2 w-[500px] h-[300px] rounded-full pointer-events-none" style={{ background: "radial-gradient(ellipse, rgba(255,180,220,0.18) 0%, transparent 70%)" }} />
+      <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 pt-6 sm:pt-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-12 items-center">
 
-      {/* Teal/blue blob — bottom */}
-      <div className="absolute bottom-0 left-1/4 w-[400px] h-[200px] rounded-full pointer-events-none" style={{ background: "radial-gradient(ellipse, rgba(140,210,255,0.22) 0%, transparent 70%)" }} />
-
-      {/* SVG Wave Lines — matching reference exactly */}
-      <svg
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        viewBox="0 0 1200 800"
-        preserveAspectRatio="xMidYMid slice"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* Single S-curve wave bundle: top-right → center → bottom-right */}
-        {Array.from({ length: 16 }, (_, i) => {
-          const o = i * 5; // 5px spacing between lines
-          return (
-            <path
-              key={i}
-              d={`M ${1300} ${-60 + o} C ${900} ${80 + o}, ${700} ${200 + o}, ${580} ${360 + o} S ${420} ${560 + o}, ${-100} ${720 + o}`}
-              stroke={`rgba(180, 170, 230, ${0.22 - i * 0.003})`}
-              strokeWidth="1"
-              fill="none"
-            />
-          );
-        })}
-      </svg>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-12 items-center">
-          {/* Left Side: Content */}
+          {/* ── Left: Content ── */}
           <div className="text-center lg:text-left">
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
+
+            {/* Badge pill */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-sm sm:text-base font-bold text-[#1428A0] mb-3 sm:mb-4 tracking-tight"
+              className="inline-flex items-center gap-2 mb-6"
             >
-              Finovert — Corporate Services & Compliance Platform
-            </motion.p>
-            {/* Main headline */}
-            <motion.h1
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, delay: 0.1 }}
-              className="text-3xl sm:text-5xl lg:text-[4.15rem] font-extrabold leading-[1.08] text-[#0F2A5F] mb-5 sm:mb-6 tracking-[-0.02em]"
-            >
-              <span className="bg-gradient-to-r from-[#0F2A5F] via-[#1E3A8A] to-[#2563EB] bg-clip-text text-transparent sm:whitespace-nowrap">
-                Finance and compliance
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[13px] font-semibold text-[#1d1d1f] bg-gray-100/80 border border-gray-200/60 backdrop-blur-md">
+                Finovert — Corporate Services & Compliance
               </span>
-              <br />
-              <span className="text-[#0B1220]">for startups in one platform.</span>
+            </motion.div>
+
+            {/* Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              className="text-[2.8rem] leading-[1.05] sm:text-5xl lg:text-[4.5rem] font-bold text-[#1d1d1f] mb-6 tracking-tight sm:tracking-tighter"
+            >
+              Finance and compliance
+              <br className="hidden sm:block" />
+              <span className="text-[#86868b]"> in one clean platform.</span>
             </motion.h1>
 
             {/* Subheading */}
             <motion.p
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="text-base sm:text-2xl lg:text-[2rem] text-gray-700 mb-8 sm:mb-10 leading-snug font-medium"
+              className="text-lg sm:text-2xl lg:text-[1.7rem] text-[#86868b] mb-10 leading-snug font-medium max-w-xl mx-auto lg:mx-0 tracking-tight"
             >
-              Built for founders and growing teams.
-              <br />
-              Faster decisions, cleaner compliance, and expert-backed execution.
+              Built for founders and growing teams.{" "}
+              <span className="text-[#1d1d1f]">Faster decisions</span>, cleaner compliance, expert-backed execution.
             </motion.p>
 
-            {/* Primary + Secondary CTA */}
+            {/* CTA Buttons */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.25 }}
-              className="flex flex-nowrap items-center justify-center lg:justify-start gap-2 sm:gap-4 mb-4 w-full overflow-x-auto scrollbar-hide"
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 mb-6 px-4 sm:px-0"
             >
               <a
                 href={WHATSAPP_GET_STARTED}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex shrink-0 whitespace-nowrap items-center justify-center bg-[#0F2A5F] hover:bg-[#0b1f47] text-white px-5 py-3 sm:px-8 sm:py-3.5 text-sm sm:text-base rounded-2xl transition-all duration-200 hover:shadow-lg font-semibold"
+                className="w-full sm:w-auto inline-flex items-center justify-center bg-[#1d1d1f] hover:bg-[#000000] active:scale-[0.98] text-white px-8 py-4 text-base sm:text-[17px] rounded-full transition-all duration-200 font-semibold tracking-wide shadow-sm"
               >
                 Get Started
               </a>
@@ -136,94 +102,76 @@ export function Hero() {
                 href="https://wa.me/916205425499"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex shrink-0 whitespace-nowrap items-center justify-center bg-white hover:bg-gray-50 text-[#0F2A5F] px-5 py-3 sm:px-8 sm:py-3.5 text-sm sm:text-base rounded-2xl transition-all duration-200 border border-gray-300 font-semibold"
+                className="w-full sm:w-auto inline-flex items-center justify-center bg-transparent hover:bg-gray-100 active:scale-[0.98] text-[#1d1d1f] px-8 py-4 text-base sm:text-[17px] rounded-full transition-all duration-200 font-medium border border-gray-300"
               >
                 Talk to Expert
               </a>
             </motion.div>
-            <p className="text-sm text-gray-600 text-center lg:text-left">
-              Trusted by 500+ startups across finance, tax, and compliance workflows.
-            </p>
+
           </div>
 
+          {/* ── Right: Phone Mockups ── */}
+          <div className="relative hidden sm:flex items-end justify-center lg:justify-end overflow-visible min-h-[300px] sm:min-h-[480px] mt-4 lg:mt-0">
+            {/* Glow */}
+            <div className="absolute bottom-0 right-4 lg:right-10 w-[360px] h-28 rounded-full -z-10"
+              style={{ background: "radial-gradient(ellipse, rgba(140,100,255,0.25) 0%, transparent 70%)" }} />
 
-          {/* Phone mockups — desktop/tablet only (hidden on mobile) */}
-          <div className="relative hidden md:flex items-end justify-center lg:justify-end overflow-visible min-h-[450px]">
-            {/* Subtle glow under phones */}
-            <div className="absolute bottom-0 right-0 lg:right-20 w-[400px] h-24 bg-purple-100 blur-3xl opacity-40 rounded-full -z-10" />
-
-            {/* Left phone in the group */}
+            {/* Left phone */}
             <motion.div
               initial={{ opacity: 0, x: 40, y: 40 }}
-              whileInView={{ opacity: 1, x: 0, y: 0 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
               transition={{ duration: 0.9, delay: 0.4 }}
-              viewport={{ once: true }}
               className="relative z-10 hidden sm:block"
-              style={{ marginRight: "-40px", marginBottom: "0px" }}
+              style={{ marginRight: "-36px", marginBottom: "0px" }}
             >
               <motion.div
-                animate={shouldAnimate ? { y: [0, -10, 0] } : undefined}
+                animate={shouldAnimate ? { y: [0, -12, 0] } : undefined}
                 transition={shouldAnimate ? { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 } : undefined}
               >
-                <img
-                  src={leftImg}
-                  alt="Company Registration"
-                  className="w-auto object-contain drop-shadow-xl"
-                  style={{ height: 340 }}
-                  loading="lazy"
-                />
+                <img src={leftImg} alt="Company Registration" className="w-auto object-contain drop-shadow-xl" style={{ height: 300 }} loading="lazy" />
               </motion.div>
             </motion.div>
 
-            {/* Center phone in the group */}
+            {/* Center phone */}
             <motion.div
               initial={{ opacity: 0, y: 60 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, delay: 0.2 }}
-              viewport={{ once: true }}
               className="relative z-20"
             >
               <motion.div
-                animate={shouldAnimate ? { y: [0, -14, 0] } : undefined}
+                animate={shouldAnimate ? { y: [0, -16, 0] } : undefined}
                 transition={shouldAnimate ? { duration: 4.5, repeat: Infinity, ease: "easeInOut" } : undefined}
               >
                 <img
                   src={homeImg}
                   alt="App Home"
-                  className="h-[340px] sm:h-[440px] w-auto object-contain drop-shadow-2xl"
+                  className="h-[280px] sm:h-[420px] lg:h-[480px] w-auto object-contain drop-shadow-[0_24px_60px_rgba(0,0,0,0.22)]"
                   loading="eager"
                   fetchPriority="high"
                 />
               </motion.div>
             </motion.div>
 
-            {/* Right phone in the group */}
+            {/* Right phone */}
             <motion.div
               initial={{ opacity: 0, x: -40, y: 40 }}
-              whileInView={{ opacity: 1, x: 0, y: 0 }}
+              animate={{ opacity: 1, x: 0, y: 0 }}
               transition={{ duration: 0.9, delay: 0.4 }}
-              viewport={{ once: true }}
               className="relative z-10 hidden sm:block"
-              style={{ marginLeft: "-40px", marginBottom: "0px" }}
+              style={{ marginLeft: "-36px", marginBottom: "0px" }}
             >
               <motion.div
                 animate={shouldAnimate ? { y: [0, -10, 0] } : undefined}
                 transition={shouldAnimate ? { duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1 } : undefined}
               >
-                <img
-                  src={rightImg}
-                  alt="Tracking"
-                  className="w-auto object-contain drop-shadow-xl"
-                  style={{ height: 340 }}
-                  loading="lazy"
-                />
-
+                <img src={rightImg} alt="Tracking" className="w-auto object-contain drop-shadow-xl" style={{ height: 300 }} loading="lazy" />
               </motion.div>
             </motion.div>
           </div>
-
         </div>
       </div>
+
     </section>
   );
 }

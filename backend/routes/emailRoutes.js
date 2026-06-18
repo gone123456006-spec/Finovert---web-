@@ -45,8 +45,18 @@ router.post('/broadcast/subadmins', async (req, res) => {
 // Broadcast to all intern applicants
 router.post('/broadcast/interns', async (req, res) => {
   try {
-    const { subject, message } = req.body;
-    const interns = await Internship.find({ email: { $ne: '' } });
+    const { subject, message, status } = req.body;
+    
+    const filter = { email: { $ne: '' } };
+    if (status && status !== 'all') {
+      if (status === 'pending') {
+        filter.$or = [{ status: 'pending' }, { status: { $exists: false } }, { status: '' }];
+      } else {
+        filter.status = status;
+      }
+    }
+
+    const interns = await Internship.find(filter);
     const { html } = emails.customAdmin(message);
 
     const results = await Promise.allSettled(

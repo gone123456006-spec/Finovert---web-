@@ -162,6 +162,7 @@ export function AdminDashboard() {
   const [emailMessage, setEmailMessage] = useState("");
   const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [emailResult, setEmailResult] = useState("");
+  const [internEmailStatus, setInternEmailStatus] = useState("all");
 
   // Forms
   const [formData, setFormData] = useState({ title: "", excerpt: "", content: "", category: "Technology", author: "", image: "", readTime: "5 min read" });
@@ -1337,9 +1338,21 @@ export function AdminDashboard() {
                   body: JSON.stringify(payload)
                 });
                 const data = await res.json();
-                if (res.ok) { setEmailStatus("success"); setEmailResult(data.message); }
-                else { setEmailStatus("error"); setEmailResult(data.message || "Failed to send."); }
-              } catch { setEmailStatus("error"); setEmailResult("Network error."); }
+                if (res.ok) { 
+                  setEmailStatus("success"); 
+                  setEmailResult(data.message); 
+                  alert(data.message);
+                }
+                else { 
+                  setEmailStatus("error"); 
+                  setEmailResult(data.message || "Failed to send."); 
+                  alert(data.message || "Failed to send.");
+                }
+              } catch { 
+                setEmailStatus("error"); 
+                setEmailResult("Network error."); 
+                alert("Network error.");
+              }
               setTimeout(() => setEmailStatus("idle"), 5000);
             };
 
@@ -1381,7 +1394,17 @@ export function AdminDashboard() {
                   <div className="bg-blue-50 rounded-2xl border border-blue-200 p-6 flex flex-col">
                     <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2"><Briefcase className="w-4 h-4 text-blue-600" /> All Intern Applicants</h3>
                     <p className="text-sm text-gray-500 flex-1 mb-4">Send to everyone who submitted an internship application.</p>
-                    <button disabled={emailStatus === "loading" || !emailMessage} onClick={() => sendEmailAction("broadcast/interns", { subject: emailSubject, message: emailMessage })} className="w-full py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 text-sm">Broadcast to Interns</button>
+                    <select 
+                      value={internEmailStatus} 
+                      onChange={(e) => setInternEmailStatus(e.target.value)} 
+                      className="mb-4 w-full px-4 py-2 rounded-xl border border-blue-200 outline-none focus:border-blue-500 text-sm bg-white"
+                    >
+                      <option value="all">All Applicants</option>
+                      <option value="pending">Pending</option>
+                      <option value="selected">Selected</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                    <button disabled={emailStatus === "loading" || !emailMessage} onClick={() => sendEmailAction("broadcast/interns", { subject: emailSubject, message: emailMessage, status: internEmailStatus })} className="w-full py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-50 text-sm">Broadcast to Interns</button>
                   </div>
                   <div className="bg-purple-50 rounded-2xl border border-purple-200 p-6 flex flex-col">
                     <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2"><Mail className="w-4 h-4 text-purple-600" /> Everyone</h3>
