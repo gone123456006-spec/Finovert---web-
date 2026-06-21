@@ -72,7 +72,8 @@ export function Navbar() {
           { name: "ID Verification", path: "/verify" },
           { name: "Contributors", path: "/contributors" },
           { name: "Blog & Insights", path: "/blog" },
-          { name: "Confirmation Form", path: "/confirmation-form" }
+          { name: "Confirmation Form", path: "/confirmation-form" },
+          { name: "Book Inquiry", path: "/book-consultation" }
         ]
       },
       { name: "My App", path: "/my-app" },

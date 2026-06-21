@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
-import { Lock, FileText, CheckCircle, AlertCircle, BadgeCheck, Users, Clock, Briefcase, Trash2, Download, XCircle, Check, Mail, Building, Calendar, RefreshCw, PhoneCall, Filter, Search, LogOut, FileSpreadsheet, Receipt, Eye, CheckSquare } from "lucide-react";
+import { Lock, FileText, CheckCircle, AlertCircle, BadgeCheck, Users, Clock, Briefcase, Trash2, Download, XCircle, Check, Mail, Building, Calendar, RefreshCw, PhoneCall, Filter, Search, LogOut, FileSpreadsheet, Receipt, Eye, CheckSquare, ClipboardList } from "lucide-react";
 
 const AUTH_STORAGE_KEY = "finovert_admin_session";
 const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
@@ -140,7 +140,7 @@ export function AdminDashboard() {
   const [isFetchingData, setIsFetchingData] = useState(false);
   const [fetchMessage, setFetchMessage] = useState("");
   const [activeTab, setActiveTab] = useState<
-    "blog" | "verification" | "requests" | "interns" | "consultations" | "taxFilings" | "email" | "confirmations"
+    "blog" | "verification" | "requests" | "interns" | "consultations" | "taxFilings" | "email" | "confirmations" | "inquiries"
   >("blog");
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
   const [allBlogs, setAllBlogs] = useState<any[]>([]);
@@ -153,6 +153,7 @@ export function AdminDashboard() {
   const [taxFilings, setTaxFilings] = useState<any[]>([]);
   const [allVerifications, setAllVerifications] = useState<any[]>([]);
   const [confirmations, setConfirmations] = useState<any[]>([]);
+  const [inquiries, setInquiries] = useState<any[]>([]);
   const [expandedSubAdmin, setExpandedSubAdmin] = useState<string | null>(null);
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
   const [selectedIntern, setSelectedIntern] = useState<any | null>(null);
@@ -282,6 +283,25 @@ export function AdminDashboard() {
     }
   };
 
+  const fetchInquiries = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/consultations`);
+      if (res.ok) setInquiries(await res.json());
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleDeleteInquiry = async (id: string) => {
+    if (!confirm("Delete this inquiry?")) return;
+    try {
+      await fetch(`${API_BASE}/api/consultations/${id}`, { method: "DELETE" });
+      fetchInquiries();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       setIsFetchingData(true);
@@ -295,6 +315,7 @@ export function AdminDashboard() {
           if (activeTab === "taxFilings") promises.push(fetchTaxFilings());
           if (activeTab === "verification") promises.push(fetchVerifications());
           if (activeTab === "confirmations") promises.push(fetchConfirmations());
+          if (activeTab === "inquiries") promises.push(fetchInquiries());
         }
         await Promise.all(promises);
       } finally {
@@ -736,6 +757,7 @@ export function AdminDashboard() {
                     ["taxFilings", Receipt, "Tax Filing"],
                     ["email", Mail, "Email"],
                     ["confirmations", CheckSquare, "Confirmations"],
+                    ["inquiries", ClipboardList, "Inquiries"],
                   ] as const).map(([tab, Icon, label]) => (
                     <button
                       key={tab}
@@ -1468,6 +1490,81 @@ export function AdminDashboard() {
                           <td className="px-6 py-4 text-gray-600">{conf.email}</td>
                           <td className="px-6 py-4 text-gray-500">
                             {new Date(conf.createdAt).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {authRole === "main_admin" && activeTab === "inquiries" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <ClipboardList className="w-5 h-5 text-blue-600" /> Book Inquiries
+                  <span className="ml-2 text-sm font-semibold bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full">{inquiries.length}</span>
+                </h2>
+                <button
+                  onClick={fetchInquiries}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 text-sm font-semibold rounded-lg hover:bg-blue-100 transition-colors"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isFetchingData ? "animate-spin" : ""}`} /> Refresh
+                </button>
+              </div>
+
+              {inquiries.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-2xl border border-gray-200 border-dashed">
+                  <ClipboardList className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 font-medium">No inquiries yet.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                  <table className="w-full text-left text-sm whitespace-nowrap">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-4 py-4 font-semibold text-gray-900">#</th>
+                        <th className="px-4 py-4 font-semibold text-gray-900">Name</th>
+                        <th className="px-4 py-4 font-semibold text-gray-900">Phone</th>
+                        <th className="px-4 py-4 font-semibold text-gray-900">Business Name</th>
+                        <th className="px-4 py-4 font-semibold text-gray-900">Category</th>
+                        <th className="px-4 py-4 font-semibold text-gray-900">City</th>
+                        <th className="px-4 py-4 font-semibold text-gray-900">Service</th>
+                        <th className="px-4 py-4 font-semibold text-gray-900">Description</th>
+                        <th className="px-4 py-4 font-semibold text-gray-900">Submitted At</th>
+                        <th className="px-4 py-4 font-semibold text-gray-900">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 bg-white">
+                      {inquiries.map((inq, index) => (
+                        <tr key={inq._id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-4 text-gray-500">{index + 1}</td>
+                          <td className="px-4 py-4 font-medium text-gray-900">{inq.name}</td>
+                          <td className="px-4 py-4 text-gray-600">{inq.phone}</td>
+                          <td className="px-4 py-4 text-gray-600">{inq.businessName || <span className="text-gray-300">—</span>}</td>
+                          <td className="px-4 py-4 text-gray-600">{inq.businessCategory || <span className="text-gray-300">—</span>}</td>
+                          <td className="px-4 py-4 text-gray-600">{inq.city || <span className="text-gray-300">—</span>}</td>
+                          <td className="px-4 py-4">
+                            {inq.service ? (
+                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
+                                {inq.service === 'Other' && inq.otherService ? inq.otherService : inq.service}
+                              </span>
+                            ) : <span className="text-gray-300">—</span>}
+                          </td>
+                          <td className="px-4 py-4 text-gray-600 max-w-[180px] truncate" title={inq.description}>
+                            {inq.description || <span className="text-gray-300">—</span>}
+                          </td>
+                          <td className="px-4 py-4 text-gray-500 text-xs">{new Date(inq.createdAt).toLocaleString()}</td>
+                          <td className="px-4 py-4">
+                            <button
+                              onClick={() => handleDeleteInquiry(inq._id)}
+                              className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete inquiry"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </td>
                         </tr>
                       ))}

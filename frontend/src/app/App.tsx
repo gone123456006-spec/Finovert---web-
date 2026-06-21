@@ -11,6 +11,7 @@ import { CareersPage } from "./pages/CareersPage";
 import { FinanceGuidesPage } from "./pages/FinanceGuidesPage";
 import { MyAppPage } from "./pages/MyAppPage";
 import { ConfirmationFormPage } from "./pages/ConfirmationFormPage";
+import { BookConsultationPage } from "./pages/BookConsultationPage";
 
 import { AboutPage } from "./pages/AboutPage";
 
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="finance-guides" element={<FinanceGuidesPage />} />
         <Route path="my-app" element={<MyAppPage />} />
         <Route path="confirmation-form" element={<ConfirmationFormPage />} />
+        <Route path="book-consultation" element={<BookConsultationPage />} />
       </Route>
     </Routes>
   );
