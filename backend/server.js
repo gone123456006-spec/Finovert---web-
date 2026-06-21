@@ -21,6 +21,7 @@ import authRoutes from './routes/authRoutes.js';
 import consultationRoutes from './routes/consultationRoutes.js';
 import taxFilingRoutes from './routes/taxFilingRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import confirmationRoutes from './routes/confirmationRoutes.js';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 dotenv.config();
@@ -147,6 +148,7 @@ app.use('/api/email', emailLimiter, emailRoutes);
 app.use('/api/consultations', consultationRoutes);
 app.use('/api/tax-filings', taxFilingRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/confirmations', confirmationRoutes);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {

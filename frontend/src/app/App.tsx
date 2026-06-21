@@ -10,6 +10,7 @@ import { AdminDashboard } from "./pages/AdminDashboard";
 import { CareersPage } from "./pages/CareersPage";
 import { FinanceGuidesPage } from "./pages/FinanceGuidesPage";
 import { MyAppPage } from "./pages/MyAppPage";
+import { ConfirmationFormPage } from "./pages/ConfirmationFormPage";
 
 import { AboutPage } from "./pages/AboutPage";
 
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="careers" element={<CareersPage />} />
         <Route path="finance-guides" element={<FinanceGuidesPage />} />
         <Route path="my-app" element={<MyAppPage />} />
+        <Route path="confirmation-form" element={<ConfirmationFormPage />} />
       </Route>
     </Routes>
   );

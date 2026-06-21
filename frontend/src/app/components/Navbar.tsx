@@ -71,7 +71,8 @@ export function Navbar() {
         dropdown: [
           { name: "ID Verification", path: "/verify" },
           { name: "Contributors", path: "/contributors" },
-          { name: "Blog & Insights", path: "/blog" }
+          { name: "Blog & Insights", path: "/blog" },
+          { name: "Confirmation Form", path: "/confirmation-form" }
         ]
       },
       { name: "My App", path: "/my-app" },
