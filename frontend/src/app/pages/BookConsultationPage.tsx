@@ -53,7 +53,15 @@ export function BookConsultationPage() {
 
       if (response.ok) {
         setStatus('success');
-        setMessage('Your consultation request has been submitted successfully!');
+        setMessage('Your inquiry has been submitted! Redirecting to WhatsApp...');
+
+        // Construct WhatsApp message
+        const serviceText = formData.service === 'Other' && formData.otherService ? formData.otherService : formData.service;
+        const whatsappMessage = `*New Book Inquiry*\n\n*Name:* ${formData.name}\n*Phone:* ${formData.phone}\n*Business Name:* ${formData.businessName || 'N/A'}\n*Category:* ${formData.businessCategory || 'N/A'}\n*City:* ${formData.city || 'N/A'}\n*Service Needed:* ${serviceText || 'N/A'}\n*Description:* ${formData.description || 'N/A'}`;
+        
+        const whatsappUrl = `https://wa.me/919153832948?text=${encodeURIComponent(whatsappMessage)}`;
+        window.open(whatsappUrl, '_blank');
+
         setFormData({
           name: '',
           phone: '',
