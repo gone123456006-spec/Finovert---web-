@@ -178,13 +178,11 @@ export function BookConsultationPage() {
                 className="w-full px-4 py-3 rounded-xl border border-blue-100 bg-blue-50 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-gray-700 appearance-none cursor-pointer"
               >
                 <option value="">— Select a service —</option>
-                <option value="Company Registration">Company Registration</option>
-                <option value="GST Registration">GST Registration</option>
-                <option value="ITR Filing">ITR Filing</option>
-                <option value="Trademark Registration">Trademark Registration</option>
-                <option value="Accounting & Bookkeeping">Accounting &amp; Bookkeeping</option>
-                <option value="Compliance Support">Compliance Support</option>
-                <option value="Other">Other</option>
+                {servicesList.map(service => (
+                  <option key={service} value={service}>
+                    {service}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
