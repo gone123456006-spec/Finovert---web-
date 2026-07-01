@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { motion } from "motion/react";
-import { Send, CheckCircle, AlertCircle, UploadCloud, GraduationCap, FileCheck, User, Briefcase, X } from "lucide-react";
-import { Navbar } from "../components/Navbar";
-import { Footer } from "../components/Footer";
+import { Send, CheckCircle, AlertCircle, UploadCloud, X } from "lucide-react";
 import { SEO } from "../components/SEO";
+import { OutlinedField, outlinedInputClass } from "../components/corporate/OutlinedField";
+import { FormSection } from "../components/corporate/FormSection";
 import API_BASE from "../../config/api";
 
 const PREFERRED_ROLES = [
@@ -32,13 +31,21 @@ function isValidIndianMobile(phone: string) {
 
 export function CareersPage() {
   const [formData, setFormData] = useState({
-    fullName: "", phone: "", email: "",
-    collegeName: "", course: "", branch: "", yearOfStudy: "1st Year",
-    preferredRole: "", eligibilityReason: "",
-    resumeUrl: "", idProofUrl: "", collegeIdUrl: "",
-    declared: false
+    fullName: "",
+    phone: "",
+    email: "",
+    collegeName: "",
+    course: "",
+    branch: "",
+    yearOfStudy: "1st Year",
+    preferredRole: "",
+    eligibilityReason: "",
+    resumeUrl: "",
+    idProofUrl: "",
+    collegeIdUrl: "",
+    declared: false,
   });
-  
+
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -53,17 +60,16 @@ export function CareersPage() {
 
     setUploadingField(fieldName);
     const uploadData = new FormData();
-    uploadData.append('image', file);
+    uploadData.append("image", file);
 
     try {
       const response = await fetch(`${API_BASE}/api/upload`, {
-        method: 'POST',
-        body: uploadData
+        method: "POST",
+        body: uploadData,
       });
       if (response.ok) {
         const filePath = await response.text();
-        // Server returns a full data URL (base64), no need to prefix API_BASE
-        setFormData(prev => ({ ...prev, [fieldName]: filePath }));
+        setFormData((prev) => ({ ...prev, [fieldName]: filePath }));
       } else {
         alert("Upload failed. Please try again.");
       }
@@ -82,7 +88,7 @@ export function CareersPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isValidIndianMobile(formData.phone)) {
-      setErrorMsg("Enter a valid 10-digit Indian mobile number (starts with 6, 7, 8, or 9).");
+      setErrorMsg("Enter a valid 10-digit Indian mobile number.");
       return;
     }
     if (!formData.resumeUrl) {
@@ -101,20 +107,29 @@ export function CareersPage() {
     setStatus("loading");
     try {
       const response = await fetch(`${API_BASE}/api/internships`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
           idProofUrl: formData.idProofUrl || "",
           collegeIdUrl: formData.collegeIdUrl || "",
-        })
+        }),
       });
       if (response.ok) {
         setFormData({
-          fullName: "", phone: "", email: "",
-          collegeName: "", course: "", branch: "", yearOfStudy: "1st Year",
-          preferredRole: "", eligibilityReason: "",
-          resumeUrl: "", idProofUrl: "", collegeIdUrl: "",
-          declared: false
+          fullName: "",
+          phone: "",
+          email: "",
+          collegeName: "",
+          course: "",
+          branch: "",
+          yearOfStudy: "1st Year",
+          preferredRole: "",
+          eligibilityReason: "",
+          resumeUrl: "",
+          idProofUrl: "",
+          collegeIdUrl: "",
+          declared: false,
         });
         setStatus("success");
       } else {
@@ -122,7 +137,7 @@ export function CareersPage() {
         setStatus("error");
         setErrorMsg(data.message || "Failed to submit application.");
       }
-    } catch (error) {
+    } catch {
       setStatus("error");
       setErrorMsg("Network error.");
     }
@@ -130,207 +145,241 @@ export function CareersPage() {
 
   return (
     <>
-      <SEO 
+      <SEO
         title="Finovert - Careers | Join Our Team"
         description="Build your career at Finovert. Apply for internships and roles in finance, compliance, technology, marketing, and operations across India."
         path="/careers"
         keywords={["finovert careers", "join finovert", "finance internship india", "compliance jobs", "fintech careers"]}
       />
-      <Navbar />
-      <div className="min-h-screen bg-gray-50 pt-32 pb-20 px-4">
-        <div className="max-w-3xl mx-auto">
-          
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Join Our Team</h1>
-            <p className="text-xl text-gray-600">Apply for our internship program and start your career at Finovert.</p>
-          </div>
 
+      <div className="bg-slate-50 min-h-[calc(100dvh-8rem)] pt-20 sm:pt-24">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 sm:pb-12">
           {status === "success" && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-white p-8 md:p-10 rounded-3xl shadow-2xl border border-gray-100 text-center max-w-md w-full relative"
-              >
-                <button
-                  type="button"
-                  onClick={() => setStatus("idle")}
-                  className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
-                  aria-label="Close"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle className="w-10 h-10" />
-                </div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">Application Submitted!</h2>
-                <p className="text-gray-600 mb-2">Your application has been submitted successfully.</p>
-                <p className="text-sm text-gray-500 mb-8">It will appear on our admin dashboard for review. We will get back to you shortly.</p>
-                <a href="/" className="inline-flex items-center justify-center px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors w-full sm:w-auto">
-                  Return to Home
-                </a>
-              </motion.div>
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+                  <div className="bg-white p-8 border border-slate-200 text-center max-w-md w-full relative shadow-lg">
+                    <button
+                      type="button"
+                      onClick={() => setStatus("idle")}
+                      className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                      aria-label="Close"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                    <div className="w-14 h-14 bg-green-50 text-green-700 flex items-center justify-center mx-auto mb-5 border border-green-200">
+                      <CheckCircle className="w-7 h-7" />
+                    </div>
+                    <h2 className="text-xl font-bold text-[#0F2A5F] mb-2">Application Submitted</h2>
+                    <p className="text-slate-600 mb-6 text-sm leading-relaxed">
+                      Your application has been received. Our HR team will review it and contact you shortly.
+                    </p>
+                    <a
+                      href="/"
+                      className="inline-flex items-center justify-center px-6 py-3 bg-[#0F2A5F] text-white text-sm font-semibold hover:bg-[#0b1f47] transition-colors"
+                    >
+                      Return to Home
+                    </a>
+                  </div>
             </div>
           )}
 
           {status !== "success" && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-              <div className="p-8 md:p-10">
-                <form onSubmit={handleSubmit} className="space-y-8">
-                  
-                  {/* 1. Personal Information */}
-                  <section>
-                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3 mb-6"><User className="w-5 h-5 text-blue-600" /> 1. Personal Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="col-span-1 md:col-span-2">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name *</label>
-                        <input required type="text" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors" placeholder="shyam" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
-                        <input
-                          required
-                          type="tel"
-                          inputMode="numeric"
-                          autoComplete="tel-national"
-                          value={formData.phone}
-                          onChange={e => handlePhoneChange(e.target.value)}
-                          maxLength={10}
-                          pattern="[6-9][0-9]{9}"
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors"
-                          placeholder="9876543210"
-                          title="10-digit Indian mobile number starting with 6, 7, 8, or 9"
-                        />
-                        <p className="mt-1.5 text-xs text-gray-500">10 digits only · Indian mobile (6–9XXXXXXXXX)</p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address *</label>
-                        <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors" placeholder="john@example.com" />
-                      </div>
-                    </div>
-                  </section>
+            <div className="bg-white border border-slate-200 shadow-sm">
+                  <div className="border-b border-slate-200 bg-slate-50 px-6 py-5">
+                    <h1 className="text-xl sm:text-2xl font-bold text-[#0F2A5F]">Join Our Team</h1>
+                    <p className="text-xs text-slate-500 mt-1">Complete all sections below</p>
+                  </div>
 
-                  {/* 2. Educational Details */}
-                  <section>
-                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3 mb-6 mt-10"><GraduationCap className="w-5 h-5 text-blue-600" /> 2. Educational Details</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="col-span-1 md:col-span-2">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">College/University Name *</label>
-                        <input required type="text" value={formData.collegeName} onChange={e => setFormData({...formData, collegeName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors" placeholder="Enter your college or university name" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Course *</label>
-                        <select required value={formData.course} onChange={e => setFormData({...formData, course: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors">
-                          <option value="">Select Course</option>
-                          <option value="B.Tech">B.Tech</option>
-                          <option value="M.Tech">M.Tech</option>
-                          <option value="BBA">BBA</option>
-                          <option value="MBA">MBA</option>
-                          <option value="B.Sc">B.Sc</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Branch / Specialization *</label>
-                        <input required type="text" value={formData.branch} onChange={e => setFormData({...formData, branch: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors" placeholder="Computer Science" />
-                      </div>
-                      <div className="col-span-1 md:col-span-2">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">Year of Study *</label>
-                        <select required value={formData.yearOfStudy} onChange={e => setFormData({...formData, yearOfStudy: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors">
-                          <option value="1st Year">1st Year</option>
-                          <option value="2nd Year">2nd Year</option>
-                          <option value="3rd Year">3rd Year</option>
-                          <option value="4th Year">4th Year</option>
-                          <option value="Graduated">Graduated</option>
-                        </select>
-                      </div>
-                    </div>
-                  </section>
+                  <div className="p-6 sm:p-8">
+                    <form onSubmit={handleSubmit}>
+                      <FormSection step={1} title="Personal Information">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+                          <div className="md:col-span-2">
+                            <OutlinedField label="Full Name" required>
+                              <input
+                                required
+                                type="text"
+                                value={formData.fullName}
+                                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                className={outlinedInputClass}
+                              />
+                            </OutlinedField>
+                          </div>
+                          <OutlinedField label="Phone Number" required>
+                            <input
+                              required
+                              type="tel"
+                              inputMode="numeric"
+                              autoComplete="tel-national"
+                              value={formData.phone}
+                              onChange={(e) => handlePhoneChange(e.target.value)}
+                              maxLength={10}
+                              pattern="[6-9][0-9]{9}"
+                              className={outlinedInputClass}
+                            />
+                          </OutlinedField>
+                          <OutlinedField label="Email Address" required>
+                            <input
+                              required
+                              type="email"
+                              value={formData.email}
+                              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                              className={outlinedInputClass}
+                            />
+                          </OutlinedField>
+                        </div>
+                      </FormSection>
 
-                  {/* 3. Preferred Role */}
-                  <section>
-                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3 mb-6 mt-10"><Briefcase className="w-5 h-5 text-blue-600" /> 3. Preferred Role</h3>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Select your preferred role *</label>
-                    <select
-                      required
-                      value={formData.preferredRole}
-                      onChange={e => setFormData({ ...formData, preferredRole: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors"
-                    >
-                      <option value="">Select a role</option>
-                      {PREFERRED_ROLES.map((role, index) => (
-                        <option key={role} value={role}>
-                          {index + 1}. {role}
-                        </option>
-                      ))}
-                    </select>
-                  </section>
+                      <FormSection step={2} title="Educational Details">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+                          <div className="md:col-span-2">
+                            <OutlinedField label="College / University" required>
+                              <input
+                                required
+                                type="text"
+                                value={formData.collegeName}
+                                onChange={(e) => setFormData({ ...formData, collegeName: e.target.value })}
+                                className={outlinedInputClass}
+                              />
+                            </OutlinedField>
+                          </div>
+                          <OutlinedField label="Course" required>
+                            <select
+                              required
+                              value={formData.course}
+                              onChange={(e) => setFormData({ ...formData, course: e.target.value })}
+                              className={`${outlinedInputClass} cursor-pointer`}
+                            >
+                              <option value="">Select course</option>
+                              <option value="B.Tech">B.Tech</option>
+                              <option value="M.Tech">M.Tech</option>
+                              <option value="BBA">BBA</option>
+                              <option value="MBA">MBA</option>
+                              <option value="B.Sc">B.Sc</option>
+                              <option value="Other">Other</option>
+                            </select>
+                          </OutlinedField>
+                          <OutlinedField label="Branch" required>
+                            <input
+                              required
+                              type="text"
+                              value={formData.branch}
+                              onChange={(e) => setFormData({ ...formData, branch: e.target.value })}
+                              className={outlinedInputClass}
+                            />
+                          </OutlinedField>
+                          <div className="md:col-span-2">
+                            <OutlinedField label="Year of Study" required>
+                              <select
+                                required
+                                value={formData.yearOfStudy}
+                                onChange={(e) => setFormData({ ...formData, yearOfStudy: e.target.value })}
+                                className={`${outlinedInputClass} cursor-pointer`}
+                              >
+                                <option value="1st Year">1st Year</option>
+                                <option value="2nd Year">2nd Year</option>
+                                <option value="3rd Year">3rd Year</option>
+                                <option value="4th Year">4th Year</option>
+                                <option value="Graduated">Graduated</option>
+                              </select>
+                            </OutlinedField>
+                          </div>
+                        </div>
+                      </FormSection>
 
-                  {/* 4. Why eligible */}
-                  <section>
-                    <h3 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-3 mb-6 mt-10">4. Why are you eligible for this job?</h3>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Tell us why you are a good fit <span className="text-gray-400 font-normal">(optional)</span></label>
-                    <textarea
-                      rows={5}
-                      value={formData.eligibilityReason}
-                      onChange={e => setFormData({ ...formData, eligibilityReason: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-blue-500 bg-gray-50 focus:bg-white transition-colors resize-none"
-                      placeholder="Share your skills, experience, and why you want to join Finovert..."
-                    />
-                  </section>
+                      <FormSection step={3} title="Preferred Role">
+                        <OutlinedField label="Role" required>
+                          <select
+                            required
+                            value={formData.preferredRole}
+                            onChange={(e) => setFormData({ ...formData, preferredRole: e.target.value })}
+                            className={`${outlinedInputClass} cursor-pointer`}
+                          >
+                            <option value="">Select a role</option>
+                            {PREFERRED_ROLES.map((role) => (
+                              <option key={role} value={role}>
+                                {role}
+                              </option>
+                            ))}
+                          </select>
+                        </OutlinedField>
+                      </FormSection>
 
-                  {/* 5. Documents Upload */}
-                  <section>
-                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3 mb-6 mt-10"><FileCheck className="w-5 h-5 text-blue-600" /> 5. Documents Upload</h3>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Resume / CV *</label>
-                    <div className="w-full bg-gray-50 px-4 py-4 rounded-xl border border-gray-200 flex items-center gap-4 relative group hover:border-blue-400 focus-within:border-blue-500 transition-colors min-h-[56px]">
-                      <UploadCloud className="w-8 h-8 shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                      <div className="flex-1 min-w-0 text-left">
-                        {uploadingField === 'resumeUrl' ? (
-                          <p className="text-sm text-blue-600 font-semibold">Uploading...</p>
-                        ) : formData.resumeUrl ? (
-                          <p className="text-sm text-green-600 font-semibold">Resume uploaded successfully</p>
+                      <FormSection step={4} title="Eligibility">
+                        <OutlinedField label="Why you are a good fit" optional>
+                          <textarea
+                            rows={4}
+                            value={formData.eligibilityReason}
+                            onChange={(e) => setFormData({ ...formData, eligibilityReason: e.target.value })}
+                            className={`${outlinedInputClass} resize-none min-h-[100px]`}
+                          />
+                        </OutlinedField>
+                      </FormSection>
+
+                      <FormSection step={5} title="Resume & Declaration">
+                        <div className="space-y-6">
+                          <OutlinedField label="Resume / CV" required>
+                            <div className="flex items-center gap-3 relative min-h-[24px]">
+                              <UploadCloud className="w-5 h-5 shrink-0 text-slate-400" />
+                              <p className="flex-1 text-sm text-slate-700">
+                                {uploadingField === "resumeUrl"
+                                  ? "Uploading..."
+                                  : formData.resumeUrl
+                                    ? "File attached"
+                                    : "Click to upload PDF, DOC, or image"}
+                              </p>
+                              <input
+                                type="file"
+                                required={!formData.resumeUrl}
+                                onChange={(e) => handleFileUpload(e, "resumeUrl")}
+                                accept=".pdf,.doc,.docx,image/*"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              />
+                            </div>
+                          </OutlinedField>
+
+                          <label className="flex items-start gap-3 cursor-pointer border border-slate-200 bg-slate-50 p-4">
+                            <input
+                              type="checkbox"
+                              required
+                              checked={formData.declared}
+                              onChange={(e) => setFormData({ ...formData, declared: e.target.checked })}
+                              className="w-4 h-4 mt-0.5 border-slate-300 text-[#0F2A5F] focus:ring-[#0F2A5F]"
+                            />
+                            <span className="text-sm text-slate-700 leading-relaxed">
+                              I confirm that all information provided is accurate. I understand that false details may
+                              result in rejection of my application.
+                            </span>
+                          </label>
+                        </div>
+                      </FormSection>
+
+                      {errorMsg && (
+                        <div className="mb-6 p-4 bg-red-50 border border-red-200 flex items-start gap-3 text-red-800 text-sm">
+                          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                          <span>{errorMsg}</span>
+                        </div>
+                      )}
+
+                      <button
+                        disabled={status === "loading"}
+                        type="submit"
+                        className="w-full bg-[#0F2A5F] text-white font-semibold py-3.5 hover:bg-[#0b1f47] disabled:opacity-60 transition-colors flex items-center justify-center gap-2 text-sm uppercase tracking-wide"
+                      >
+                        {status === "loading" ? (
+                          "Submitting..."
                         ) : (
                           <>
-                            <p className="text-sm font-bold text-gray-900">Click or drag to upload your resume</p>
-                            <p className="text-xs text-gray-500 mt-0.5">PDF, DOC, DOCX, or image</p>
+                            <Send className="w-4 h-4" />
+                            Submit Application
                           </>
                         )}
-                      </div>
-                      <input type="file" required={!formData.resumeUrl} onChange={e => handleFileUpload(e, 'resumeUrl')} accept=".pdf,.doc,.docx,image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                    </div>
-                  </section>
-
-                  {/* 6. Declaration */}
-                  <section className="mt-10">
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <div className="mt-1">
-                        <input type="checkbox" required checked={formData.declared} onChange={e => setFormData({...formData, declared: e.target.checked})} className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                      </div>
-                      <span className="text-sm text-gray-800 font-medium">
-                        <strong>Declaration:</strong> I confirm that the above details are correct and I understand that any false information may result in the rejection of my application.
-                      </span>
-                    </label>
-                  </section>
-
-                  {errorMsg && (
-                    <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-700 font-semibold">
-                      <AlertCircle className="w-5 h-5" /> {errorMsg}
-                    </div>
-                  )}
-
-                  <button disabled={status === "loading"} type="submit" className="w-full bg-blue-600 text-white font-bold py-5 text-lg rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 flex items-center justify-center gap-2">
-                    {status === "loading" ? "Submitting..." : <><Send className="w-5 h-5" /> Submit Application</>}
-                  </button>
-
-                </form>
-              </div>
-            </motion.div>
+                      </button>
+                    </form>
+                  </div>
+            </div>
           )}
-
         </div>
       </div>
-      <Footer />
     </>
   );
 }

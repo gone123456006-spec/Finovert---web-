@@ -244,3 +244,8 @@
     font-size: 16px !important;
   }
 }
+
+/* Rounded corners for cards and form fields */
+.rounded-card {
+  border-radius: 12px;
+}

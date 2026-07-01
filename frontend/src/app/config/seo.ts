@@ -10,13 +10,26 @@ export const SEO_SITE = {
   linkedIn: "https://www.linkedin.com/company/finovert",
 };
 
-export const HOME_PAGE_TITLE = `${SEO_SITE.name} - ${SEO_SITE.tagline}`;
+export const HOME_PAGE_TITLE = `${SEO_SITE.name} - India's Best Compliance & Virtual CFO Platform`;
 
 export const HOME_PAGE_DESCRIPTION =
-  "India compliance, automated. Stay compliant with GST filing, income tax returns, ROC compliance, and annual filings for startups and SMEs — with expert support, virtual CFO services, and smart finance workflows.";
+  "Finovert is India's best finance and compliance platform for startups and SMEs. Get GST filing, income tax returns (ITR), ROC compliance, company registration, accounting, and virtual CFO services — all finance services in one platform, backed by expert CAs. Trusted by 500+ startups.";
+
+export const HOME_PAGE_DEFINITION =
+  "Finovert is India's best finance and compliance platform, built for startups and SMEs. It combines AI-driven automation with expert, CA-backed support to deliver finance services including GST filing, income tax return (ITR) filing, company registration, ROC compliance, business accounting, and virtual CFO operations — all in one place.";
 
 export const DEFAULT_SEO_KEYWORDS = [
   "finovert",
+  "india's best compliance platform",
+  "best compliance platform in india",
+  "best finance platform for startups india",
+  "best finance company in india",
+  "finance services india",
+  "financial services for startups",
+  "online finance services india",
+  "finance and compliance services",
+  "fintech platform india",
+  "finance app for business",
   "corporate services india",
   "business compliance platform",
   "gst filing india",
@@ -26,6 +39,8 @@ export const DEFAULT_SEO_KEYWORDS = [
   "virtual cfo india",
   "company registration india",
   "annual compliance filing",
+  "business accounting services india",
+  "cash flow management for startups",
 ];
 
 export const SITE_NAV_LINKS = [
@@ -92,7 +107,9 @@ export function buildOrganizationSchema(): JsonLd {
     "@type": "Organization",
     "@id": `${SEO_SITE.baseUrl}/#organization`,
     name: SEO_SITE.name,
-    alternateName: "Finovert Finance",
+    alternateName: ["Finovert Finance", "India's Best Compliance Platform"],
+    disambiguatingDescription:
+      "Finovert is an India-based compliance and virtual CFO platform for startups and SMEs, distinct from unrelated companies with similar-sounding names such as Finovers (accounting ERP) or Finoverse (fintech events network).",
     url: SEO_SITE.baseUrl,
     logo: {
       "@type": "ImageObject",
@@ -101,7 +118,17 @@ export function buildOrganizationSchema(): JsonLd {
       height: 512,
     },
     image: SEO_SITE.defaultImage,
-    description: HOME_PAGE_DESCRIPTION,
+    description: HOME_PAGE_DEFINITION,
+    slogan: "India's Best Compliance & Virtual CFO Platform",
+    knowsAbout: [
+      "GST Filing",
+      "Income Tax Return Filing",
+      "Company Registration",
+      "ROC Compliance",
+      "Virtual CFO Services",
+      "Startup Finance",
+      "Business Compliance in India",
+    ],
     email: SEO_SITE.email,
     telephone: SEO_SITE.phone,
     address: {
@@ -111,6 +138,7 @@ export function buildOrganizationSchema(): JsonLd {
       postalCode: "110096",
       addressCountry: "IN",
     },
+    areaServed: { "@type": "Country", name: "India" },
     sameAs: [SEO_SITE.linkedIn],
     contactPoint: {
       "@type": "ContactPoint",
@@ -130,8 +158,8 @@ export function buildWebSiteSchema(): JsonLd {
     "@id": `${SEO_SITE.baseUrl}/#website`,
     url: SEO_SITE.baseUrl,
     name: SEO_SITE.name,
-    alternateName: SEO_SITE.tagline,
-    description: HOME_PAGE_DESCRIPTION,
+    alternateName: ["India's Best Compliance Platform", SEO_SITE.tagline],
+    description: HOME_PAGE_DEFINITION,
     publisher: { "@id": `${SEO_SITE.baseUrl}/#organization` },
     inLanguage: "en-IN",
     potentialAction: {
@@ -151,23 +179,81 @@ export function buildProfessionalServiceSchema(): JsonLd {
     "@type": "ProfessionalService",
     "@id": `${SEO_SITE.baseUrl}/#service`,
     name: SEO_SITE.name,
+    slogan: "India's Best Compliance & Virtual CFO Platform",
     url: SEO_SITE.baseUrl,
     image: SEO_SITE.defaultImage,
-    description: HOME_PAGE_DESCRIPTION,
+    description: HOME_PAGE_DEFINITION,
     priceRange: "$$",
     areaServed: {
       "@type": "Country",
       name: "India",
     },
     serviceType: [
+      "Finance Services",
       "GST Filing",
       "Income Tax Return Filing",
       "Company Registration",
       "ROC Compliance",
       "Virtual CFO Services",
+      "Business Accounting",
+      "Cash Flow Management",
       "Business Compliance",
     ],
     provider: { "@id": `${SEO_SITE.baseUrl}/#organization` },
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Finovert Finance & Compliance Services",
+      itemListElement: [
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "GST Filing",
+            description: "GST registration, monthly and quarterly return filing, and reconciliation for Indian businesses.",
+          },
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Income Tax Return (ITR) Filing",
+            description: "Business and startup ITR filing with expert review and deadline tracking.",
+          },
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Company Registration",
+            description: "Private Limited, LLP, OPC, and Partnership Firm registration across India.",
+          },
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "ROC Compliance",
+            description: "Annual filings, board resolutions, and MCA/ROC compliance management.",
+          },
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Virtual CFO Services",
+            description: "Financial management, forecasting, budgeting, and reporting for growing startups.",
+          },
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Business Accounting & Bookkeeping",
+            description: "End-to-end bookkeeping, reconciliation, and real-time finance dashboards.",
+          },
+        },
+      ],
+    },
   };
 }
 
@@ -193,11 +279,15 @@ export function buildHomePageStructuredData(faqSchema?: JsonLd): JsonLd[] {
       "@id": `${SEO_SITE.baseUrl}/#webpage`,
       url: SEO_SITE.baseUrl,
       name: HOME_PAGE_TITLE,
-      description: HOME_PAGE_DESCRIPTION,
+      description: HOME_PAGE_DEFINITION,
       isPartOf: { "@id": `${SEO_SITE.baseUrl}/#website` },
       about: { "@id": `${SEO_SITE.baseUrl}/#organization` },
       primaryImageOfPage: SEO_SITE.defaultImage,
       inLanguage: "en-IN",
+      speakable: {
+        "@type": "SpeakableSpecification",
+        cssSelector: ["[data-geo-definition]", "h1", "[data-geo-faq]"],
+      },
     },
   ];
 

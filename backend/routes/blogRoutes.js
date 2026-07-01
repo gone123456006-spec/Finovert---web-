@@ -146,9 +146,8 @@ async function buildUniqueSeoTitle(rawTitle) {
   return candidate;
 }
 
-async function createUniqueSlugFromTitle(title, sourceName) {
-  const sourceSlug = toSlug(sourceName || "source");
-  const base = `${toSlug(title)}-${sourceSlug}`.replace(/(^-|-$)+/g, '');
+async function createUniqueSlugFromTitle(title) {
+  const base = toSlug(title).replace(/(^-|-$)+/g, '');
   let candidate = base;
   let counter = 2;
 
@@ -254,14 +253,14 @@ async function fetchAndSaveNews() {
           ],
         });
         if (!existing) {
-          const slug = await createUniqueSlugFromTitle(finovertTitle, source.name);
+          const slug = await createUniqueSlugFromTitle(finovertTitle);
 
           // Prefer full article HTML from content:encoded, then item.content, then snippet
           const richContent  = item.contentEncoded || item.content || '';
           const cleanContent = richContent.replace(/<[^>]*>/g, ' ').replace(/&[a-z]+;/g, ' ').replace(/\s{2,}/g, ' ').trim();
           const cleanExcerpt = item.contentSnippet
             ? item.contentSnippet.substring(0, 200).replace(/<[^>]*>/g, '') + '...'
-            : `Read the latest news from ${source.name}.`;
+            : `Read the latest finance and business update, curated by Finovert.`;
 
           const blog = new Blog({
             title:      finovertTitle,
@@ -269,7 +268,7 @@ async function fetchAndSaveNews() {
             excerpt:    cleanExcerpt,
             content:    cleanContent || cleanExcerpt,
             category:   source.category,
-            author:     source.name,
+            author:     "Finovert Team",
             image:      extractImage(item) || getUniqueImage(source.category, source.name),
             readTime:   '3 min read',
             sourceLink: item.link || '',
@@ -345,7 +344,7 @@ router.post('/', async (req, res) => {
     const seoTitle = await buildUniqueSeoTitle(req.body.title);
     const blog = new Blog({
       title: seoTitle,
-      slug: await createUniqueSlugFromTitle(seoTitle, req.body.author || "finovert"),
+      slug: await createUniqueSlugFromTitle(seoTitle),
       excerpt: req.body.excerpt,
       content: req.body.content,
       category: req.body.category,
@@ -382,6 +381,56 @@ router.post('/fix-images', async (req, res) => {
       await Blog.updateOne({ _id: blog._id }, { $set: { image: newImage } });
     }
     res.json({ message: `Updated images for ${allBlogs.length} blogs.` });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// POST — one-time cleanup: remove other-site source names from existing
+// blog slugs/authors so only Finovert branding is ever shown or linked.
+router.post('/fix-source-branding', async (req, res) => {
+  try {
+    const KNOWN_SOURCES = NEWS_SOURCES.map((s) => s.name);
+    const blogs = await Blog.find({});
+    let slugsFixed = 0;
+    let authorsFixed = 0;
+
+    for (const blog of blogs) {
+      let changed = false;
+
+      // Strip trailing "-<source-name>" (and optional "-<n>") suffix from slug.
+      for (const sourceName of KNOWN_SOURCES) {
+        const suffix = toSlug(sourceName);
+        const pattern = new RegExp(`-${suffix}(-\\d+)?$`);
+        if (pattern.test(blog.slug)) {
+          let base = blog.slug.replace(pattern, '');
+          let candidate = base;
+          let counter = 2;
+          // eslint-disable-next-line no-await-in-loop
+          while (await Blog.findOne({ slug: candidate, _id: { $ne: blog._id } })) {
+            candidate = `${base}-${counter}`;
+            counter += 1;
+          }
+          blog.slug = candidate;
+          changed = true;
+          slugsFixed++;
+          break;
+        }
+      }
+
+      if (KNOWN_SOURCES.includes(blog.author)) {
+        blog.author = 'Finovert Team';
+        changed = true;
+        authorsFixed++;
+      }
+
+      if (changed) {
+        // eslint-disable-next-line no-await-in-loop
+        await blog.save();
+      }
+    }
+
+    res.json({ message: `Cleaned ${slugsFixed} slugs and ${authorsFixed} author fields.`, slugsFixed, authorsFixed });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
