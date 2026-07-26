@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ChevronDown, Menu, Phone, Search, X } from "lucide-react";
 import logo from "@/assets/logogogw.png";
 import { buildServiceSearchItems, searchSiteContent } from "../config/siteSearch";
+import { rafThrottle } from "../utils/performance";
 
 type MegaLink = { name: string; href: string };
 type MegaCategory = { name: string; links: MegaLink[] };
@@ -192,10 +193,16 @@ export function Navbar() {
   };
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 24);
+    };
+    
+    // Use RAF throttle for smoother scroll
+    const throttledScroll = rafThrottle(handleScroll);
+    
+    handleScroll(); // Check initial state
+    window.addEventListener("scroll", throttledScroll, { passive: true });
+    return () => window.removeEventListener("scroll", throttledScroll);
   }, []);
 
   useEffect(() => {

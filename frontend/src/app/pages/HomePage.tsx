@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Check, ChevronDown } from "lucide-react";
 
 import API_BASE from "../../config/api";
+import { rafThrottle } from "../utils/performance";
 import { SpecialServices } from "../components/SpecialServices";
 import { HowItWorks } from "../components/HowItWorks";
 import { WhyFinovert } from "../components/WhyFinovert";
@@ -197,31 +198,34 @@ export function HomePage() {
   };
 
   useEffect(() => {
-    const onScroll = () => {
+    const handleScroll = () => {
       const currentY = window.scrollY;
       const isScrollingDown = currentY > lastScrollYRef.current;
 
-      // Hide while actively scrolling down; show when scrolling up.
+      // Only update state if there's an actual change needed
       if (isScrollingDown && currentY > 120) {
-        setShowFloatingButtons(false);
-      } else {
-        setShowFloatingButtons(true);
+        setShowFloatingButtons(prev => prev ? false : prev);
+      } else if (currentY <= 120) {
+        setShowFloatingButtons(prev => prev ? prev : true);
       }
 
       lastScrollYRef.current = currentY;
 
-      // Show again when user stops scrolling.
+      // Show again when user stops scrolling
       if (scrollStopTimerRef.current) {
         window.clearTimeout(scrollStopTimerRef.current);
       }
       scrollStopTimerRef.current = window.setTimeout(() => {
         setShowFloatingButtons(true);
-      }, 180);
+      }, 200);
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    // Use RAF throttle for better scroll performance
+    const throttledScroll = rafThrottle(handleScroll);
+
+    window.addEventListener("scroll", throttledScroll, { passive: true });
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", throttledScroll);
       if (scrollStopTimerRef.current) {
         window.clearTimeout(scrollStopTimerRef.current);
       }
@@ -269,32 +273,26 @@ export function HomePage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-8 items-center min-h-[340px] sm:min-h-[380px] lg:min-h-[400px]">
-            <div className="max-w-3xl">
-              <motion.h1
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="text-[1.75rem] sm:text-[2.25rem] lg:text-[2.75rem] font-bold text-[#0F2A5F] tracking-tight leading-[1.2] mb-5 sm:mb-6"
+            <div className="max-w-3xl" style={{ willChange: 'auto' }}>
+              <h1
+                className="text-[1.75rem] sm:text-[2.25rem] lg:text-[2.75rem] font-bold text-[#0F2A5F] tracking-tight leading-[1.2] mb-5 sm:mb-6 animate-fade-in"
+                style={{ animationDelay: '0ms' }}
               >
                 Finance &amp; Compliance for Growing Businesses
-              </motion.h1>
+              </h1>
 
-              <motion.p
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.05 }}
-                className="text-[1.1rem] sm:text-[1.35rem] font-semibold text-[#0F2A5F]/90 leading-snug mb-7 sm:mb-9 max-w-xl"
+              <p
+                className="text-[1.1rem] sm:text-[1.35rem] font-semibold text-[#0F2A5F]/90 leading-snug mb-7 sm:mb-9 max-w-xl animate-fade-in"
+                style={{ animationDelay: '100ms' }}
               >
                 Get your setup done in just{" "}
                 <span className="font-bold text-[#0F2A5F]">7 days</span> starting at{" "}
                 <span className="text-[#C9A227] font-bold">Rs.1,999/-</span> only.
-              </motion.p>
+              </p>
 
-              <motion.ul
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 mb-9 sm:mb-11"
+              <ul
+                className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 mb-9 sm:mb-11 animate-fade-in"
+                style={{ animationDelay: '200ms' }}
               >
                 {HERO_FEATURES.map((feature) => (
                   <li key={feature} className="flex items-center gap-3 min-w-0">
@@ -306,13 +304,11 @@ export function HomePage() {
                     </span>
                   </li>
                 ))}
-              </motion.ul>
+              </ul>
 
-              <motion.div
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.15 }}
-                className="flex w-full flex-nowrap items-center justify-center gap-3 sm:w-auto sm:justify-start sm:gap-4"
+              <div
+                className="flex w-full flex-nowrap items-center justify-center gap-3 sm:w-auto sm:justify-start sm:gap-4 animate-fade-in"
+                style={{ animationDelay: '300ms' }}
               >
                 <Link
                   to="/book-consultation"
@@ -326,38 +322,31 @@ export function HomePage() {
                 >
                   Explore Services
                 </a>
-              </motion.div>
+              </div>
             </div>
 
             {/* Right: service icons with opening animation */}
             <div className="relative mx-auto hidden lg:block w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[380px] lg:justify-self-end">
               <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-4">
-                {HERO_ICONS.map((icon) => (
-                  <motion.div
+                {HERO_ICONS.map((icon, idx) => (
+                  <div
                     key={icon.src}
-                    initial={{ opacity: 0, scale: 0.82, x: icon.x, y: icon.y, filter: "blur(6px)" }}
-                    animate={{ opacity: 1, scale: 1, x: 0, y: 0, filter: "blur(0px)" }}
-                    transition={{
-                      duration: 0.85,
-                      delay: icon.delay,
-                      ease: [0.22, 1, 0.36, 1],
+                    className="relative animate-fade-in"
+                    style={{ 
+                      animationDelay: `${400 + idx * 200}ms`,
+                      willChange: 'auto'
                     }}
-                    className="relative"
                   >
-                    <motion.img
+                    <img
                       src={icon.src}
                       alt={icon.alt}
-                      className="w-full max-w-[170px] mx-auto h-auto object-contain drop-shadow-[0_12px_24px_rgba(15,42,95,0.16)] will-change-transform"
+                      className="w-full max-w-[170px] mx-auto h-auto object-contain drop-shadow-[0_12px_24px_rgba(15,42,95,0.16)]"
                       loading="eager"
-                      animate={{ y: [0, -7, 0] }}
-                      transition={{
-                        duration: 4.2,
-                        repeat: Infinity,
-                        ease: [0.45, 0, 0.55, 1],
-                        delay: icon.delay + 0.85,
-                      }}
+                      width="170"
+                      height="170"
+                      decoding="async"
                     />
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </div>

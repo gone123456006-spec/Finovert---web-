@@ -133,6 +133,18 @@
     font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", Helvetica, Ubuntu, Roboto, Noto, "Segoe UI", Arial, sans-serif;
   }
 
+  /* GPU acceleration for better scroll performance */
+  img, video, iframe {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* Optimize fixed/sticky elements */
+  .fixed, .sticky, [class*="fixed:"], [class*="sticky:"] {
+    transform: translateZ(0);
+    will-change: auto;
+  }
+
   /**
   * Default typography styles for HTML elements (h1-h4, p, label, button, input).
   * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
@@ -220,6 +232,17 @@
   }
 }
 
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-marquee-x {
   animation: marquee-x var(--marquee-duration, 42s) linear infinite;
   width: max-content;
@@ -229,9 +252,19 @@
   animation-play-state: paused;
 }
 
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee-x {
     animation: none;
+  }
+  .animate-fade-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }
 

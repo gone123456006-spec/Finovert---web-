@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import API_BASE from "../../config/api";
+import { rafThrottle } from "../utils/performance";
+import { Calendar, Clock } from "lucide-react";
 
 type BlogPreview = {
   slug?: string;
@@ -252,7 +254,7 @@ export function LatestBlogSection() {
     const el = scrollRef.current;
     if (!el) return;
 
-    const onScroll = () => {
+    const handleScroll = () => {
       const cards = el.querySelectorAll<HTMLElement>("[data-blog-card]");
       if (!cards.length) return;
       let closest = 0;
@@ -264,11 +266,15 @@ export function LatestBlogSection() {
           closest = idx;
         }
       });
-      setActiveIndex(closest);
+      if (closest !== activeIndexRef.current) {
+        setActiveIndex(closest);
+      }
     };
 
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
+    const throttledScroll = rafThrottle(handleScroll);
+
+    el.addEventListener("scroll", throttledScroll, { passive: true });
+    return () => el.removeEventListener("scroll", throttledScroll);
   }, [posts.length, loading]);
 
   return (
