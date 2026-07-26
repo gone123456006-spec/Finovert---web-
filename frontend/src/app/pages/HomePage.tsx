@@ -1,32 +1,76 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronDown } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 
 import API_BASE from "../../config/api";
 import { SpecialServices } from "../components/SpecialServices";
-import { VideoBannerSection } from "../components/VideoBannerSection";
+import { HowItWorks } from "../components/HowItWorks";
 import { WhyFinovert } from "../components/WhyFinovert";
 import { PowerfulFinanceTools } from "../components/PowerfulFinanceTools";
 import { SEO } from "../components/SEO";
 import {
   buildHomePageStructuredData,
   DEFAULT_SEO_KEYWORDS,
-  HOME_PAGE_DEFINITION,
   HOME_PAGE_DESCRIPTION,
   HOME_PAGE_TITLE,
 } from "../config/seo";
 import { LatestBlogSection } from "../components/LatestBlogSection";
+import { TrustedPartners } from "../components/TrustedPartners";
 import { FinanceChatBoard } from "../components/FinanceChatBoard";
+import {
+  TextField,
+  PhoneField,
+  SelectField,
+  formButtonClass,
+} from "../components/corporate/OutlinedField";
+
+const HERO_FEATURES = [
+  "Company Registration & GST Filing",
+  "ITR Filing with CA Review",
+  "Accounting & Bookkeeping",
+  "ROC Compliance Support",
+  "Virtual CFO Insights",
+  "Expert-Led Execution",
+] as const;
+
+const HERO_ICONS = [
+  { src: "/invoice-icon.png", alt: "Invoice Financing", delay: 0.25, x: -16, y: 14 },
+  { src: "/itr.png", alt: "ITR Filing", delay: 0.7, x: 16, y: 10 },
+  { src: "/tds-filing.png", alt: "TDS Filing", delay: 1.15, x: -12, y: -10 },
+  { src: "/gst-filing.png", alt: "GST Filing", delay: 1.6, x: 14, y: -12 },
+] as const;
+
+const REGISTRATION_FEATURES = [
+  "Certificate of Incorporation, PAN, TAN & DIN in 7–15 Working Days",
+  "Free Company Name Search & Reservation (up to 2 options)",
+  "Professionally Drafted MoA, AoA + GST Registration via AGILE-PRO-S",
+  "Bank-Account-Ready Document Kit",
+  "Complete Post-incorporation Compliance Support",
+] as const;
+
+const SERVICE_OPTIONS = [
+  "Private Limited Company Registration",
+  "LLP Registration",
+  "OPC Registration",
+  "Partnership Firm Registration",
+  "GST Registration",
+  "Trademark Registration",
+  "Accounting & Bookkeeping",
+  "ITR Filing",
+  "Other",
+] as const;
 
 export function HomePage() {
-  const [leadForm, setLeadForm] = useState({
+  const [regForm, setRegForm] = useState({
     name: "",
     contact: "",
-    businessType: "Startup",
+    email: "",
+    businessType: "",
   });
-  const [leadSubmitting, setLeadSubmitting] = useState(false);
-  const [phoneError, setPhoneError] = useState("");
+  const [regSubmitting, setRegSubmitting] = useState(false);
+  const [regPhoneError, setRegPhoneError] = useState("");
+  const [regEmailError, setRegEmailError] = useState("");
   const [showFloatingButtons, setShowFloatingButtons] = useState(true);
   const [showMoreFaq, setShowMoreFaq] = useState(false);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
@@ -99,33 +143,56 @@ export function HomePage() {
     })),
   };
 
-  const handleLeadSubmit = async (e: React.FormEvent) => {
+  const handleRegSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Validate: phone number only (10 digits, optionally starting with +91 or 0)
-    const phoneRegex = /^(?:\+91|0)?[6-9]\d{9}$/;
-    const cleaned = leadForm.contact.replace(/\s+/g, "");
+    const phoneRegex = /^[6-9]\d{9}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const cleaned = regForm.contact.replace(/\D/g, "");
+    let hasError = false;
+
     if (!phoneRegex.test(cleaned)) {
-      setPhoneError("Please enter a valid 10-digit Indian mobile number.");
+      setRegPhoneError("Please enter a valid 10-digit Indian mobile number.");
+      hasError = true;
+    } else {
+      setRegPhoneError("");
+    }
+
+    if (!emailRegex.test(regForm.email.trim())) {
+      setRegEmailError("Please enter a valid email address.");
+      hasError = true;
+    } else {
+      setRegEmailError("");
+    }
+
+    if (!regForm.businessType) {
+      alert("Please select a service.");
       return;
     }
-    setPhoneError("");
-    setLeadSubmitting(true);
+
+    if (hasError) return;
+
+    setRegSubmitting(true);
     try {
       const response = await fetch(`${API_BASE}/api/consultations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(leadForm),
+        body: JSON.stringify({
+          name: regForm.name.trim(),
+          contact: cleaned,
+          email: regForm.email.trim(),
+          businessType: regForm.businessType,
+        }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(data.message || "Failed to submit consultation request.");
       }
-      setLeadForm({ name: "", contact: "", businessType: "Startup" });
+      setRegForm({ name: "", contact: "", email: "", businessType: "" });
       alert("Consultation request submitted successfully.");
     } catch (error) {
       alert(error instanceof Error ? error.message : "Could not submit right now. Please try again.");
     } finally {
-      setLeadSubmitting(false);
+      setRegSubmitting(false);
     }
   };
 
@@ -173,273 +240,267 @@ export function HomePage() {
 
       <FinanceChatBoard />
 
-      <section className="bg-white py-8 sm:py-10">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p data-geo-definition className="text-[#515154] text-[15px] sm:text-base leading-relaxed">
-            {HOME_PAGE_DEFINITION}
-          </p>
-        </div>
-      </section>
+      <section className="relative overflow-hidden bg-[#4a90d9] pt-24 sm:pt-28 pb-10 sm:pb-14">
+        {/* Background image */}
+        <div
+          className="pointer-events-none absolute inset-0 bg-cover bg-left-top sm:bg-center"
+          aria-hidden="true"
+          style={{
+            backgroundImage: "url('/4b3ba9b0-f3e8-4230-a16e-518d1c309f72.jpg')",
+          }}
+        />
+        {/* Readability overlay — vertical on mobile, horizontal on desktop */}
+        <div
+          className="pointer-events-none absolute inset-0 sm:hidden"
+          aria-hidden="true"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(255,255,255,0.86) 0%, rgba(255,255,255,0.93) 35%, rgba(255,255,255,0.93) 100%)",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 hidden sm:block"
+          aria-hidden="true"
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.78) 40%, rgba(255,255,255,0.35) 75%, rgba(255,255,255,0.05) 100%)",
+          }}
+        />
 
-      <section className="bg-[#f4f8fc] pt-8 pb-8 sm:pt-20 sm:pb-24 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-8 items-center min-h-[340px] sm:min-h-[380px] lg:min-h-[400px]">
+            <div className="max-w-3xl">
+              <motion.h1
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-[1.75rem] sm:text-[2.25rem] lg:text-[2.75rem] font-bold text-[#0F2A5F] tracking-tight leading-[1.2] mb-5 sm:mb-6"
+              >
+                Finance &amp; Compliance for Growing Businesses
+              </motion.h1>
 
-          {/* ── MOBILE LAYOUT ── */}
-          <div className="sm:hidden flex flex-col">
-            {/* Heading + Paragraph */}
-            <h2 className="text-center text-[1.6rem] font-bold text-[#1d1d1f] mb-3 tracking-tight leading-[1.15]">
-              One platform for finance &{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10 text-emerald-500 font-extrabold italic">growth</span>
-                <span className="absolute -bottom-0.5 left-0 w-full h-[3px] bg-emerald-400/50 rounded-full" />
-              </span>
-            </h2>
-            <p className="text-center text-[13px] text-[#515154] font-medium leading-relaxed mb-4">
-              Consolidate accounting, compliance, and reporting into one tool with expert support to move faster.
-            </p>
+              <motion.p
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.05 }}
+                className="text-[1.1rem] sm:text-[1.35rem] font-semibold text-[#0F2A5F]/90 leading-snug mb-7 sm:mb-9 max-w-xl"
+              >
+                Get your setup done in just{" "}
+                <span className="font-bold text-[#0F2A5F]">7 days</span> starting at{" "}
+                <span className="text-[#C9A227] font-bold">Rs.1,999/-</span> only.
+              </motion.p>
 
-            {/* Image with Sparkles */}
-            <div className="relative mb-4">
-              <img
-                src="/cartoon.png"
-                alt="Finance professional"
-                className="w-full object-contain mix-blend-multiply relative z-10"
-              />
+              <motion.ul
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 mb-9 sm:mb-11"
+              >
+                {HERO_FEATURES.map((feature) => (
+                  <li key={feature} className="flex items-center gap-3 min-w-0">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-[#0F2A5F] text-white">
+                      <Check className="w-3.5 h-3.5" strokeWidth={3} />
+                    </span>
+                    <span className="whitespace-nowrap text-[14px] sm:text-[15px] text-[#0F2A5F] leading-none">
+                      {feature}
+                    </span>
+                  </li>
+                ))}
+              </motion.ul>
 
-              {/* Blue/Purple Sparkle */}
               <motion.div
-                className="absolute top-[10%] left-[10%] z-0 text-[#9E9EFF] drop-shadow-[0_0_12px_rgba(158,158,255,0.8)]"
-                animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.1, 0.8] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+                className="flex w-full flex-nowrap items-center justify-center gap-3 sm:w-auto sm:justify-start sm:gap-4"
               >
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" />
-                </svg>
-              </motion.div>
-
-              {/* Green Sparkle */}
-              <motion.div
-                className="absolute top-[20%] right-[35%] z-0 text-[#A8FF9E] drop-shadow-[0_0_10px_rgba(168,255,158,0.8)]"
-                animate={{ opacity: [0.2, 0.9, 0.2], scale: [0.7, 1, 0.7] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" />
-                </svg>
-              </motion.div>
-
-              {/* Small Blue Sparkle */}
-              <motion.div
-                className="absolute top-[35%] left-[5%] z-0 text-[#9E9EFF] drop-shadow-[0_0_8px_rgba(158,158,255,0.6)]"
-                animate={{ opacity: [0.4, 1, 0.4], scale: [0.9, 1.2, 0.9] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" />
-                </svg>
-              </motion.div>
-            </div>
-
-            {/* Buttons in one row */}
-            <div className="flex flex-row justify-center items-center gap-2">
-              <Link
-                to="/finance-guides"
-                className="flex-1 text-center whitespace-nowrap text-[12px] px-3 py-2 rounded-full bg-[#1d1d1f] text-white font-semibold hover:bg-black transition-colors"
-              >
-                Read Finance Guides
-              </Link>
-              <a
-                href="#services"
-                className="flex-1 text-center whitespace-nowrap text-[12px] px-3 py-2 rounded-full bg-white border border-gray-200 text-[#1d1d1f] font-semibold hover:bg-gray-50 transition-colors shadow-sm"
-              >
-                Explore Services
-              </a>
-            </div>
-          </div>
-
-          {/* ── DESKTOP LAYOUT ── */}
-          <div className="hidden sm:grid grid-cols-2 gap-12 lg:gap-8 items-center">
-            {/* Left Column - Text + Buttons */}
-            <div>
-              <h2 className="text-[2.75rem] lg:text-[3.25rem] font-bold text-[#1d1d1f] mb-6 tracking-tight leading-[1.1]">
-                One platform for finance, compliance, and{" "}
-                <span className="relative inline-block">
-                  <span className="relative z-10 text-emerald-500 font-extrabold italic">growth</span>
-                  <span className="absolute -bottom-1.5 left-0 w-full h-[4px] bg-emerald-400/50 rounded-full" />
-                </span>{" "}
-                execution
-              </h2>
-              <p className="text-[#515154] text-[1.15rem] mb-8 font-medium leading-relaxed pr-8">
-                Most startups use multiple tools for accounting, compliance, and reporting. Finovert combines everything with expert support so your team moves faster with fewer errors.
-              </p>
-              <div className="flex flex-wrap items-center gap-4">
                 <Link
-                  to="/finance-guides"
-                  className="whitespace-nowrap text-[16px] px-8 py-3.5 rounded-full bg-[#1d1d1f] text-white font-semibold hover:bg-black transition-colors"
+                  to="/book-consultation"
+                  className="inline-flex flex-1 items-center justify-center rounded bg-[#0F2A5F] px-4 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-[#0b1f47] sm:flex-none sm:px-10 sm:py-4 sm:text-base"
                 >
-                  Read Finance Guides
+                  Book Inquiry
                 </Link>
                 <a
                   href="#services"
-                  className="whitespace-nowrap text-[16px] px-8 py-3.5 rounded-full bg-white border border-gray-200 text-[#1d1d1f] font-semibold hover:bg-gray-50 transition-colors shadow-sm"
+                  className="inline-flex flex-1 items-center justify-center rounded border border-[#0F2A5F] bg-white px-4 py-3.5 text-sm font-semibold text-[#0F2A5F] transition-colors hover:bg-[#0F2A5F] hover:text-white sm:flex-none sm:px-10 sm:py-4 sm:text-base"
                 >
                   Explore Services
                 </a>
-              </div>
+              </motion.div>
             </div>
 
-            {/* Right Column - Image */}
-            <div className="flex items-center justify-center lg:justify-end">
-              <div className="relative w-full max-w-[480px]">
-                <img
-                  src="/cartoon.png"
-                  alt="Finance professional"
-                  className="w-full object-contain mix-blend-multiply relative z-10"
-                />
-
-                {/* Blue/Purple Sparkle */}
-                <motion.div
-                  className="absolute top-[8%] left-[10%] z-0 text-[#9E9EFF] drop-shadow-[0_0_12px_rgba(158,158,255,0.8)]"
-                  animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.1, 0.8] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" />
-                  </svg>
-                </motion.div>
-
-                {/* Green Sparkle */}
-                <motion.div
-                  className="absolute top-[18%] right-[35%] z-0 text-[#A8FF9E] drop-shadow-[0_0_10px_rgba(168,255,158,0.8)]"
-                  animate={{ opacity: [0.2, 0.9, 0.2], scale: [0.7, 1, 0.7] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                >
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" />
-                  </svg>
-                </motion.div>
-
-                {/* Small Blue Sparkle */}
-                <motion.div
-                  className="absolute top-[35%] left-[0%] z-0 text-[#9E9EFF] drop-shadow-[0_0_8px_rgba(158,158,255,0.6)]"
-                  animate={{ opacity: [0.4, 1, 0.4], scale: [0.9, 1.2, 0.9] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 0C12 6.627 17.373 12 24 12C17.373 12 12 17.373 12 24C12 17.373 6.627 12 0 12C6.627 12 12 6.627 12 0Z" />
-                  </svg>
-                </motion.div>
+            {/* Right: service icons with opening animation */}
+            <div className="relative mx-auto hidden lg:block w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[380px] lg:justify-self-end">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-4">
+                {HERO_ICONS.map((icon) => (
+                  <motion.div
+                    key={icon.src}
+                    initial={{ opacity: 0, scale: 0.82, x: icon.x, y: icon.y, filter: "blur(6px)" }}
+                    animate={{ opacity: 1, scale: 1, x: 0, y: 0, filter: "blur(0px)" }}
+                    transition={{
+                      duration: 0.85,
+                      delay: icon.delay,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    className="relative"
+                  >
+                    <motion.img
+                      src={icon.src}
+                      alt={icon.alt}
+                      className="w-full max-w-[170px] mx-auto h-auto object-contain drop-shadow-[0_12px_24px_rgba(15,42,95,0.16)] will-change-transform"
+                      loading="eager"
+                      animate={{ y: [0, -7, 0] }}
+                      transition={{
+                        duration: 4.2,
+                        repeat: Infinity,
+                        ease: [0.45, 0, 0.55, 1],
+                        delay: icon.delay + 0.85,
+                      }}
+                    />
+                  </motion.div>
+                ))}
               </div>
             </div>
           </div>
-
         </div>
       </section>
 
+      <HowItWorks />
       <SpecialServices />
-      <VideoBannerSection />
-      <WhyFinovert />
-      <PowerfulFinanceTools />
 
-      <section id="consultation" className="pt-2 pb-10 sm:pt-4 sm:pb-14 bg-white scroll-mt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="w-full p-6 sm:p-8 lg:p-12">
-            <h3 className="text-2xl sm:text-[2.2rem] font-bold text-[#1d1d1f] mb-2 tracking-tight">
-              Book a{" "}
-              <span className="relative inline-block">
-                <span className="relative z-10 text-emerald-500 font-extrabold italic">free</span>
-                <span className="absolute -bottom-0.5 left-0 w-full h-[3px] bg-emerald-400/50 rounded-full" />
-              </span>
-              {" "}consultation
-            </h3>
-            <p className="text-[#86868b] mb-8 font-medium">
-              Share your details and our team will connect with you.
+      {/* Company registration lead — below special services */}
+      <section id="company-registration" className="relative overflow-hidden bg-[#eef3f9] py-12 sm:py-16 scroll-mt-24">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-4 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:px-8">
+          <div className="max-w-xl">
+            <h2 className="text-[1.85rem] font-bold leading-[1.15] tracking-tight text-[#0F2A5F] sm:text-4xl lg:text-[2.55rem] lg:leading-[1.12]">
+              Company Registration Online in India
+            </h2>
+            <p className="mt-4 text-[15px] leading-relaxed text-slate-600 sm:text-base">
+              Register your company online with Finovert — MCA-compliant Private Limited, LLP &amp; OPC
+              filing, CA-led documentation, and end-to-end support from name approval to incorporation.
             </p>
-            <form onSubmit={handleLeadSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <input
-                required
-                type="text"
-                placeholder="Name"
-                value={leadForm.name}
-                onChange={(e) => setLeadForm((prev) => ({ ...prev, name: e.target.value }))}
-                className="rounded-[20px] border border-gray-200/80 px-5 py-4 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all shadow-sm text-[#1d1d1f]"
-              />
-              <div className="flex flex-col gap-1">
-                <input
+
+            <ul className="mt-6 space-y-3.5 sm:mt-8 sm:space-y-4">
+              {REGISTRATION_FEATURES.map((feature) => (
+                <li key={feature} className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full bg-[#22c55e] text-white shadow-sm">
+                    <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />
+                  </span>
+                  <span className="text-[14px] leading-snug text-slate-700 sm:text-[15px]">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="w-full max-w-md justify-self-center lg:max-w-none lg:justify-self-end">
+            <form
+              onSubmit={handleRegSubmit}
+              className="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-[0_12px_40px_rgba(15,42,95,0.12)] sm:p-7 lg:p-8"
+            >
+              <h3 className="text-center text-[15px] font-bold leading-snug text-[#0F2A5F] sm:text-base">
+                Choose your business structure and get started with your company registration
+              </h3>
+
+              <div className="mt-5 space-y-4 sm:mt-6 sm:space-y-5">
+                <TextField
+                  id="reg-name"
+                  label="Full Name"
                   required
-                  type="tel"
-                  placeholder="Phone number (e.g. 9876543210)"
-                  value={leadForm.contact}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/[^0-9+]/g, "");
-                    setLeadForm((prev) => ({ ...prev, contact: val }));
-                    if (phoneError) setPhoneError("");
-                  }}
-                  maxLength={13}
-                  className={`rounded-[20px] border px-5 py-4 outline-none focus:ring-1 bg-white transition-all shadow-sm text-[#1d1d1f] ${phoneError
-                      ? "border-red-400 focus:border-red-500 focus:ring-red-300"
-                      : "border-gray-200/80 focus:border-blue-500 focus:ring-blue-500"
-                    }`}
+                  value={regForm.name}
+                  onChange={(e) => setRegForm((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter Your Name"
                 />
-                {phoneError && (
-                  <p className="text-red-500 text-xs px-2 font-medium">{phoneError}</p>
-                )}
+                <PhoneField
+                  id="reg-phone"
+                  required
+                  value={regForm.contact}
+                  error={regPhoneError || undefined}
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                    setRegForm((prev) => ({ ...prev, contact: digits }));
+                    if (regPhoneError) setRegPhoneError("");
+                  }}
+                  placeholder="Enter your PhoneNo."
+                />
+                <SelectField
+                  id="reg-service"
+                  label="Service"
+                  required
+                  value={regForm.businessType}
+                  onChange={(e) => setRegForm((prev) => ({ ...prev, businessType: e.target.value }))}
+                >
+                  <option value="">-Select-</option>
+                  {SERVICE_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </SelectField>
+                <TextField
+                  id="reg-email"
+                  label="Enter Your Email"
+                  type="email"
+                  required
+                  value={regForm.email}
+                  error={regEmailError || undefined}
+                  onChange={(e) => {
+                    setRegForm((prev) => ({ ...prev, email: e.target.value }));
+                    if (regEmailError) setRegEmailError("");
+                  }}
+                  placeholder="Enter your Email"
+                />
               </div>
-              <select
-                value={leadForm.businessType}
-                onChange={(e) => setLeadForm((prev) => ({ ...prev, businessType: e.target.value }))}
-                className="rounded-[20px] border border-gray-200/80 px-5 py-4 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white transition-all shadow-sm text-[#1d1d1f]"
-              >
-                <option>Startup</option>
-                <option>SME</option>
-                <option>Enterprise</option>
-              </select>
-              <button
-                type="submit"
-                disabled={leadSubmitting}
-                className="md:col-span-3 rounded-full bg-[#1d1d1f] text-white font-semibold text-[17px] py-4 hover:bg-black active:scale-[0.99] transition-all shadow-sm tracking-wide"
-              >
-                {leadSubmitting ? "Submitting..." : "Book Free Consultation"}
+
+              <button type="submit" disabled={regSubmitting} className={`mt-5 sm:mt-6 ${formButtonClass}`}>
+                {regSubmitting ? "Submitting..." : "Claim your Free Consultation"}
               </button>
             </form>
           </div>
         </div>
       </section>
 
+      <WhyFinovert />
+      <PowerfulFinanceTools />
+
       <LatestBlogSection />
 
-      <section data-geo-faq className="pt-4 pb-10 sm:pt-8 sm:pb-14 md:py-16 bg-[#fbfbfd]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h3 className="text-3xl sm:text-[2.2rem] font-bold text-[#1d1d1f] mb-8 sm:mb-10 text-center tracking-tight">
-            Frequently asked{" "}
-            <span className="relative inline-block">
-              <span className="relative z-10 text-emerald-500 font-extrabold italic">questions</span>
-              <span className="absolute -bottom-1.5 left-0 w-full h-[3px] bg-emerald-400/50 rounded-full" />
-            </span>
-          </h3>
+      <section data-geo-faq className="relative overflow-hidden">
+        <div className="bg-white pt-14 sm:pt-16 md:pt-20">
+          <TrustedPartners />
+        </div>
 
-          {/* Stacked numbered FAQ list for all screens */}
-          <div className="flex flex-col gap-3">
-            {faqItems.slice(0, showMoreFaq ? faqItems.length : 4).map((item, idx) => {
-              const isOpen = openFaqIdx === idx;
-              return (
-                <div
-                  key={item.question}
-                  onClick={() => setOpenFaqIdx(isOpen ? null : idx)}
-                  className="rounded-[20px] border border-gray-100/80 bg-white p-5 sm:p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] flex gap-4 items-start cursor-pointer hover:border-gray-200/85 transition-all duration-200 select-none"
-                >
-                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#1d1d1f] text-white font-bold text-[14px] flex items-center justify-center mt-0.5">
-                    {idx + 1}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center gap-4">
-                      <h4 className="font-semibold text-[#1d1d1f] text-[16px] sm:text-[17px] tracking-tight leading-snug">
+        <div
+          className="relative py-14 sm:py-16 md:py-20"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 60% at 50% 0%, #eef1f5 0%, #f7f8fa 45%, #f3f4f6 100%)",
+          }}
+        >
+          <div className="relative mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <h3 className="mb-10 text-center text-2xl font-bold tracking-tight text-[#0F2A5F] sm:mb-12 sm:text-3xl md:text-[2.15rem]">
+              Frequently Asked{" "}
+              <span className="text-[#C9A227]">Questions</span>
+            </h3>
+
+            <div className="flex flex-col gap-4">
+              {faqItems.slice(0, showMoreFaq ? faqItems.length : 4).map((item, idx) => {
+                const isOpen = openFaqIdx === idx;
+                return (
+                  <button
+                    key={item.question}
+                    type="button"
+                    onClick={() => setOpenFaqIdx(isOpen ? null : idx)}
+                    className="w-full rounded-xl border-0 bg-white px-5 py-4 text-left shadow-[0_6px_24px_rgba(15,23,42,0.06)] transition-shadow duration-200 hover:shadow-[0_8px_28px_rgba(15,23,42,0.09)] sm:px-6 sm:py-5"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <h4 className="pr-2 text-[15px] font-medium leading-snug text-[#6b7280] sm:text-base">
                         {item.question}
                       </h4>
                       <ChevronDown
-                        className={`w-5 h-5 text-[#86868b] transition-transform duration-300 shrink-0 ${
+                        className={`h-5 w-5 shrink-0 text-[#6b7280] transition-transform duration-300 ${
                           isOpen ? "rotate-180" : ""
                         }`}
+                        strokeWidth={1.75}
                       />
                     </div>
                     <AnimatePresence initial={false}>
@@ -451,65 +512,49 @@ export function HomePage() {
                           transition={{ duration: 0.25, ease: "easeInOut" }}
                           className="overflow-hidden"
                         >
-                          <p className="text-[#86868b] mt-3 text-[13px] sm:text-[15px] leading-relaxed font-medium">
+                          <p className="mt-3 text-[13px] font-normal leading-relaxed text-[#6b7280] sm:text-[15px]">
                             {item.answer}
                           </p>
                         </motion.div>
                       )}
                     </AnimatePresence>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {faqItems.length > 4 && (
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={() => setShowMoreFaq(!showMoreFaq)}
-                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#1428A0] hover:text-[#0f1d75] transition-colors group/faq-more cursor-pointer"
-              >
-                {showMoreFaq ? "Show less" : `Show ${faqItems.length - 4} more`}
-                <svg
-                  className={`w-4 h-4 transition-transform duration-200 ${
-                    showMoreFaq ? "rotate-180" : "group-hover/faq-more:translate-y-0.5"
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+                  </button>
+                );
+              })}
             </div>
-          )}
+
+            {faqItems.length > 4 && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setShowMoreFaq(!showMoreFaq)}
+                  className="group/faq-more inline-flex cursor-pointer items-center gap-1.5 text-sm font-semibold text-[#0F2A5F] transition-colors hover:text-[#163a7a]"
+                >
+                  {showMoreFaq ? "Show less" : `Show ${faqItems.length - 4} more`}
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${
+                      showMoreFaq ? "rotate-180" : "group-hover/faq-more:translate-y-0.5"
+                    }`}
+                  />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </section>
-
-      <Link
-        to="/my-app"
-        className={`fixed right-4 bottom-20 z-50 hidden md:inline-flex items-center gap-2 px-4 h-12 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 border border-blue-500 transition-all duration-200 ${showFloatingButtons ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
-          }`}
-        aria-label="Open My App page"
-      >
-        <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <rect x="7" y="2" width="10" height="20" rx="2" ry="2"></rect>
-          <line x1="11" y1="18" x2="13" y2="18"></line>
-        </svg>
-        <span className="text-sm font-semibold">MyApp</span>
-      </Link>
 
       <a
         href="https://wa.me/916205425499"
         target="_blank"
         rel="noopener noreferrer"
-        className={`fixed right-4 bottom-6 z-50 hidden md:inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition-all duration-200 ${showFloatingButtons ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
-          }`}
+        className={`fixed right-3 bottom-5 z-50 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-200 hover:bg-[#1ebe57] sm:right-4 sm:bottom-6 sm:h-14 sm:w-14 ${
+          showFloatingButtons ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
+        }`}
         aria-label="Chat on WhatsApp"
       >
         <svg
           viewBox="0 0 32 32"
-          className="w-6 h-6"
+          className="h-5 w-5 sm:h-7 sm:w-7"
           fill="currentColor"
           aria-hidden="true"
         >

@@ -1,18 +1,31 @@
 import { useState } from "react";
-import { Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { SEO } from "../components/SEO";
 import { CorporateFormLayout } from "../components/corporate/CorporateFormLayout";
-import { FormSection } from "../components/corporate/FormSection";
-import { OutlinedField, outlinedInputClass } from "../components/corporate/OutlinedField";
+import {
+  TextField,
+  PhoneField,
+  SelectField,
+  formButtonClass,
+} from "../components/corporate/OutlinedField";
 import API_BASE from "../../config/api";
 
 const SERVICES_LIST = [
-  "Company Registration",
+  "Private Limited Company",
+  "LLP Registration",
+  "One Person Company",
+  "Partnership Firm",
+  "Sole Proprietorship",
+  "Public Limited Company",
   "GST Registration",
+  "GST Filing",
   "ITR Filing",
+  "TDS Filing",
   "Trademark Registration",
   "Accounting & Bookkeeping",
   "Compliance Support",
+  "Virtual CFO",
   "Other",
 ] as const;
 
@@ -20,21 +33,20 @@ export function BookConsultationPage() {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    businessName: "",
-    businessCategory: "",
-    city: "",
     service: "",
-    otherService: "",
-    description: "",
+    email: "",
   });
 
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    if (name === "phone") {
+      const digits = value.replace(/\D/g, "").slice(0, 10);
+      setFormData((prev) => ({ ...prev, phone: digits }));
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -43,40 +55,48 @@ export function BookConsultationPage() {
     setStatus("loading");
     setMessage("");
 
-    if (!formData.name || !formData.phone) {
+    if (!formData.name || !formData.phone || !formData.service || !formData.email) {
       setStatus("error");
-      setMessage("Name and phone are required.");
+      setMessage("Please fill all required fields.");
+      return;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+      setStatus("error");
+      setMessage("Please enter a valid 10-digit Indian mobile number.");
       return;
     }
 
     try {
+      const payload = {
+        name: formData.name,
+        phone: formData.phone,
+        service: formData.service,
+        email: formData.email,
+        businessName: "",
+        businessCategory: "",
+        city: "",
+        otherService: "",
+        description: `Email: ${formData.email}`,
+      };
+
       const response = await fetch(`${API_BASE}/api/consultations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
         setStatus("success");
-        setMessage("Your inquiry has been submitted. Opening WhatsApp for follow-up...");
+        setMessage("Your free consultation request has been submitted.");
 
-        const serviceText =
-          formData.service === "Other" && formData.otherService ? formData.otherService : formData.service;
-        const whatsappMessage = `*New Book Inquiry*\n\n*Name:* ${formData.name}\n*Phone:* ${formData.phone}\n*Business Name:* ${formData.businessName || "N/A"}\n*Category:* ${formData.businessCategory || "N/A"}\n*City:* ${formData.city || "N/A"}\n*Service Needed:* ${serviceText || "N/A"}\n*Description:* ${formData.description || "N/A"}`;
+        const whatsappMessage = `*New Free Consultation*\n\n*Name:* ${formData.name}\n*Phone:* +91 ${formData.phone}\n*Email:* ${formData.email}\n*Service:* ${formData.service}`;
+        window.open(
+          `https://wa.me/919153832948?text=${encodeURIComponent(whatsappMessage)}`,
+          "_blank",
+        );
 
-        const whatsappUrl = `https://wa.me/919153832948?text=${encodeURIComponent(whatsappMessage)}`;
-        window.open(whatsappUrl, "_blank");
-
-        setFormData({
-          name: "",
-          phone: "",
-          businessName: "",
-          businessCategory: "",
-          city: "",
-          service: "",
-          otherService: "",
-          description: "",
-        });
+        setFormData({ name: "", phone: "", service: "", email: "" });
       } else {
         const errorData = await response.json().catch(() => ({}));
         setStatus("error");
@@ -92,145 +112,91 @@ export function BookConsultationPage() {
   return (
     <>
       <SEO
-        title="Finovert - Book Inquiry"
-        description="Book a consultation with Finovert for finance, compliance, and business registration services in India."
+        title="Finovert - Free Consultation"
+        description="Choose your business structure and get started with company registration, GST, ITR, and compliance with Finovert."
         path="/book-consultation"
       />
 
-      <CorporateFormLayout title="Book Inquiry" maxWidthClass="max-w-3xl">
+      <CorporateFormLayout title="Choose your business structure and get started with your company registration">
         {status === "success" && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 flex items-start gap-3 text-green-800 text-sm">
-            <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div className="mb-5 flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+            <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" />
             <span>{message}</span>
           </div>
         )}
 
         {status === "error" && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 flex items-start gap-3 text-red-800 text-sm">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div className="mb-5 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
             <span>{message}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <FormSection step={1} title="Contact Information" hideHeading>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-              <OutlinedField label="Full Name" required>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className={outlinedInputClass}
-                  required
-                />
-              </OutlinedField>
-              <OutlinedField label="Phone Number" required>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className={outlinedInputClass}
-                  required
-                />
-              </OutlinedField>
-            </div>
-          </FormSection>
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <TextField
+            id="name"
+            label="Full Name"
+            name="name"
+            required
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter Your Name"
+          />
 
-          <FormSection step={2} title="Business Details" hideHeading>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
-              <OutlinedField label="Business Name">
-                <input
-                  type="text"
-                  name="businessName"
-                  value={formData.businessName}
-                  onChange={handleChange}
-                  className={outlinedInputClass}
-                />
-              </OutlinedField>
-              <OutlinedField label="Business Category">
-                <input
-                  type="text"
-                  name="businessCategory"
-                  value={formData.businessCategory}
-                  onChange={handleChange}
-                  className={outlinedInputClass}
-                />
-              </OutlinedField>
-              <div className="md:col-span-2">
-                <OutlinedField label="City">
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleChange}
-                    className={outlinedInputClass}
-                  />
-                </OutlinedField>
-              </div>
-            </div>
-          </FormSection>
+          <PhoneField
+            id="phone"
+            name="phone"
+            required
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder="Enter your PhoneNo."
+          />
 
-          <FormSection step={3} title="Service Request" hideHeading>
-            <div className="space-y-5 md:space-y-6">
-              <OutlinedField label="Service Needed">
-                <select
-                  name="service"
-                  value={formData.service}
-                  onChange={handleChange}
-                  className={`${outlinedInputClass} cursor-pointer`}
-                >
-                  <option value="">Select a service</option>
-                  {SERVICES_LIST.map((service) => (
-                    <option key={service} value={service}>
-                      {service}
-                    </option>
-                  ))}
-                </select>
-              </OutlinedField>
-
-              {formData.service === "Other" && (
-                <OutlinedField label="Specify Service">
-                  <input
-                    type="text"
-                    name="otherService"
-                    value={formData.otherService}
-                    onChange={handleChange}
-                    className={outlinedInputClass}
-                  />
-                </OutlinedField>
-              )}
-
-              <OutlinedField label="Brief Description" optional>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={4}
-                  className={`${outlinedInputClass} resize-none min-h-[100px]`}
-                />
-              </OutlinedField>
-            </div>
-          </FormSection>
-
-          <button
-            type="submit"
-            disabled={status === "loading"}
-            className="w-full bg-[#0F2A5F] text-white font-semibold py-3.5 hover:bg-[#0b1f47] disabled:opacity-60 transition-colors flex items-center justify-center gap-2 text-sm uppercase tracking-wide"
+          <SelectField
+            id="service"
+            label="Service"
+            name="service"
+            required
+            value={formData.service}
+            onChange={handleChange}
           >
+            <option value="">-Select-</option>
+            {SERVICES_LIST.map((service) => (
+              <option key={service} value={service}>
+                {service}
+              </option>
+            ))}
+          </SelectField>
+
+          <TextField
+            id="email"
+            label="Enter Your Email"
+            name="email"
+            type="email"
+            required
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your Email"
+          />
+
+          <button type="submit" disabled={status === "loading"} className={formButtonClass}>
             {status === "loading" ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="inline-flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Submitting...
-              </>
+              </span>
             ) : (
-              <>
-                <Send className="w-4 h-4" />
-                Book Inquiry
-              </>
+              "Claim your Free Consultation"
             )}
           </button>
+
+          <p className="text-balance text-center text-xs leading-relaxed text-slate-500">
+            By clicking, you consent to receiving updates about our services as outlined in our{" "}
+            <Link to="/privacy" className="font-semibold text-[#0F2A5F] underline underline-offset-2">
+              Privacy Statement
+            </Link>
+            .
+          </p>
         </form>
       </CorporateFormLayout>
     </>

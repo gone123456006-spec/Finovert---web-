@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { SEO } from "../components/SEO";
 import { CorporateFormLayout } from "../components/corporate/CorporateFormLayout";
-import { FormSection } from "../components/corporate/FormSection";
-import { OutlinedField, outlinedInputClass } from "../components/corporate/OutlinedField";
+import {
+  TextField,
+  PhoneField,
+  formButtonClass,
+} from "../components/corporate/OutlinedField";
 import API_BASE from "../../config/api";
 
 export function ConfirmationFormPage() {
@@ -17,6 +20,11 @@ export function ConfirmationFormPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if (name === "phone") {
+      const digits = value.replace(/\D/g, "").slice(0, 10);
+      setFormData((prev) => ({ ...prev, phone: digits }));
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -28,6 +36,12 @@ export function ConfirmationFormPage() {
     if (!formData.name || !formData.phone || !formData.email) {
       setStatus("error");
       setMessage("All fields are required.");
+      return;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+      setStatus("error");
+      setMessage("Please enter a valid 10-digit Indian mobile number.");
       return;
     }
 
@@ -68,74 +82,63 @@ export function ConfirmationFormPage() {
         path="/confirmation-form"
       />
 
-      <CorporateFormLayout title="Confirmation Form" subtitle="For internship program — all fields marked * are required">
+      <CorporateFormLayout
+        title="Confirmation Form"
+        subtitle="For internship program — all fields marked * are required"
+      >
         {status === "success" && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 flex items-start gap-3 text-green-800 text-sm">
-            <CheckCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div className="mb-5 flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+            <CheckCircle className="mt-0.5 h-5 w-5 shrink-0" />
             <span>{message}</span>
           </div>
         )}
 
         {status === "error" && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 flex items-start gap-3 text-red-800 text-sm">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          <div className="mb-5 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
             <span>{message}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <FormSection step={1} title="Your Details">
-            <div className="space-y-5 md:space-y-6">
-              <OutlinedField label="Full Name" required>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className={outlinedInputClass}
-                  required
-                />
-              </OutlinedField>
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <TextField
+            id="name"
+            label="Full Name"
+            name="name"
+            required
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter Your Name"
+          />
 
-              <OutlinedField label="Phone Number" required>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className={outlinedInputClass}
-                  required
-                />
-              </OutlinedField>
+          <PhoneField
+            id="phone"
+            name="phone"
+            required
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder="Enter your PhoneNo."
+          />
 
-              <OutlinedField label="Gmail Address" required>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={outlinedInputClass}
-                  required
-                />
-              </OutlinedField>
-            </div>
-          </FormSection>
+          <TextField
+            id="email"
+            label="Gmail Address"
+            name="email"
+            type="email"
+            required
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your Gmail"
+          />
 
-          <button
-            type="submit"
-            disabled={status === "loading"}
-            className="w-full bg-[#0F2A5F] text-white font-semibold py-3.5 hover:bg-[#0b1f47] disabled:opacity-60 transition-colors flex items-center justify-center gap-2 text-sm uppercase tracking-wide"
-          >
+          <button type="submit" disabled={status === "loading"} className={formButtonClass}>
             {status === "loading" ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="inline-flex items-center justify-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Submitting...
-              </>
+              </span>
             ) : (
-              <>
-                <Send className="w-4 h-4" />
-                Submit Confirmation
-              </>
+              "Submit Confirmation"
             )}
           </button>
         </form>

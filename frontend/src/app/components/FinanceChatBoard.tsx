@@ -13,6 +13,8 @@ import {
   Lock,
   CreditCard,
   CheckCircle2,
+  MessageCircle,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import API_BASE from "../../config/api";
@@ -33,6 +35,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
+import {
+  TextField,
+  PhoneField,
+  SelectField,
+  formButtonClass,
+} from "./corporate/OutlinedField";
 
 // ── Razorpay window type declaration ────────────────────────────────────────
 declare global {
@@ -134,6 +142,7 @@ function loadRazorpayScript(): Promise<boolean> {
 }
 
 export function FinanceChatBoard() {
+  const [widgetOpen, setWidgetOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([
     { id: RAJ_WELCOME_ID, role: "assistant", text: RAJ_INTRO },
@@ -153,7 +162,8 @@ export function FinanceChatBoard() {
   const [leadForm, setLeadForm] = useState({
     name: "",
     contact: "",
-    businessType: "Startup",
+    email: "",
+    businessType: "",
   });
   const [leadSubmitting, setLeadSubmitting] = useState(false);
   const chatScrollRef = useRef<HTMLDivElement>(null);
@@ -888,16 +898,30 @@ export function FinanceChatBoard() {
 
   const handleLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!leadForm.name.trim() || !leadForm.contact.trim() || !leadForm.email.trim() || !leadForm.businessType) {
+      alert("Please fill all required fields.");
+      return;
+    }
+    const phone = leadForm.contact.replace(/\D/g, "");
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      alert("Please enter a valid 10-digit Indian mobile number.");
+      return;
+    }
     setLeadSubmitting(true);
     try {
       const response = await fetch(`${API_BASE}/api/consultations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(leadForm),
+        body: JSON.stringify({
+          name: leadForm.name.trim(),
+          contact: phone,
+          email: leadForm.email.trim(),
+          businessType: leadForm.businessType,
+        }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error((data as { message?: string }).message || "Failed to submit consultation request.");
-      setLeadForm({ name: "", contact: "", businessType: "Startup" });
+      setLeadForm({ name: "", contact: "", email: "", businessType: "" });
       setConsultationOpen(false);
       setLockedFeature(null);
       appendAssistantMessage("Your free consultation is booked. Our team will contact you shortly.");
@@ -910,21 +934,30 @@ export function FinanceChatBoard() {
 
   const handleInlineLeadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!leadForm.name.trim() || !leadForm.contact.trim()) return;
+    if (!leadForm.name.trim() || !leadForm.contact.trim() || !leadForm.email.trim() || !leadForm.businessType) return;
+    const phone = leadForm.contact.replace(/\D/g, "");
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      alert("Please enter a valid 10-digit Indian mobile number.");
+      return;
+    }
+    const payload = {
+      name: leadForm.name.trim(),
+      contact: phone,
+      email: leadForm.email.trim(),
+      businessType: leadForm.businessType,
+    };
     setLeadSubmitting(true);
 
-    // Always show success to the user immediately — API failure is silent
-    setLeadForm({ name: "", contact: "", businessType: "Startup" });
+    setLeadForm({ name: "", contact: "", email: "", businessType: "" });
     setFlowStep("consultation_booked");
     replyAssistant("Your free consultation is booked. Our team will review your details and contact you shortly.");
     setLeadSubmitting(false);
     focusChatInput();
 
-    // Fire API in background (non-blocking)
     fetch(`${API_BASE}/api/consultations`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(leadForm),
+      body: JSON.stringify(payload),
     }).catch((err) => console.warn("Consultation API error:", err));
   };
 
@@ -1056,14 +1089,54 @@ export function FinanceChatBoard() {
 
   return (
     <>
-      <section className="relative z-10 pb-6 sm:pb-12 bg-gradient-to-b from-[#f4f8fc] via-white to-white pt-16 sm:pt-24">
-        <div
-          className="max-w-4xl lg:max-w-5xl mx-auto px-3 sm:px-6 lg:px-8"
+      {/* ── Floating launcher (like WhatsApp) ── */}
+      {!widgetOpen && (
+        <button
+          type="button"
+          onClick={() => {
+            setWidgetOpen(true);
+            focusChatInput();
+          }}
+          className="fixed z-[60] right-3 bottom-20 flex h-11 w-11 items-center justify-center rounded-full bg-[#0F2A5F] text-white shadow-lg transition-colors hover:bg-[#0b1f47] sm:right-4 sm:bottom-24 sm:h-14 sm:w-14"
+          aria-label="Open Finovert AI chat"
         >
+          <MessageCircle className="h-5 w-5 sm:h-7 sm:w-7" />
+        </button>
+      )}
 
-          {/* ── Big Heading ── */}
+      {/* ── Floating chat panel ── */}
+      <section
+        className={`fixed z-[60] right-2 sm:right-4 bottom-4 sm:bottom-6 w-[calc(100vw-1rem)] sm:w-[400px] max-w-[400px] transition-all duration-200 ${
+          widgetOpen
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 translate-y-4 pointer-events-none"
+        }`}
+        aria-hidden={!widgetOpen}
+      >
+        <div className="flex flex-col rounded-2xl overflow-hidden shadow-2xl border border-gray-200 bg-white max-h-[85vh]">
+          {/* Header */}
+          <div className="flex items-center justify-between bg-[#0F2A5F] px-4 py-3 shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/15 text-white">
+                <MessageCircle className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-[11px] text-white/70 leading-tight">We're here to help you</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setWidgetOpen(false)}
+              className="text-white/80 hover:text-white p-1"
+              aria-label="Close chat"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* ── Big Heading (hidden in widget mode) ── */}
           {!hasChat && (
-            <div className="text-center mb-6 sm:mb-10">
+            <div className="hidden">
               <h1 className="text-[2rem] sm:text-[3.5rem] lg:text-[4rem] font-bold tracking-tight leading-[1.1] mb-3 sm:mb-4 min-h-[1.2em] flex justify-center items-baseline gap-x-2">
 
                 {phraseIdx === -1 ? (
@@ -1115,11 +1188,11 @@ export function FinanceChatBoard() {
             </div>
           )}
 
-          <div className="rounded-xl sm:rounded-[1.75rem] bg-white overflow-hidden flex flex-col shadow-[0_16px_56px_rgba(15,42,95,0.18)] transition-shadow">
+          <div className="bg-white overflow-hidden flex flex-col min-h-0">
             <div
               ref={chatScrollRef}
               data-chat-messages
-              className="min-h-[220px] max-h-[300px] sm:min-h-[260px] sm:max-h-[400px] overflow-y-auto overscroll-contain scrollbar-hide px-4 sm:px-6 pt-4 sm:pt-6 pb-3 space-y-4 sm:space-y-5 bg-white cursor-default touch-pan-y"
+              className="min-h-[280px] max-h-[52vh] overflow-y-auto overscroll-contain scrollbar-hide px-4 pt-4 pb-3 space-y-4 bg-white cursor-default touch-pan-y"
             >
               {messages.map((msg) =>
                 msg.role === "user" ? (
@@ -1255,40 +1328,60 @@ export function FinanceChatBoard() {
               {/* Consultation Form inside chat */}
               {flowStep === "awaiting_consultation_form" && (
                 <div className="flex justify-start">
-                  <div className="w-full max-w-[92%] sm:max-w-[78%] rounded-[20px] rounded-bl-[4px] bg-white border border-gray-200/90 p-4 sm:p-5 shadow-sm space-y-3">
-                    <p className="text-[13px] sm:text-[15px] font-semibold text-gray-800">Book Free CFO Consultation</p>
-                    <form onSubmit={handleInlineLeadSubmit} className="grid grid-cols-1 gap-2.5">
-                      <input
+                  <div className="w-full max-w-[92%] space-y-4 rounded-[20px] rounded-bl-[4px] border border-slate-200/80 bg-white p-4 shadow-sm sm:max-w-[78%] sm:p-5">
+                    <p className="text-center text-[13px] font-bold leading-snug text-[#0F2A5F] sm:text-[14px]">
+                      Choose your business structure and get started with your company registration
+                    </p>
+                    <form onSubmit={handleInlineLeadSubmit} className="space-y-3.5">
+                      <TextField
+                        id="chat-name"
+                        label="Full Name"
                         required
-                        type="text"
-                        placeholder="Your Name"
                         value={leadForm.name}
                         onChange={(e) => setLeadForm((prev) => ({ ...prev, name: e.target.value }))}
-                        className="rounded-xl border border-gray-200 px-3 py-2.5 text-[14px] sm:text-[15px] outline-none bg-gray-50 focus:border-[#007AFF] focus:bg-white transition-colors w-full"
+                        placeholder="Enter Your Name"
                       />
-                      <input
+                      <PhoneField
+                        id="chat-phone"
                         required
-                        type="text"
-                        placeholder="Phone or email"
                         value={leadForm.contact}
-                        onChange={(e) => setLeadForm((prev) => ({ ...prev, contact: e.target.value }))}
-                        className="rounded-xl border border-gray-200 px-3 py-2.5 text-[14px] sm:text-[15px] outline-none bg-gray-50 focus:border-[#007AFF] focus:bg-white transition-colors w-full"
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                          setLeadForm((prev) => ({ ...prev, contact: digits }));
+                        }}
+                        placeholder="Enter your PhoneNo."
                       />
-                      <select
+                      <SelectField
+                        id="chat-service"
+                        label="Service"
+                        required
                         value={leadForm.businessType}
                         onChange={(e) => setLeadForm((prev) => ({ ...prev, businessType: e.target.value }))}
-                        className="rounded-xl border border-gray-200 px-3 py-2.5 text-[14px] sm:text-[15px] outline-none bg-gray-50 focus:border-[#007AFF] focus:bg-white transition-colors w-full appearance-none"
                       >
-                        <option>Startup</option>
-                        <option>SME</option>
-                        <option>Enterprise</option>
-                      </select>
+                        <option value="">-Select-</option>
+                        <option value="Private Limited Company Registration">Private Limited Company Registration</option>
+                        <option value="LLP Registration">LLP Registration</option>
+                        <option value="GST Registration">GST Registration</option>
+                        <option value="ITR Filing">ITR Filing</option>
+                        <option value="Accounting & Bookkeeping">Accounting & Bookkeeping</option>
+                        <option value="Virtual CFO">Virtual CFO</option>
+                        <option value="Other">Other</option>
+                      </SelectField>
+                      <TextField
+                        id="chat-email"
+                        label="Enter Your Email"
+                        type="email"
+                        required
+                        value={leadForm.email}
+                        onChange={(e) => setLeadForm((prev) => ({ ...prev, email: e.target.value }))}
+                        placeholder="Enter your Email"
+                      />
                       <button
                         type="submit"
                         disabled={leadSubmitting || isTyping}
-                        className="mt-1 w-full rounded-xl bg-[#007AFF] text-white text-[14px] sm:text-[15px] font-semibold py-2.5 hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                        className={formButtonClass}
                       >
-                        {leadSubmitting ? "Submitting…" : "Confirm Booking"}
+                        {leadSubmitting ? "Submitting…" : "Claim your Free Consultation"}
                       </button>
                     </form>
                   </div>
@@ -1408,8 +1501,8 @@ export function FinanceChatBoard() {
           </div>
 
           {/* ── Suggestion chips ──────────────────────────────────────────── */}
-          <div className="mt-3 sm:mt-6 -mx-3 sm:-mx-2 pb-1">
-            <div className="flex flex-nowrap items-center gap-2 sm:gap-3 overflow-x-auto overscroll-x-contain scrollbar-hide px-3 sm:px-2 snap-x snap-mandatory touch-pan-x">
+          <div className="shrink-0 border-t border-gray-100 px-3 py-2.5 bg-white">
+            <div className="flex flex-nowrap items-center gap-2 overflow-x-auto overscroll-x-contain scrollbar-hide snap-x snap-mandatory touch-pan-x">
               {SUGGESTIONS.map((item) => {
                 const Icon = item.icon;
                 return (
@@ -1419,8 +1512,8 @@ export function FinanceChatBoard() {
                     onClick={() => handleSuggestionClick(item)}
                     disabled={isTyping}
                     className={`
-                      inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 sm:gap-2 sm:px-5 sm:py-3
-                      text-xs sm:text-base font-medium shadow-sm transition-colors shrink-0 snap-start disabled:opacity-50
+                      inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5
+                      text-xs font-medium shadow-sm transition-colors shrink-0 snap-start disabled:opacity-50
                       ${item.locked
                         ? "border-gray-200 bg-gray-50/90 text-gray-600 hover:border-[#1428A0]/30 hover:bg-[#1428A0]/5"
                         : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
@@ -1428,7 +1521,7 @@ export function FinanceChatBoard() {
                     `}
                   >
                     <Icon
-                      className={`w-3.5 h-3.5 sm:w-5 sm:h-5 ${item.locked ? "text-gray-500" : "text-[#1428A0]"}`}
+                      className={`w-3.5 h-3.5 ${item.locked ? "text-gray-500" : "text-[#1428A0]"}`}
                       strokeWidth={2.2}
                     />
                     <span>{item.label}</span>
@@ -1445,52 +1538,65 @@ export function FinanceChatBoard() {
 
       {/* ── Consultation modal ──────────────────────────────────────────────── */}
       <Dialog open={consultationOpen} onOpenChange={setConsultationOpen}>
-        <DialogContent className="sm:max-w-md rounded-2xl p-0 gap-0 overflow-hidden">
-          <div className="p-6 sm:p-8 bg-gray-50">
-            <DialogHeader className="text-left space-y-2">
-              <DialogTitle className="text-2xl font-bold text-gray-900">
-                Book a{" "}
-                <span className="text-emerald-600 font-bold">free</span> consultation
+        <DialogContent className="gap-0 overflow-hidden rounded-[20px] border-slate-200/80 p-0 sm:max-w-md">
+          <div className="bg-white p-6 sm:p-8">
+            <DialogHeader className="space-y-2 text-center sm:text-center">
+              <DialogTitle className="text-[15px] font-bold leading-snug text-[#0F2A5F] sm:text-base">
+                Choose your business structure and get started with your company registration
               </DialogTitle>
-              <DialogDescription className="text-gray-600 text-base">
-                {lockedFeature
-                  ? `Unlock "${lockedFeature}" and get expert help from our finance team.`
-                  : "Share your details and our team will connect with you."}
-              </DialogDescription>
+              {lockedFeature ? (
+                <DialogDescription className="text-xs text-slate-500">
+                  Unlock &quot;{lockedFeature}&quot; and get expert help from our finance team.
+                </DialogDescription>
+              ) : null}
             </DialogHeader>
 
-            <form onSubmit={handleLeadSubmit} className="mt-6 grid grid-cols-1 gap-3">
-              <input
+            <form onSubmit={handleLeadSubmit} className="mt-5 space-y-4 sm:mt-6 sm:space-y-5">
+              <TextField
+                id="modal-name"
+                label="Full Name"
                 required
-                type="text"
-                placeholder="Name"
                 value={leadForm.name}
                 onChange={(e) => setLeadForm((prev) => ({ ...prev, name: e.target.value }))}
-                className="rounded-xl border border-gray-300 px-4 py-3 outline-none bg-white focus:border-blue-500"
+                placeholder="Enter Your Name"
               />
-              <input
+              <PhoneField
+                id="modal-phone"
                 required
-                type="text"
-                placeholder="Phone or email"
                 value={leadForm.contact}
-                onChange={(e) => setLeadForm((prev) => ({ ...prev, contact: e.target.value }))}
-                className="rounded-xl border border-gray-300 px-4 py-3 outline-none bg-white focus:border-blue-500"
+                onChange={(e) => {
+                  const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  setLeadForm((prev) => ({ ...prev, contact: digits }));
+                }}
+                placeholder="Enter your PhoneNo."
               />
-              <select
+              <SelectField
+                id="modal-service"
+                label="Service"
+                required
                 value={leadForm.businessType}
                 onChange={(e) => setLeadForm((prev) => ({ ...prev, businessType: e.target.value }))}
-                className="rounded-xl border border-gray-300 px-4 py-3 outline-none bg-white focus:border-blue-500"
               >
-                <option>Startup</option>
-                <option>SME</option>
-                <option>Enterprise</option>
-              </select>
-              <button
-                type="submit"
-                disabled={leadSubmitting}
-                className="mt-1 rounded-[20px] bg-[#1d1d1f] text-white font-semibold py-3.5 hover:bg-black transition-colors disabled:opacity-60 shadow-sm"
-              >
-                {leadSubmitting ? "Submitting…" : "Book Free Consultation"}
+                <option value="">-Select-</option>
+                <option value="Private Limited Company Registration">Private Limited Company Registration</option>
+                <option value="LLP Registration">LLP Registration</option>
+                <option value="GST Registration">GST Registration</option>
+                <option value="ITR Filing">ITR Filing</option>
+                <option value="Accounting & Bookkeeping">Accounting & Bookkeeping</option>
+                <option value="Virtual CFO">Virtual CFO</option>
+                <option value="Other">Other</option>
+              </SelectField>
+              <TextField
+                id="modal-email"
+                label="Enter Your Email"
+                type="email"
+                required
+                value={leadForm.email}
+                onChange={(e) => setLeadForm((prev) => ({ ...prev, email: e.target.value }))}
+                placeholder="Enter your Email"
+              />
+              <button type="submit" disabled={leadSubmitting} className={formButtonClass}>
+                {leadSubmitting ? "Submitting…" : "Claim your Free Consultation"}
               </button>
             </form>
           </div>

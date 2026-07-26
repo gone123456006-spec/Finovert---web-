@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
 import { Search, Calendar, User, ArrowRight, BookOpen, Clock } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { SEO } from "../components/SEO";
 import API_BASE from "../../config/api";
 
@@ -89,7 +89,8 @@ const CATEGORIES = ["All", "Finance", "Technology", "SEO", "Engineering", "Compa
 const BLOG_CACHE_KEY = "finovert_blogs_cache_v1";
 
 export function BlogsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") ?? "");
   const [activeCategory, setActiveCategory] = useState("All");
   const [blogs, setBlogs] = useState<BlogPost[]>(BLOG_POSTS as BlogPost[]);
   const [loading, setLoading] = useState(true);
@@ -135,6 +136,10 @@ export function BlogsPage() {
 
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    setSearchQuery(searchParams.get("q") ?? "");
+  }, [searchParams]);
 
   const filteredPosts = useMemo(() => {
     return blogs.filter((post) => {

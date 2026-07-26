@@ -1,49 +1,54 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { CheckCircle, XCircle, Search, User, Briefcase, Calendar, Building, FileText, BadgeCheck, RefreshCw } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  User,
+  Briefcase,
+  Calendar,
+  Building,
+  FileText,
+  BadgeCheck,
+  RefreshCw,
+  Loader2,
+} from "lucide-react";
 import API_BASE from "../../config/api";
+import { SEO } from "../components/SEO";
+import {
+  TextField,
+  formButtonClass,
+  formInputClass,
+} from "../components/corporate/OutlinedField";
 
-const DUMMY_RECORDS = [
-  {
-    id: "FIN-2026-INT-001",
-    name: "Alice Sharma",
-    institute: "IIT Delhi",
-    joinDate: "Jan 15, 2026",
-    endDate: "Jun 15, 2026",
-    role: "Software Engineering Intern",
-    remarks: "Excellent performance, strong problem-solving skills and team collaboration."
-  },
-  {
-    id: "FIN-EMP-1042",
-    name: "Bob Verma",
-    institute: "N/A",
-    joinDate: "Apr 10, 2023",
-    endDate: "Present",
-    role: "Senior Frontend Developer",
-    remarks: "Key contributor to the new dashboard UI and mobile-first experience."
-  }
-];
+type VerificationRecord = {
+  id: string;
+  name: string;
+  institute: string;
+  joinDate: string;
+  endDate: string;
+  role: string;
+  remarks: string;
+};
 
 export function VerificationPage() {
   const [searchId, setSearchId] = useState("");
-  const [result, setResult] = useState<typeof DUMMY_RECORDS[0] | null>(null);
+  const [result, setResult] = useState<VerificationRecord | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [captcha, setCaptcha] = useState({ q: "", a: 0 });
+  const [captcha, setCaptcha] = useState("");
   const [userCaptcha, setUserCaptcha] = useState("");
   const [error, setError] = useState("");
 
   const generateCaptcha = () => {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    let result = "";
+    let next = "";
     for (let i = 0; i < 6; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
+      next += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    setCaptcha({ q: result, a: 0 }); // 'a' is not used for string captcha
+    setCaptcha(next);
   };
 
   useEffect(() => {
-    document.title = "Verify Authenticity | Finovert";
     generateCaptcha();
   }, []);
 
@@ -51,7 +56,7 @@ export function VerificationPage() {
     e.preventDefault();
     if (!searchId.trim()) return;
 
-    if (userCaptcha.toUpperCase() !== captcha.q) {
+    if (userCaptcha.toUpperCase() !== captcha) {
       setError("CAPTCHA verification failed. Please enter the characters exactly as shown.");
       generateCaptcha();
       setUserCaptcha("");
@@ -62,11 +67,10 @@ export function VerificationPage() {
     setIsSearching(true);
     setHasSearched(false);
 
-    // Fetch from backend API
     fetch(`${API_BASE}/api/verifications/${encodeURIComponent(searchId.trim())}`)
       .then((res) => {
         if (res.ok) return res.json();
-        throw new Error('Not found');
+        throw new Error("Not found");
       })
       .then((data) => {
         setResult(data);
@@ -83,206 +87,210 @@ export function VerificationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24 pb-12">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center justify-center p-3 bg-blue-100 text-blue-700 rounded-full mb-4">
-            <BadgeCheck className="w-8 h-8" />
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Verification Portal
-          </h1>
-          <p className="text-gray-600 text-lg max-w-xl mx-auto">
-            Enter an Intern ID or Employee ID to verify authenticity and view official profile details.
-          </p>
-        </motion.div>
+    <>
+      <SEO
+        title="Finovert - Verification Portal"
+        description="Verify Intern ID or Employee ID authenticity with Finovert's official verification portal."
+        path="/verify"
+      />
 
-        {/* Search Box */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8"
-        >
-          <form onSubmit={handleSearch} className="relative">
-            <div className="relative flex items-center">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
+      <div className="min-h-[calc(100dvh-8rem)] bg-[#eef3f9] pt-20 pb-12 sm:pt-24 sm:pb-16">
+        <div className="mx-auto max-w-xl px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 text-center"
+          >
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#0F2A5F] text-white shadow-sm">
+              <BadgeCheck className="h-7 w-7" />
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-[#0F2A5F] sm:text-3xl">
+              Verification Portal
+            </h1>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600 sm:text-[15px]">
+              Enter an Intern ID or Employee ID to verify authenticity and view official profile details.
+            </p>
+          </motion.div>
+
+          <motion.form
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            onSubmit={handleSearch}
+            className="rounded-[20px] border border-slate-200/80 bg-white p-6 shadow-[0_12px_40px_rgba(15,42,95,0.12)] sm:p-8 lg:p-10"
+          >
+            <h2 className="text-center text-[15px] font-bold leading-snug text-[#0F2A5F] sm:text-base">
+              Verify official records with Finovert
+            </h2>
+
+            <div className="mt-5 space-y-4 sm:mt-6 sm:space-y-5">
+              <TextField
+                id="verify-id"
+                label="Intern / Employee ID"
+                required
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
-                className="block w-full pl-11 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all sm:text-lg"
                 placeholder="e.g. FIN-2026-INT-001"
-                required
+                autoComplete="off"
               />
-            </div>
-            <div className="mt-8 bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm w-full">
-              <div className="flex items-center gap-4 p-4">
-                <div className="flex-shrink-0 flex flex-col items-center gap-2">
-                  <div className="bg-[#f9f9f9] border border-gray-200 rounded p-3 select-none flex items-center justify-center min-w-[140px] h-12 relative overflow-hidden">
-                    {/* Background noise lines */}
-                    <div className="absolute inset-0 opacity-10 pointer-events-none">
-                      <div className="absolute top-1/2 left-0 w-full h-[1px] bg-black rotate-3"></div>
-                      <div className="absolute top-1/3 left-0 w-full h-[1px] bg-black -rotate-2"></div>
+
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-slate-600">
+                  Security Code<span className="text-red-500">*</span>
+                </label>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                  <div className="flex items-center gap-2">
+                    <div className="relative flex h-[42px] min-w-[140px] flex-1 items-center justify-center overflow-hidden rounded-lg border border-slate-300 bg-slate-50 select-none sm:flex-none">
+                      <div className="pointer-events-none absolute inset-0 opacity-15" aria-hidden>
+                        <div className="absolute left-0 top-1/2 h-px w-full rotate-3 bg-[#0F2A5F]" />
+                        <div className="absolute left-0 top-1/3 h-px w-full -rotate-2 bg-[#0F2A5F]" />
+                      </div>
+                      <span className="relative flex gap-0.5 text-lg font-bold italic tracking-widest text-[#0F2A5F]">
+                        {captcha.split("").map((char, i) => (
+                          <span
+                            key={`${char}-${i}`}
+                            style={{
+                              transform: `translateY(${(i % 3) - 1}px) rotate(${(i % 2 === 0 ? -1 : 1) * 4}deg)`,
+                            }}
+                          >
+                            {char}
+                          </span>
+                        ))}
+                      </span>
                     </div>
-                    <span className="relative text-xl font-bold tracking-tighter text-gray-700 italic flex gap-0.5">
-                      {captcha.q.split('').map((char, i) => (
-                        <span key={i} style={{ transform: `translateY(${Math.random() * 4 - 2}px) rotate(${Math.random() * 10 - 5}deg)` }}>
-                          {char}
-                        </span>
-                      ))}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={generateCaptcha}
+                      className="inline-flex h-[42px] items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-[#0F2A5F] transition hover:bg-slate-50"
+                      aria-label="Get new code"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      Refresh
+                    </button>
                   </div>
-                  <button 
-                    type="button" 
-                    onClick={generateCaptcha}
-                    className="text-[10px] text-blue-600 font-bold hover:underline flex items-center gap-1"
-                  >
-                    <RefreshCw className="w-3 h-3" /> Get new code
-                  </button>
-                </div>
-                
-                <div className="flex-grow">
-                  <input 
+                  <input
                     type="text"
                     value={userCaptcha}
                     onChange={(e) => setUserCaptcha(e.target.value)}
-                    placeholder="Type code"
-                    className="w-full px-3 py-3 bg-white border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-gray-900 font-medium text-sm"
+                    placeholder="Type the code shown"
                     required
+                    autoComplete="off"
+                    className={`${formInputClass} sm:flex-1`}
                   />
-                </div>
-              </div>
-              
-              <div className="bg-[#f9f9f9] px-4 py-2 border-t border-gray-200 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <img src="https://www.gstatic.com/recaptcha/api2/logo_48.png" alt="reCAPTCHA" className="w-5 h-5 opacity-70" />
-                  <span className="text-[10px] text-gray-500 font-medium">reCAPTCHA Verification</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="text-[10px] text-gray-400 hover:underline cursor-pointer">Privacy</span>
-                  <span className="text-[10px] text-gray-400 hover:underline cursor-pointer">Terms</span>
                 </div>
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={isSearching}
-              className="mt-8 w-full bg-[#1a73e8] text-white py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-md hover:shadow-lg disabled:opacity-70 flex items-center justify-center gap-3"
-            >
+            <button type="submit" disabled={isSearching} className={`mt-5 sm:mt-6 ${formButtonClass}`}>
               {isSearching ? (
-                <>
-                  <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin" />
-                  Verifying Identity...
-                </>
+                <span className="inline-flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Verifying...
+                </span>
               ) : (
-                <>Verify Official Record</>
+                "Verify Official Record"
               )}
             </button>
 
-            {error && (
-              <motion.p 
-                initial={{ opacity: 0, y: -10 }}
+            {error ? (
+              <motion.p
+                initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-red-400 text-sm font-semibold mt-4 bg-red-900/20 p-4 rounded-xl border border-red-900/30 text-center"
+                className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-center text-sm font-medium text-red-700"
               >
                 {error}
               </motion.p>
-            )}
-          </form>
-        </motion.div>
+            ) : null}
+          </motion.form>
 
-        {/* Results Area */}
-        <AnimatePresence mode="wait">
-          {hasSearched && !isSearching && (
-            <motion.div
-              key={result ? "found" : "not-found"}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {result ? (
-                <div className="bg-white rounded-2xl shadow-lg border border-green-100 overflow-hidden relative">
-                  {/* Success Banner */}
-                  <div className="bg-green-50 px-6 py-4 border-b border-green-100 flex items-center gap-3">
-                    <CheckCircle className="w-6 h-6 text-green-600" />
-                    <div>
-                      <h3 className="text-green-800 font-semibold text-lg">Verified Authenticity</h3>
-                      <p className="text-green-600 text-sm">This ID is officially registered with Finovert.</p>
-                    </div>
-                  </div>
-
-                  {/* Profile Details */}
-                  <div className="p-6 sm:p-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="space-y-6">
-                        <div>
-                          <p className="text-sm text-gray-500 mb-1 flex items-center gap-2">
-                            <User className="w-4 h-4" /> Full Name
-                          </p>
-                          <p className="text-lg font-medium text-gray-900">{result.name}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500 mb-1 flex items-center gap-2">
-                            <Briefcase className="w-4 h-4" /> Role / Position
-                          </p>
-                          <p className="text-lg font-medium text-gray-900">{result.role}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500 mb-1 flex items-center gap-2">
-                            <Building className="w-4 h-4" /> Institute Name
-                          </p>
-                          <p className="text-lg font-medium text-gray-900">{result.institute}</p>
-                        </div>
+          <AnimatePresence mode="wait">
+            {hasSearched && !isSearching ? (
+              <motion.div
+                key={result ? "found" : "not-found"}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25 }}
+                className="mt-6"
+              >
+                {result ? (
+                  <div className="overflow-hidden rounded-[20px] border border-slate-200/80 bg-white shadow-[0_12px_40px_rgba(15,42,95,0.1)]">
+                    <div className="flex items-center gap-3 border-b border-green-100 bg-green-50 px-6 py-4">
+                      <CheckCircle className="h-6 w-6 shrink-0 text-green-600" />
+                      <div>
+                        <h3 className="text-base font-semibold text-green-800">Verified Authenticity</h3>
+                        <p className="text-sm text-green-700">This ID is officially registered with Finovert.</p>
                       </div>
+                    </div>
 
-                      <div className="space-y-6">
-                        <div>
-                          <p className="text-sm text-gray-500 mb-1 flex items-center gap-2">
-                            <Calendar className="w-4 h-4" /> Tenure
-                          </p>
-                          <p className="text-lg font-medium text-gray-900">
-                            {result.joinDate} – {result.endDate}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-gray-500 mb-1 flex items-center gap-2">
-                            <FileText className="w-4 h-4" /> Remarks / Performance
-                          </p>
-                          <p className="text-gray-900 leading-relaxed bg-gray-50 p-4 rounded-lg text-sm border border-gray-100">
-                            {result.remarks}
-                          </p>
-                        </div>
+                    <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 sm:gap-8 sm:p-8">
+                      <Detail
+                        icon={<User className="h-4 w-4" />}
+                        label="Full Name"
+                        value={result.name}
+                      />
+                      <Detail
+                        icon={<Briefcase className="h-4 w-4" />}
+                        label="Role / Position"
+                        value={result.role}
+                      />
+                      <Detail
+                        icon={<Building className="h-4 w-4" />}
+                        label="Institute Name"
+                        value={result.institute || "N/A"}
+                      />
+                      <Detail
+                        icon={<Calendar className="h-4 w-4" />}
+                        label="Tenure"
+                        value={`${result.joinDate} – ${result.endDate || "Present"}`}
+                      />
+                      <div className="sm:col-span-2">
+                        <p className="mb-1.5 flex items-center gap-2 text-xs font-medium text-slate-500">
+                          <FileText className="h-4 w-4" /> Remarks / Performance
+                        </p>
+                        <p className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-800">
+                          {result.remarks}
+                        </p>
                       </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="bg-white rounded-2xl shadow-sm border border-red-100 p-8 text-center">
-                  <div className="inline-flex items-center justify-center p-3 bg-red-100 text-red-600 rounded-full mb-4">
-                    <XCircle className="w-8 h-8" />
+                ) : (
+                  <div className="rounded-[20px] border border-red-100 bg-white p-8 text-center shadow-[0_12px_40px_rgba(15,42,95,0.08)]">
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
+                      <XCircle className="h-8 w-8" />
+                    </div>
+                    <h3 className="mb-2 text-xl font-bold text-[#0F2A5F]">Record Not Found</h3>
+                    <p className="text-sm leading-relaxed text-slate-600">
+                      The ID <strong className="text-slate-800">&quot;{searchId}&quot;</strong> does not match any
+                      active or past records in our system. Please check the ID and try again.
+                    </p>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">Record Not Found</h3>
-                  <p className="text-gray-600">
-                    The ID <strong>"{searchId}"</strong> does not match any active or past records in our system. Please check the ID and try again.
-                  </p>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
+                )}
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </div>
       </div>
+    </>
+  );
+}
+
+function Detail({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div>
+      <p className="mb-1.5 flex items-center gap-2 text-xs font-medium text-slate-500">
+        {icon}
+        {label}
+      </p>
+      <p className="text-[15px] font-medium text-[#0F2A5F] sm:text-base">{value}</p>
     </div>
   );
 }
