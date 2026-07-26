@@ -503,21 +503,18 @@ export function HomePage() {
                         strokeWidth={1.75}
                       />
                     </div>
-                    <AnimatePresence initial={false}>
-                      {isOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.25, ease: "easeInOut" }}
-                          className="overflow-hidden"
-                        >
-                          <p className="mt-3 text-[13px] font-normal leading-relaxed text-[#6b7280] sm:text-[15px]">
-                            {item.answer}
-                          </p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    {isOpen && (
+                      <div 
+                        className="overflow-hidden transition-all duration-300 ease-in-out"
+                        style={{
+                          animation: 'fade-in 0.3s ease-out forwards'
+                        }}
+                      >
+                        <p className="mt-3 text-[13px] font-normal leading-relaxed text-[#6b7280] sm:text-[15px]">
+                          {item.answer}
+                        </p>
+                      </div>
+                    )}
                   </button>
                 );
               })}

@@ -289,6 +289,9 @@ button, a, [role="button"] {
   /* Use native click without transform lag */
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  /* Mobile Safari optimization */
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Prevent rapid clicks that cause freeze */
@@ -303,6 +306,34 @@ button:active, a:active, [role="button"]:active {
 
 input, textarea, select, [contenteditable] {
   -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Mobile-specific scroll optimizations */
+@media (max-width: 768px) {
+  /* Reduce motion on mobile for better performance */
+  * {
+    animation-duration: 0.3s !important;
+    transition-duration: 0.15s !important;
+  }
+  
+  /* Optimize touch scrolling on mobile */
+  body, html {
+    -webkit-overflow-scrolling: touch;
+    /* Prevent overscroll bounce that causes lag */
+    overscroll-behavior: none;
+  }
+  
+  /* Reduce GPU layers on mobile */
+  img, video {
+    will-change: auto !important;
+  }
+  
+  /* Disable hover effects on mobile */
+  *:hover {
+    animation: none !important;
+  }
 }
 
 /* iOS Safari auto-zooms focused fields below 16px — keep inputs at 16px on mobile */
