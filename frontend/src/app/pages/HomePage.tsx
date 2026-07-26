@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "motion/react";
 import { Check, ChevronDown } from "lucide-react";
 
 import API_BASE from "../../config/api";

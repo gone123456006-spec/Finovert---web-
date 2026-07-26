@@ -284,6 +284,27 @@
   }
 }
 
+/* Prevent interaction lag during transitions/animations */
+button, a, [role="button"] {
+  /* Use native click without transform lag */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent rapid clicks that cause freeze */
+button:active, a:active, [role="button"]:active {
+  transition: none !important;
+}
+
+/* Optimize click/tap responsiveness */
+* {
+  -webkit-touch-callout: none;
+}
+
+input, textarea, select, [contenteditable] {
+  -webkit-touch-callout: default;
+}
+
 /* iOS Safari auto-zooms focused fields below 16px — keep inputs at 16px on mobile */
 @media (max-width: 767px) {
 

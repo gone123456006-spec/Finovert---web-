@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 
 export function AppDownloadPopup() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     // Check if user has already closed the popup in this session
@@ -19,24 +19,32 @@ export function AppDownloadPopup() {
   }, []);
 
   const handleClose = () => {
-    setIsOpen(false);
-    sessionStorage.setItem("app-popup-closed", "true");
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      sessionStorage.setItem("app-popup-closed", "true");
+    }, 300); // Match animation duration
   };
 
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: 100, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 100, scale: 0.9 }}
-          className="fixed bottom-6 right-6 z-[9999] max-w-sm w-[calc(100vw-3rem)]"
-        >
+    <div
+      className={`fixed bottom-6 right-6 z-[9999] max-w-sm w-[calc(100vw-3rem)] transition-all duration-300 ease-out ${
+        isClosing 
+          ? 'opacity-0 translate-y-24 scale-90' 
+          : 'opacity-100 translate-y-0 scale-100 animate-fade-in'
+      }`}
+      style={{
+        willChange: 'transform, opacity'
+      }}
+    >
           <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden relative">
             {/* Close Button */}
             <button
               onClick={handleClose}
               className="absolute top-4 right-4 p-1.5 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors z-10"
+              aria-label="Close popup"
             >
               <X className="w-4 h-4" />
             </button>
@@ -88,8 +96,6 @@ export function AppDownloadPopup() {
             {/* Decorative element */}
             <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-blue-50 rounded-full opacity-50 pointer-events-none" />
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        </div>
   );
 }
