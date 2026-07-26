@@ -133,12 +133,15 @@ function BlogCard({ post }: { post: BlogPreview }) {
 
 function BlogCardSkeleton() {
   return (
-    <div className="w-[min(85vw,320px)] shrink-0 animate-pulse snap-start sm:w-[340px] lg:w-[360px]">
-      <div className="aspect-[16/10] rounded-lg bg-slate-200" />
-      <div className="mt-4 space-y-3">
-        <div className="h-6 w-28 rounded-full bg-slate-200" />
-        <div className="h-5 w-full rounded bg-slate-200" />
-        <div className="h-4 w-[80%] rounded bg-slate-100" />
+    <div className="w-[min(85vw,320px)] shrink-0 snap-start sm:w-[340px] lg:w-[360px]">
+      <div className="animate-pulse">
+        <div className="aspect-[16/10] rounded-lg bg-slate-200" />
+        <div className="mt-4 space-y-3">
+          <div className="h-5 w-24 rounded-full bg-slate-200" />
+          <div className="h-6 w-full rounded bg-slate-200" />
+          <div className="h-4 w-11/12 rounded bg-slate-100" />
+          <div className="h-4 w-4/5 rounded bg-slate-100" />
+        </div>
       </div>
     </div>
   );

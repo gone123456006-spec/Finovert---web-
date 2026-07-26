@@ -37,6 +37,25 @@ export default defineConfig({
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 
+  build: {
+    // Optimize build performance
+    target: 'es2020',
+    minify: 'esbuild',
+    cssMinify: true,
+    rollupOptions: {
+      output: {
+        // Manual chunking for better caching
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'motion': ['motion/react'],
+          'icons': ['lucide-react'],
+        },
+      },
+    },
+    // Increase chunk size warning limit
+    chunkSizeWarningLimit: 1000,
+  },
+
   server: {
     host: true,
     port: 5173,
@@ -46,5 +65,9 @@ export default defineConfig({
       usePolling: true,
       interval: 1000,
     },
+  },
+
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', 'motion/react', 'lucide-react'],
   },
 })
