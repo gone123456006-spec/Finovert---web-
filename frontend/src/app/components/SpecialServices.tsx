@@ -1,4 +1,28 @@
 import { motion } from "motion/react";
+import { Link } from "react-router-dom";
+
+const SERVICES = [
+  {
+    image: "/service-1.png",
+    title: "Company Registration",
+    link: "/book-consultation"
+  },
+  {
+    image: "/service-2.png",
+    title: "CFO Services",
+    link: "/book-consultation"
+  },
+  {
+    image: "/service-4.png",
+    title: "GST Filing",
+    link: "/book-consultation"
+  },
+  {
+    image: "/service-3.png",
+    title: "ITR Filing",
+    link: "/book-consultation"
+  },
+];
 
 export function SpecialServices() {
   return (
@@ -23,29 +47,38 @@ export function SpecialServices() {
           </p>
         </motion.div>
 
-        {/* Horizontal Images Container */}
+        {/* Services Container */}
         <div className="-mx-4 sm:mx-0">
           <div className="flex lg:grid lg:grid-cols-4 gap-4 sm:gap-6 overflow-x-auto scrollbar-hide px-4 sm:px-0" style={{ WebkitOverflowScrolling: "touch" }}>
-            {[
-              "/service-1.png",
-              "/service-2.png",
-              "/service-4.png",
-              "/service-3.png",
-            ].map((src, idx) => (
+            {SERVICES.map((service, idx) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="shrink-0 w-[min(82vw,300px)] lg:w-auto flex flex-col items-center"
+                className="shrink-0 w-[min(82vw,300px)] lg:w-auto"
               >
-                <img
-                  src={src}
-                  alt={`Service ${idx + 1}`}
-                  className="w-full aspect-[4/5] object-cover object-top drop-shadow-sm rounded-[24px]"
-                  loading="lazy"
-                />
+                {/* Card Container */}
+                <div className="relative bg-white rounded-[24px] shadow-lg overflow-hidden" style={{ height: '400px' }}>
+                  {/* Service Image */}
+                  <img
+                    src={service.image}
+                    alt={service.title}
+                    className="w-full h-full object-cover object-top"
+                    loading="lazy"
+                  />
+                  
+                  {/* Button overlaid on image at bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 p-3 flex justify-center">
+                    <Link
+                      to={service.link}
+                      className="px-8 py-2 text-xs font-semibold text-black bg-white/20 border border-white/40 hover:bg-white/30 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-md"
+                    >
+                      Get Started
+                    </Link>
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>

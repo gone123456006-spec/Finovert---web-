@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ChevronDown, Menu, Phone, Search, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, Phone, Search, X } from "lucide-react";
 import logo from "@/assets/logogogw.png";
 import { buildServiceSearchItems, searchSiteContent } from "../config/siteSearch";
 import { rafThrottle } from "../utils/performance";
@@ -575,33 +575,34 @@ export function Navbar() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-3 py-3">
+              <div className="flex-1 overflow-y-auto px-6">
                 <Link
                   to="/"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-3 py-2.5 text-[15px] font-medium text-[#0F2A5F]"
+                  className="flex items-center justify-between py-4 pl-2 text-[15px] font-semibold text-[#1d1d1f] border-b border-slate-200"
                 >
                   Home
                 </Link>
 
                 {Object.entries(MEGA_MENUS).map(([section, cats]) => (
-                  <div key={section} className="border-t border-slate-100 mt-1 pt-1">
+                  <div key={section} className="border-b border-slate-200">
                     <button
                       type="button"
                       onClick={() =>
                         setMobileOpenSection((prev) => (prev === section ? null : section))
                       }
-                      className="w-full flex items-center justify-between px-3 py-2.5 text-[15px] font-semibold text-[#0F2A5F]"
+                      className="w-full flex items-center justify-between py-4 pl-2 text-[15px] font-semibold text-[#1d1d1f]"
+                      aria-expanded={mobileOpenSection === section}
                     >
                       {section}
-                      <ChevronDown
-                        className={`w-4 h-4 transition-transform ${
-                          mobileOpenSection === section ? "rotate-180" : ""
+                      <ChevronRight
+                        className={`w-5 h-5 text-slate-500 transition-transform ${
+                          mobileOpenSection === section ? "rotate-90" : ""
                         }`}
                       />
                     </button>
                     {mobileOpenSection === section && (
-                      <div className="pb-2 pl-2">
+                      <div className="pb-3 pl-3">
                         {cats.map((cat) => (
                           <div key={cat.name} className="mb-2">
                             <p className="px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-[#0F2A5F]">
@@ -627,43 +628,46 @@ export function Navbar() {
                 <Link
                   to="/blog"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-3 py-2.5 text-[15px] font-medium text-[#0F2A5F] border-t border-slate-100"
+                  className="flex items-center justify-between py-4 pl-2 text-[15px] font-semibold text-[#1d1d1f] border-b border-slate-200"
                 >
                   Blog
+                  <ChevronRight className="w-5 h-5 text-slate-500" />
                 </Link>
                 <Link
                   to="/my-app"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-3 py-2.5 text-[15px] font-medium text-[#0F2A5F]"
+                  className="flex items-center justify-between py-4 pl-2 text-[15px] font-semibold text-[#1d1d1f] border-b border-slate-200"
                 >
                   My App
+                  <ChevronRight className="w-5 h-5 text-slate-500" />
                 </Link>
                 <Link
                   to="/careers"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-3 py-2.5 text-[15px] font-medium text-[#0F2A5F]"
+                  className="flex items-center justify-between py-4 pl-2 text-[15px] font-semibold text-[#1d1d1f] border-b border-slate-200"
                 >
                   Join Our Team
+                  <ChevronRight className="w-5 h-5 text-slate-500" />
                 </Link>
-              </div>
-
-              <div className="p-4 border-t border-slate-100 space-y-2">
                 <Link
                   to="/book-consultation"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-center w-full py-3 text-sm font-semibold border border-[#0F2A5F] text-[#0F2A5F]"
+                  className="flex items-center justify-between py-4 pl-2 text-[15px] font-semibold text-[#1d1d1f] border-b border-slate-200"
                 >
                   Book Inquiry
                 </Link>
-                <a
-                  href="https://wa.me/919153832948"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full rounded-full py-3 text-sm font-semibold text-white bg-[#1d1d1f] hover:bg-black"
-                >
-                  <Phone className="w-4 h-4" />
-                  Talk to Experts
-                </a>
+
+                <div className="py-5">
+                  <a
+                    href="https://wa.me/919153832948"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full rounded-xl py-3.5 text-sm font-semibold text-white bg-[#0F2A5F] hover:bg-[#0c2350] transition-colors"
+                  >
+                    <Phone className="w-4 h-4" />
+                    Talk to Experts
+                  </a>
+                </div>
               </div>
             </motion.aside>
           </>

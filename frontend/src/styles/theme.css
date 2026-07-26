@@ -126,23 +126,39 @@
 
   html {
     scroll-behavior: smooth;
+    /* Prevent scroll bouncing that can cause unmounting */
+    overscroll-behavior-y: contain;
   }
 
   body {
     @apply bg-background text-foreground;
     font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", Helvetica, Ubuntu, Roboto, Noto, "Segoe UI", Arial, sans-serif;
+    /* Prevent body scroll issues */
+    min-height: 100vh;
+    position: relative;
   }
 
   /* GPU acceleration for better scroll performance */
   img, video, iframe {
     transform: translateZ(0);
     backface-visibility: hidden;
+    /* Prevent image decode lag during scroll */
+    image-rendering: auto;
   }
 
   /* Optimize fixed/sticky elements */
   .fixed, .sticky, [class*="fixed:"], [class*="sticky:"] {
     transform: translateZ(0);
     will-change: auto;
+    /* Force layer promotion for smooth scrolling */
+    backface-visibility: hidden;
+  }
+
+  /* Prevent content shift during scroll */
+  #root {
+    position: relative;
+    min-height: 100vh;
+    isolation: isolate;
   }
 
   /**

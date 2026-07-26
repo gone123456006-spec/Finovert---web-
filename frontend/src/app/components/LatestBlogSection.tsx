@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import API_BASE from "../../config/api";
 import { rafThrottle } from "../utils/performance";
-import { Calendar, Clock } from "lucide-react";
 
 type BlogPreview = {
   slug?: string;
@@ -266,9 +265,7 @@ export function LatestBlogSection() {
           closest = idx;
         }
       });
-      if (closest !== activeIndexRef.current) {
-        setActiveIndex(closest);
-      }
+      setActiveIndex((prev) => (closest !== prev ? closest : prev));
     };
 
     const throttledScroll = rafThrottle(handleScroll);

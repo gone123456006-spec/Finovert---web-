@@ -9,6 +9,8 @@ import { SpecialServices } from "../components/SpecialServices";
 import { HowItWorks } from "../components/HowItWorks";
 import { WhyFinovert } from "../components/WhyFinovert";
 import { PowerfulFinanceTools } from "../components/PowerfulFinanceTools";
+import { RegistrationServices } from "../components/RegistrationServices";
+import { RegistrationSection } from "../components/RegistrationSection";
 import { SEO } from "../components/SEO";
 import {
   buildHomePageStructuredData,
@@ -198,7 +200,11 @@ export function HomePage() {
   };
 
   useEffect(() => {
+    let mounted = true; // Prevent state updates after unmount
+
     const handleScroll = () => {
+      if (!mounted) return; // Safety check
+
       const currentY = window.scrollY;
       const isScrollingDown = currentY > lastScrollYRef.current;
 
@@ -216,7 +222,9 @@ export function HomePage() {
         window.clearTimeout(scrollStopTimerRef.current);
       }
       scrollStopTimerRef.current = window.setTimeout(() => {
-        setShowFloatingButtons(true);
+        if (mounted) {
+          setShowFloatingButtons(true);
+        }
       }, 200);
     };
 
@@ -224,7 +232,9 @@ export function HomePage() {
     const throttledScroll = rafThrottle(handleScroll);
 
     window.addEventListener("scroll", throttledScroll, { passive: true });
+    
     return () => {
+      mounted = false; // Mark as unmounted
       window.removeEventListener("scroll", throttledScroll);
       if (scrollStopTimerRef.current) {
         window.clearTimeout(scrollStopTimerRef.current);
@@ -355,6 +365,8 @@ export function HomePage() {
       </section>
 
       <HowItWorks />
+      <RegistrationSection />
+      <RegistrationServices />
       <SpecialServices />
 
       {/* Company registration lead — below special services */}

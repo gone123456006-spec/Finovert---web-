@@ -1,9 +1,10 @@
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const SITE_URL = (process.env.SITE_URL || "https://www.finovert.com").replace(/\/+$/, "");
 const API_URL = (process.env.SITEMAP_API_URL || process.env.VITE_API_URL || "https://finovert-web-1.onrender.com").replace(/\/+$/, "");
 const OUTPUT_PATH = resolve(process.cwd(), "public", "sitemap.xml");
+const SERVICES_DATA_PATH = resolve(process.cwd(), "src", "app", "data", "services-seo.ts");
 
 const STATIC_ROUTES = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
@@ -13,7 +14,20 @@ const STATIC_ROUTES = [
   { path: "/contributors", changefreq: "monthly", priority: "0.5" },
   { path: "/verify", changefreq: "monthly", priority: "0.5" },
   { path: "/privacy", changefreq: "yearly", priority: "0.4" },
+  { path: "/services", changefreq: "weekly", priority: "0.9" },
 ];
+
+/** Read service slugs from the services-seo.ts data file. */
+function readServiceSlugs() {
+  try {
+    const source = readFileSync(SERVICES_DATA_PATH, "utf8");
+    const slugs = [...source.matchAll(/^\s*slug:\s*"([^"]+)"/gm)].map((m) => m[1]);
+    return [...new Set(slugs)];
+  } catch (error) {
+    console.warn(`[sitemap] Could not read service slugs: ${error.message}`);
+    return [];
+  }
+}
 
 function escapeXml(value) {
   return String(value)
@@ -52,7 +66,7 @@ async function fetchBlogs() {
   return Array.isArray(data) ? data : [];
 }
 
-function buildSitemapXml(blogs) {
+function buildSitemapXml(blogs, serviceSlugs) {
   const now = toIsoDate();
 
   const staticEntries = STATIC_ROUTES.map((route) =>
@@ -61,6 +75,15 @@ function buildSitemapXml(blogs) {
       lastmod: now,
       changefreq: route.changefreq,
       priority: route.priority,
+    }),
+  );
+
+  const serviceEntries = serviceSlugs.map((slug) =>
+    renderUrlTag({
+      loc: `${SITE_URL}/services/${slug}`,
+      lastmod: now,
+      changefreq: "monthly",
+      priority: "0.8",
     }),
   );
 
@@ -79,6 +102,7 @@ function buildSitemapXml(blogs) {
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     ...staticEntries,
+    ...serviceEntries,
     ...blogEntries,
     "</urlset>",
     "",
@@ -86,11 +110,21 @@ function buildSitemapXml(blogs) {
 }
 
 async function run() {
+  const serviceSlugs = readServiceSlugs();
+  let blogs = [];
   try {
-    const blogs = await fetchBlogs();
-    const xml = buildSitemapXml(blogs);
+    blogs = await fetchBlogs();
+  } catch (error) {
+    // Blog fetch failure should not block sitemap generation for static + service routes.
+    console.warn(`[sitemap] Blog fetch failed (${error.message}); generating sitemap without blog routes.`);
+  }
+
+  try {
+    const xml = buildSitemapXml(blogs, serviceSlugs);
     writeFileSync(OUTPUT_PATH, xml, "utf8");
-    console.log(`[sitemap] Generated ${OUTPUT_PATH} with ${blogs.length} blog routes.`);
+    console.log(
+      `[sitemap] Generated ${OUTPUT_PATH} with ${STATIC_ROUTES.length} static, ${serviceSlugs.length} service, and ${blogs.length} blog routes.`,
+    );
   } catch (error) {
     console.error(`[sitemap] ${error.message}`);
     process.exitCode = 1;

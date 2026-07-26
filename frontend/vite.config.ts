@@ -42,14 +42,42 @@ export default defineConfig({
     target: 'es2020',
     minify: 'esbuild',
     cssMinify: true,
+    sourcemap: false, // Disable sourcemaps for production
+    reportCompressedSize: false, // Faster builds
     rollupOptions: {
       output: {
-        // Manual chunking for better caching
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'motion': ['motion/react'],
-          'icons': ['lucide-react'],
+        // Manual chunking for better caching and performance
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor';
+            }
+            if (id.includes('motion')) {
+              return 'motion';
+            }
+            if (id.includes('lucide-react')) {
+              return 'icons';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'ui-vendor';
+            }
+            // Other node_modules go to vendor chunk
+            return 'vendor';
+          }
         },
+        // Optimize asset file names for caching
+        assetFileNames: (assetInfo) => {
+          const info = assetInfo.name.split('.');
+          const extType = info[info.length - 1];
+          if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType)) {
+            return `assets/images/[name]-[hash][extname]`;
+          } else if (/woff2?|ttf|eot/i.test(extType)) {
+            return `assets/fonts/[name]-[hash][extname]`;
+          }
+          return `assets/[name]-[hash][extname]`;
+        },
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
       },
     },
     // Increase chunk size warning limit

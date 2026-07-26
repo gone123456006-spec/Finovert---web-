@@ -11,6 +11,10 @@ import {
   OutlinedField,
   formButtonClass,
 } from "../components/corporate/OutlinedField";
+import {
+  buildJobPostingSchema,
+  buildBreadcrumbSchema,
+} from "../utils/seo-helpers";
 import API_BASE from "../../config/api";
 
 const PREFERRED_ROLES = [
@@ -57,6 +61,30 @@ export function CareersPage() {
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Build structured data for job postings and SEO
+  const structuredData = [
+    buildBreadcrumbSchema([
+      { name: "Home", url: "/" },
+      { name: "Careers", url: "/careers" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": "https://www.finovert.com/careers#webpage",
+      url: "https://www.finovert.com/careers",
+      name: "Careers at Finovert",
+      description: "Join Finovert and build the future of finance and compliance in India. We're hiring for tech, marketing, finance, and operations roles.",
+    },
+    ...PREFERRED_ROLES.slice(0, 6).map((role) =>
+      buildJobPostingSchema({
+        title: `${role} Intern`,
+        description: `Join Finovert as a ${role} Intern and help build India's best compliance and virtual CFO platform. Work with cutting-edge technology and expert finance professionals.`,
+        employmentType: "INTERN",
+        location: "New Delhi",
+      })
+    ),
+  ];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -154,10 +182,20 @@ export function CareersPage() {
   return (
     <>
       <SEO
-        title="Finovert - Careers | Join Our Team"
-        description="Build your career at Finovert. Apply for internships and roles in finance, compliance, technology, marketing, and operations across India."
+        title="Careers at Finovert | Join India's Best Compliance & Virtual CFO Platform"
+        description="Build your career at Finovert and help shape the future of finance and compliance in India. We're hiring for internships and full-time roles in finance, technology, marketing, operations, and more. Join us to build India's best finance platform."
         path="/careers"
-        keywords={["finovert careers", "join finovert", "finance internship india", "compliance jobs", "fintech careers"]}
+        keywords={[
+          "finovert careers",
+          "join finovert",
+          "finance internship india",
+          "compliance jobs",
+          "fintech careers",
+          "virtual CFO jobs",
+          "startup jobs india",
+          "tech internship delhi",
+        ]}
+        structuredData={structuredData}
       />
 
       {status === "success" && (

@@ -1,6 +1,10 @@
 import { motion } from "motion/react";
 import { Linkedin, Twitter } from "lucide-react";
 import { SEO } from "../components/SEO";
+import {
+  buildPersonSchema,
+  buildBreadcrumbSchema,
+} from "../utils/seo-helpers";
 
 // Images for the team
 import shreeRamImg from "@/assets/FOUNDER .jpeg";
@@ -32,13 +36,44 @@ const LEADERSHIP = [
 ];
 
 export function AboutPage() {
+  // Build structured data for SEO and AI discoverability
+  const structuredData = [
+    buildBreadcrumbSchema([
+      { name: "Home", url: "/" },
+      { name: "About Us", url: "/about" },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      "@id": "https://www.finovert.com/about#aboutpage",
+      url: "https://www.finovert.com/about",
+      name: "About Finovert",
+      description: "Learn about Finovert's mission to simplify GST filing, ITR compliance, ROC filings, and startup finance through technology and expert-led support.",
+      mainEntity: {
+        "@type": "Organization",
+        name: "Finovert",
+        description: "India's best compliance and virtual CFO platform for startups and SMEs",
+      },
+    },
+    ...LEADERSHIP.map((member) => buildPersonSchema(member)),
+  ];
+
   return (
     <div className="min-h-screen bg-white pt-24 pb-20 overflow-hidden">
       <SEO 
-        title="Finovert - About Us | Corporate Finance & Compliance Experts"
-        description="Learn about Finovert's mission to simplify GST filing, ITR compliance, ROC filings, and startup finance through technology and expert-led support."
+        title="About Finovert | India's Best Compliance & Virtual CFO Platform"
+        description="Meet the Finovert team simplifying finance and compliance for startups across India. Learn about our mission, vision, and expert-led approach to GST filing, ITR filing, ROC compliance, and virtual CFO services."
         path="/about"
-        keywords={["about finovert", "finovert team", "compliance experts india", "startup finance company"]}
+        keywords={[
+          "about finovert",
+          "finovert team",
+          "compliance experts india",
+          "startup finance company",
+          "virtual cfo platform",
+          "CA Shree Ram Raut",
+          "compliance automation india",
+        ]}
+        structuredData={structuredData}
       />
 
       {/* Hero Section - Google Style */}
