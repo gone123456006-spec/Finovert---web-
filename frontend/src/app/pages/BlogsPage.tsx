@@ -31,7 +31,7 @@ const BLOG_POSTS = [
     date: "April 25, 2026",
     readTime: "8 min read",
     author: "Elena Gupta",
-    image: "https://images.unsplash.com/photo-1432821596592-e2c18b78144f?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1432821596592-e2c18b78144f?auto=format&fit=crop&q=80&w=400",
   },
   {
     id: "future-of-finance",
@@ -41,7 +41,7 @@ const BLOG_POSTS = [
     date: "April 20, 2026",
     readTime: "5 min read",
     author: "Michael Chen",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400",
   },
   {
     id: "tax-planning-strategies",
@@ -51,7 +51,7 @@ const BLOG_POSTS = [
     date: "April 15, 2026",
     readTime: "12 min read",
     author: "Sarah Johnson",
-    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=400",
   },
   {
     id: "react-performance",
@@ -61,7 +61,7 @@ const BLOG_POSTS = [
     date: "April 10, 2026",
     readTime: "10 min read",
     author: "Aarav Patel",
-    image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=400",
   },
   {
     id: "remote-culture",
@@ -71,7 +71,7 @@ const BLOG_POSTS = [
     date: "April 05, 2026",
     readTime: "6 min read",
     author: "Priya Sharma",
-    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=400",
   },
   {
     id: "security-audits",
@@ -81,7 +81,7 @@ const BLOG_POSTS = [
     date: "March 28, 2026",
     readTime: "15 min read",
     author: "David Kim",
-    image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&q=80&w=400",
   }
 ];
 
@@ -268,6 +268,9 @@ export function BlogsPage() {
                     alt={post.title}
                     className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
+                    width="400"
+                    height="300"
+                    decoding="async"
                   />
                 </div>
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import API_BASE from "../../config/api";
 
@@ -25,7 +25,7 @@ const FALLBACK_POSTS: BlogPreview[] = [
     category: "Finance",
     readTime: "6 min read",
     createdAt: "2026-07-08",
-    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=900",
+    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=400",
   },
   {
     slug: "compliance-checklist-early-stage",
@@ -35,7 +35,7 @@ const FALLBACK_POSTS: BlogPreview[] = [
     category: "Compliance",
     readTime: "5 min read",
     createdAt: "2026-07-08",
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=900",
+    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&q=80&w=400",
   },
   {
     slug: "investor-ready-financial-reports",
@@ -45,7 +45,7 @@ const FALLBACK_POSTS: BlogPreview[] = [
     category: "Growth",
     readTime: "7 min read",
     createdAt: "2026-07-08",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=900",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=400",
   },
   {
     slug: "gst-filing-tips-smes",
@@ -55,7 +55,7 @@ const FALLBACK_POSTS: BlogPreview[] = [
     category: "Tax",
     readTime: "5 min read",
     createdAt: "2026-06-20",
-    image: "https://images.unsplash.com/photo-1554224154-26032ffc0d62?auto=format&fit=crop&q=80&w=900",
+    image: "https://images.unsplash.com/photo-1554224154-26032ffc0d62?auto=format&fit=crop&q=80&w=400",
   },
   {
     slug: "virtual-cfo-for-startups",
@@ -65,11 +65,13 @@ const FALLBACK_POSTS: BlogPreview[] = [
     category: "CFO",
     readTime: "6 min read",
     createdAt: "2026-06-12",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=900",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=400",
   },
 ];
 
 const PAUSE_MS = 5000;
+const BLOG_CACHE_KEY = "finovert_blog_preview_v1";
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 function blogImageSrc(image: string) {
   if (!image) return FALLBACK_POSTS[0].image;
@@ -105,6 +107,9 @@ function BlogCard({ post }: { post: BlogPreview }) {
             alt={post.title}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
             loading="lazy"
+            width="360"
+            height="225"
+            decoding="async"
           />
         </div>
 
@@ -140,22 +145,44 @@ function BlogCardSkeleton() {
 }
 
 export function LatestBlogSection() {
-  const [posts, setPosts] = useState<BlogPreview[]>(FALLBACK_POSTS);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<BlogPreview[]>(() => {
+    try {
+      const cached = sessionStorage.getItem(BLOG_CACHE_KEY);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_TTL_MS) {
+          return data;
+        }
+      }
+    } catch {}
+    return FALLBACK_POSTS;
+  });
+  const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
 
     const fetchLatest = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/blogs`, { signal: controller.signal });
+        setLoading(true);
+        const res = await fetch(`${API_BASE}/api/blogs`, { 
+          signal: controller.signal,
+          headers: { 'Accept': 'application/json' }
+        });
         if (res.ok) {
           const data: BlogPreview[] = await res.json();
           if (data.length > 0) {
             setPosts(data);
+            try {
+              sessionStorage.setItem(BLOG_CACHE_KEY, JSON.stringify({
+                data,
+                timestamp: Date.now()
+              }));
+            } catch {}
           }
         }
       } catch (err) {
@@ -171,21 +198,29 @@ export function LatestBlogSection() {
     return () => controller.abort();
   }, []);
 
-  const scrollToIndex = (index: number, behavior: ScrollBehavior = "smooth") => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const cards = el.querySelectorAll<HTMLElement>("[data-blog-card]");
-    const target = cards[index];
-    if (!target) return;
-    el.scrollTo({ left: target.offsetLeft - el.offsetLeft, behavior });
-    setActiveIndex(index);
-  };
+  const scrollToIndex = useMemo(() => 
+    (index: number, behavior: ScrollBehavior = "smooth") => {
+      const el = scrollRef.current;
+      if (!el) return;
+      const cards = el.querySelectorAll<HTMLElement>("[data-blog-card]");
+      const target = cards[index];
+      if (!target) return;
+      el.scrollTo({ left: target.offsetLeft - el.offsetLeft, behavior });
+      setActiveIndex(index);
+    },
+  []);
 
   // Auto-scroll all blogs with a 5s pause between steps
   useEffect(() => {
-    if (loading || posts.length <= 1 || paused) return;
+    if (loading || posts.length <= 1 || paused) {
+      if (timerRef.current) {
+        window.clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
 
-    const timer = window.setInterval(() => {
+    timerRef.current = window.setInterval(() => {
       const el = scrollRef.current;
       if (!el) return;
       const cards = el.querySelectorAll<HTMLElement>("[data-blog-card]");
@@ -201,7 +236,12 @@ export function LatestBlogSection() {
       });
     }, PAUSE_MS);
 
-    return () => window.clearInterval(timer);
+    return () => {
+      if (timerRef.current) {
+        window.clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
   }, [loading, posts.length, paused]);
 
   // Keep activeIndex in sync when user scrolls manually
