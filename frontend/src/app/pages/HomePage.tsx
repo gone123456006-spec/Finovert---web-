@@ -1,31 +1,52 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, ChevronDown } from "lucide-react";
 
 import API_BASE from "../../config/api";
 import { rafThrottle } from "../utils/performance";
-import { SpecialServices } from "../components/SpecialServices";
-import { HowItWorks } from "../components/HowItWorks";
-import { WhyFinovert } from "../components/WhyFinovert";
-import { PowerfulFinanceTools } from "../components/PowerfulFinanceTools";
-import { RegistrationServices } from "../components/RegistrationServices";
-import { RegistrationSection } from "../components/RegistrationSection";
 import { SEO } from "../components/SEO";
+import { LazySection } from "../components/LazySection";
 import {
   buildHomePageStructuredData,
   DEFAULT_SEO_KEYWORDS,
   HOME_PAGE_DESCRIPTION,
   HOME_PAGE_TITLE,
 } from "../config/seo";
-import { IndependentBlogSection } from "../components/IndependentBlogSection";
-import { TrustedPartners } from "../components/TrustedPartners";
-import { FinanceChatBoard } from "../components/FinanceChatBoard";
 import {
   TextField,
   PhoneField,
   SelectField,
   formButtonClass,
 } from "../components/corporate/OutlinedField";
+
+/* Each section loads independently when near viewport — hero stays eager */
+const FinanceChatBoardLazy = lazy(() =>
+  import("../components/FinanceChatBoard").then((m) => ({ default: m.FinanceChatBoard }))
+);
+const HowItWorksLazy = lazy(() =>
+  import("../components/HowItWorks").then((m) => ({ default: m.HowItWorks }))
+);
+const RegistrationSectionLazy = lazy(() =>
+  import("../components/RegistrationSection").then((m) => ({ default: m.RegistrationSection }))
+);
+const RegistrationServicesLazy = lazy(() =>
+  import("../components/RegistrationServices").then((m) => ({ default: m.RegistrationServices }))
+);
+const SpecialServicesLazy = lazy(() =>
+  import("../components/SpecialServices").then((m) => ({ default: m.SpecialServices }))
+);
+const WhyFinovertLazy = lazy(() =>
+  import("../components/WhyFinovert").then((m) => ({ default: m.WhyFinovert }))
+);
+const PowerfulFinanceToolsLazy = lazy(() =>
+  import("../components/PowerfulFinanceTools").then((m) => ({ default: m.PowerfulFinanceTools }))
+);
+const LatestBlogSectionLazy = lazy(() =>
+  import("../components/LatestBlogSection").then((m) => ({ default: m.LatestBlogSection }))
+);
+const TrustedPartnersLazy = lazy(() =>
+  import("../components/TrustedPartners").then((m) => ({ default: m.TrustedPartners }))
+);
 
 const HERO_FEATURES = [
   "Company Registration & GST Filing",
@@ -251,7 +272,14 @@ export function HomePage() {
         structuredData={buildHomePageStructuredData(faqSchema)}
       />
 
-      <FinanceChatBoard />
+      <LazySection
+        name="Chat"
+        component={FinanceChatBoardLazy}
+        minHeight={0}
+        loadOnIdle
+        idleTimeout={2500}
+        fallback={null}
+      />
 
       <section className="relative overflow-hidden bg-[#4a90d9] pt-24 sm:pt-28 pb-10 sm:pb-14">
         {/* Background image */}
@@ -363,10 +391,10 @@ export function HomePage() {
         </div>
       </section>
 
-      <HowItWorks />
-      <RegistrationSection />
-      <RegistrationServices />
-      <SpecialServices />
+      <LazySection name="HowItWorks" component={HowItWorksLazy} minHeight={360} />
+      <LazySection name="Registration" component={RegistrationSectionLazy} minHeight={160} />
+      <LazySection name="RegistrationServices" component={RegistrationServicesLazy} minHeight={420} />
+      <LazySection name="SpecialServices" component={SpecialServicesLazy} minHeight={480} />
 
       {/* Company registration lead — below special services */}
       <section id="company-registration" className="relative overflow-hidden bg-[#eef3f9] py-12 sm:py-16 scroll-mt-24">
@@ -459,14 +487,20 @@ export function HomePage() {
         </div>
       </section>
 
-      <WhyFinovert />
-      <PowerfulFinanceTools />
+      <LazySection name="WhyFinovert" component={WhyFinovertLazy} minHeight={400} />
+      <LazySection name="FinanceTools" component={PowerfulFinanceToolsLazy} minHeight={400} />
 
-      <IndependentBlogSection />
+      <LazySection
+        name="Blog"
+        component={LatestBlogSectionLazy}
+        minHeight={420}
+        rootMargin="160px"
+        idleTimeout={2200}
+      />
 
       <section data-geo-faq className="relative overflow-hidden">
         <div className="bg-white pt-14 sm:pt-16 md:pt-20">
-          <TrustedPartners />
+          <LazySection name="TrustedPartners" component={TrustedPartnersLazy} minHeight={220} />
         </div>
 
         <div
