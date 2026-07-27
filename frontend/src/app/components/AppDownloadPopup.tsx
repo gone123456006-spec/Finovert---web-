@@ -23,14 +23,14 @@ export function AppDownloadPopup() {
     setTimeout(() => {
       setIsOpen(false);
       sessionStorage.setItem("app-popup-closed", "true");
-    }, 300); // Match animation duration
+    }, 150); // Faster close animation
   };
 
   if (!isOpen) return null;
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-[9999] max-w-sm w-[calc(100vw-3rem)] transition-all duration-300 ease-out ${
+      className={`fixed bottom-6 right-6 z-[9999] max-w-sm w-[calc(100vw-3rem)] transition-all duration-150 ease-out ${
         isClosing 
           ? 'opacity-0 translate-y-24 scale-90' 
           : 'opacity-100 translate-y-0 scale-100 animate-fade-in'
@@ -40,13 +40,13 @@ export function AppDownloadPopup() {
       }}
     >
       <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden relative">
-        {/* Close Button */}
+        {/* Close Button - Bigger and Faster */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 p-1.5 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors z-10"
+          className="absolute top-3 right-3 p-2.5 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500 hover:text-gray-700 transition-all duration-150 z-10 shadow-sm hover:shadow-md"
           aria-label="Close popup"
         >
-          <X className="w-4 h-4" />
+          <X className="w-6 h-6" />
         </button>
 
         <div className="p-6">

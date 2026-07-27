@@ -191,15 +191,24 @@ export function LatestBlogSection() {
         }
       } catch (err) {
         if (!(err instanceof DOMException && err.name === "AbortError")) {
-          console.error("Failed to load latest blogs:", err);
+          console.warn("Blog fetch failed (isolated):", err);
         }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchLatest();
-    return () => controller.abort();
+    // Use requestIdleCallback for lowest priority loading
+    if ('requestIdleCallback' in window) {
+      const idleCallbackId = window.requestIdleCallback(fetchLatest, { timeout: 3000 });
+      return () => {
+        controller.abort();
+        window.cancelIdleCallback(idleCallbackId);
+      };
+    } else {
+      fetchLatest();
+      return () => controller.abort();
+    }
   }, []);
 
   const scrollToIndex = useMemo(() => 

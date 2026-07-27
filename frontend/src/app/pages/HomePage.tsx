@@ -17,7 +17,7 @@ import {
   HOME_PAGE_DESCRIPTION,
   HOME_PAGE_TITLE,
 } from "../config/seo";
-import { LatestBlogSection } from "../components/LatestBlogSection";
+import { IndependentBlogSection } from "../components/IndependentBlogSection";
 import { TrustedPartners } from "../components/TrustedPartners";
 import { FinanceChatBoard } from "../components/FinanceChatBoard";
 import {
@@ -462,7 +462,7 @@ export function HomePage() {
       <WhyFinovert />
       <PowerfulFinanceTools />
 
-      <LatestBlogSection />
+      <IndependentBlogSection />
 
       <section data-geo-faq className="relative overflow-hidden">
         <div className="bg-white pt-14 sm:pt-16 md:pt-20">
