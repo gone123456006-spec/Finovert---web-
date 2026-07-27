@@ -252,7 +252,7 @@ export function HomePage() {
     const throttledScroll = rafThrottle(handleScroll);
 
     window.addEventListener("scroll", throttledScroll, { passive: true });
-    
+
     return () => {
       mounted = false; // Mark as unmounted
       window.removeEventListener("scroll", throttledScroll);
@@ -281,7 +281,7 @@ export function HomePage() {
         fallback={null}
       />
 
-      <section className="relative overflow-hidden bg-[#4a90d9] pt-24 sm:pt-28 pb-10 sm:pb-14">
+      <section className="relative overflow-hidden bg-[#4a90d9] pt-10 sm:pt-14 pb-10 sm:pb-14">
         {/* Background image */}
         <div
           className="pointer-events-none absolute inset-0 bg-cover bg-left-top sm:bg-center"
@@ -310,7 +310,7 @@ export function HomePage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-8 items-center min-h-[340px] sm:min-h-[380px] lg:min-h-[400px]">
-            <div className="max-w-3xl" style={{ willChange: 'auto' }}>
+            <div className="max-w-3xl">
               <h1
                 className="text-[1.75rem] sm:text-[2.25rem] lg:text-[2.75rem] font-bold text-[#0F2A5F] tracking-tight leading-[1.2] mb-5 sm:mb-6 animate-fade-in"
                 style={{ animationDelay: '0ms' }}
@@ -369,7 +369,7 @@ export function HomePage() {
                   <div
                     key={icon.src}
                     className="relative animate-fade-in"
-                    style={{ 
+                    style={{
                       animationDelay: `${400 + idx * 200}ms`,
                       willChange: 'auto'
                     }}
@@ -531,14 +531,13 @@ export function HomePage() {
                         {item.question}
                       </h4>
                       <ChevronDown
-                        className={`h-5 w-5 shrink-0 text-[#6b7280] transition-transform duration-300 ${
-                          isOpen ? "rotate-180" : ""
-                        }`}
+                        className={`h-5 w-5 shrink-0 text-[#6b7280] transition-transform duration-300 ${isOpen ? "rotate-180" : ""
+                          }`}
                         strokeWidth={1.75}
                       />
                     </div>
                     {isOpen && (
-                      <div 
+                      <div
                         className="overflow-hidden transition-all duration-300 ease-in-out"
                         style={{
                           animation: 'fade-in 0.3s ease-out forwards'
@@ -563,9 +562,8 @@ export function HomePage() {
                 >
                   {showMoreFaq ? "Show less" : `Show ${faqItems.length - 4} more`}
                   <ChevronDown
-                    className={`h-4 w-4 transition-transform duration-200 ${
-                      showMoreFaq ? "rotate-180" : "group-hover/faq-more:translate-y-0.5"
-                    }`}
+                    className={`h-4 w-4 transition-transform duration-200 ${showMoreFaq ? "rotate-180" : "group-hover/faq-more:translate-y-0.5"
+                      }`}
                   />
                 </button>
               </div>
@@ -578,9 +576,8 @@ export function HomePage() {
         href="https://wa.me/916205425499"
         target="_blank"
         rel="noopener noreferrer"
-        className={`fixed right-3 bottom-5 z-50 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-200 hover:bg-[#1ebe57] sm:right-4 sm:bottom-6 sm:h-14 sm:w-14 ${
-          showFloatingButtons ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
-        }`}
+        className={`fixed right-3 bottom-5 z-50 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-200 hover:bg-[#1ebe57] sm:right-4 sm:bottom-6 sm:h-14 sm:w-14 ${showFloatingButtons ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
+          }`}
         aria-label="Chat on WhatsApp"
       >
         <svg

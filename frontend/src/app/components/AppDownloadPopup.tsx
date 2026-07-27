@@ -10,10 +10,9 @@ export function AppDownloadPopup() {
     const hasClosed = sessionStorage.getItem("app-popup-closed");
 
     if (!hasClosed) {
-      // Show popup after 3 seconds
       const timer = setTimeout(() => {
         setIsOpen(true);
-      }, 3000);
+      }, 5000); // Delay popup until after main UI is fully rendered
       return () => clearTimeout(timer);
     }
   }, []);
@@ -30,11 +29,10 @@ export function AppDownloadPopup() {
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-[9999] max-w-sm w-[calc(100vw-3rem)] transition-all duration-150 ease-out ${
-        isClosing 
-          ? 'opacity-0 translate-y-24 scale-90' 
+      className={`fixed bottom-6 right-6 z-[9999] max-w-sm w-[calc(100vw-3rem)] transition-all duration-150 ease-out ${isClosing
+          ? 'opacity-0 translate-y-24 scale-90'
           : 'opacity-100 translate-y-0 scale-100 animate-fade-in'
-      }`}
+        }`}
       style={{
         willChange: 'transform, opacity'
       }}
@@ -71,17 +69,19 @@ export function AppDownloadPopup() {
           </div>
 
           <div className="space-y-3">
-            <a 
-              href="https://play.google.com/store/apps/details?id=com.brandovert.finovert&pcampaignid=web_share" 
-              target="_blank" 
+            <a
+              href="https://play.google.com/store/apps/details?id=com.brandovert.finovert&pcampaignid=web_share"
+              target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-3 bg-black text-white py-3.5 px-6 rounded-2xl hover:bg-gray-800 transition-all group w-full"
+              className="flex items-center justify-center gap-3 bg-black text-white py-3 px-6 rounded-2xl hover:bg-gray-800 transition-colors w-full"
             >
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
-                alt="Google Play"
-                className="h-8"
-              />
+              <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor" aria-hidden="true">
+                <path d="M3.18 23.76c.3.17.63.24.97.21l13.2-11.97L13.47 8.1 3.18 23.76zM.5 1.05C.19 1.4 0 1.93 0 2.62v18.77c0 .69.19 1.22.5 1.57l.08.08L10.65 12.5v-.25L.58.97.5 1.05zm20.55 8.87-2.89-1.66-3.3 3 3.3 3 2.91-1.67c.83-.48.83-1.25-.02-1.67zM4.15.24l13.2 11.97-3.88 3.9L4.15.23z" />
+              </svg>
+              <span className="flex flex-col items-start">
+                <span className="text-[10px] leading-none opacity-80">GET IT ON</span>
+                <span className="text-sm font-semibold leading-tight">Google Play</span>
+              </span>
             </a>
 
             <button

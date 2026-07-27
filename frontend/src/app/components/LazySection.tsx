@@ -87,10 +87,14 @@ export function LazySection({
     <div
       ref={ref}
       className={className}
+      data-lazy-section={name}
       style={{
-        isolation: "isolate",
-        contain: "layout style paint",
+        /* 'style' containment only — 'layout' or 'paint' would break sticky/fixed ancestors */
+        contain: 'style',
+        /* Reserve space to prevent CLS */
         minHeight: shouldLoad ? undefined : minHeight,
+        /* Scroll margin for fixed navbar (~56px h-14 + buffer) */
+        scrollMarginTop: '4.5rem',
       }}
     >
       {shouldLoad ? (

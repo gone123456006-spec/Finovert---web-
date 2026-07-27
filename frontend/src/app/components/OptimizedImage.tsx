@@ -42,6 +42,7 @@ export function OptimizedImage({
 
   useEffect(() => {
     if (priority || !imgRef.current) return;
+    const el = imgRef.current; // capture at effect time
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -57,19 +58,12 @@ export function OptimizedImage({
         });
       },
       {
-        rootMargin: "50px", // Start loading 50px before the image enters viewport
+        rootMargin: "100px", // Larger pre-load margin for smoother experience
       }
     );
 
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
-    }
-
-    return () => {
-      if (imgRef.current) {
-        observer.unobserve(imgRef.current);
-      }
-    };
+    observer.observe(el);
+    return () => observer.disconnect(); // disconnect() handles all observed targets
   }, [priority]);
 
   const handleLoad = () => {
@@ -101,9 +95,8 @@ export function OptimizedImage({
       srcSet={srcSet}
       sizes={sizes}
       alt={alt}
-      className={`transition-opacity duration-300 ${
-        isLoaded ? "opacity-100" : "opacity-0"
-      } ${className}`}
+      className={`transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"
+        } ${className}`}
       style={{
         objectFit,
         width: width ? `${width}px` : undefined,
@@ -149,6 +142,7 @@ export function OptimizedBackgroundImage({
     }
 
     if (!divRef.current) return;
+    const el = divRef.current; // capture at effect time
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -161,16 +155,11 @@ export function OptimizedBackgroundImage({
           }
         });
       },
-      { rootMargin: "50px" }
+      { rootMargin: "100px" }
     );
 
-    observer.observe(divRef.current);
-
-    return () => {
-      if (divRef.current) {
-        observer.unobserve(divRef.current);
-      }
-    };
+    observer.observe(el);
+    return () => observer.disconnect();
   }, [src, priority]);
 
   return (

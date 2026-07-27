@@ -196,10 +196,10 @@ export function Navbar() {
     const handleScroll = () => {
       setScrolled(window.scrollY > 24);
     };
-    
+
     // Use RAF throttle for smoother scroll
     const throttledScroll = rafThrottle(handleScroll);
-    
+
     handleScroll(); // Check initial state
     window.addEventListener("scroll", throttledScroll, { passive: true });
     return () => window.removeEventListener("scroll", throttledScroll);
@@ -262,11 +262,22 @@ export function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,box-shadow,backdrop-filter] duration-300 ${
-        showNavBg
+      className={`fixed top-0 left-0 right-0 z-50 ${showNavBg
           ? "bg-white/95 shadow-[0_1px_0_rgba(15,42,95,0.08)] backdrop-blur-md"
           : "bg-transparent shadow-none"
-      }`}
+        }`}
+      style={{
+        /* Permanent GPU composite layer — never repaint during scroll */
+        transform: 'translateZ(0)',
+        WebkitTransform: 'translateZ(0)',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+        /* Contain layout so navbar changes don't trigger page reflow */
+        contain: 'layout style',
+        /* Only transition background and shadow — NO backdrop-filter transition (expensive) */
+        transition: 'background-color 0.25s ease-out, box-shadow 0.25s ease-out',
+        willChange: 'auto',
+      }}
       onMouseLeave={() => setOpenMega(null)}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -285,17 +296,15 @@ export function Navbar() {
                     type="button"
                     onMouseEnter={() => openMenu(link.name)}
                     onFocus={() => openMenu(link.name)}
-                    className={`inline-flex items-center gap-1 px-3 py-2 text-[14px] font-medium transition-colors ${
-                      openMega === link.name
+                    className={`inline-flex items-center gap-1 px-3 py-2 text-[14px] font-medium transition-colors ${openMega === link.name
                         ? "text-[#0F2A5F]"
                         : "text-[#0F2A5F]/80 hover:text-[#0F2A5F]"
-                    }`}
+                      }`}
                   >
                     {link.name}
                     <ChevronDown
-                      className={`w-3.5 h-3.5 transition-transform ${
-                        openMega === link.name ? "rotate-180" : ""
-                      }`}
+                      className={`w-3.5 h-3.5 transition-transform ${openMega === link.name ? "rotate-180" : ""
+                        }`}
                     />
                   </button>
                 ) : (
@@ -512,11 +521,10 @@ export function Navbar() {
                         type="button"
                         onMouseEnter={() => setActiveCategory(idx)}
                         onClick={() => setActiveCategory(idx)}
-                        className={`w-full text-left px-3 py-2.5 text-[14px] font-semibold mb-0.5 transition-colors ${
-                          activeCategory === idx
+                        className={`w-full text-left px-3 py-2.5 text-[14px] font-semibold mb-0.5 transition-colors ${activeCategory === idx
                             ? "bg-[#0F2A5F] text-white"
                             : "text-[#334155] hover:bg-white"
-                        }`}
+                          }`}
                       >
                         {cat.name}
                       </button>
@@ -596,9 +604,8 @@ export function Navbar() {
                     >
                       {section}
                       <ChevronRight
-                        className={`w-5 h-5 text-slate-500 transition-transform ${
-                          mobileOpenSection === section ? "rotate-90" : ""
-                        }`}
+                        className={`w-5 h-5 text-slate-500 transition-transform ${mobileOpenSection === section ? "rotate-90" : ""
+                          }`}
                       />
                     </button>
                     {mobileOpenSection === section && (

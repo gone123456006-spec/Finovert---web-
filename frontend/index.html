@@ -3,20 +3,36 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover, user-scalable=yes" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, viewport-fit=cover, user-scalable=yes" />
 
   <!-- Critical CSS for preventing layout shift -->
   <style>
+    /* Critical path CSS - rendered before anything else */
+    *, *::before, *::after { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
       min-height: 100vh;
       min-height: 100dvh;
+      overflow-x: hidden;
     }
     #root {
       min-height: 100vh;
       min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
     }
+    /* Sticky navbar critical styles - ensure it never disappears */
+    nav[class*="fixed"], .navbar-fixed {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 50 !important;
+      transform: translateZ(0) !important;
+    }
+    /* Prevent FOUC */
+    body { visibility: visible; }
   </style>
 
   <!-- Favicons -->
@@ -31,9 +47,12 @@
   <link rel="dns-prefetch" href="https://images.unsplash.com" />
   <link rel="preconnect" href="https://www.googletagmanager.com" />
   <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-  
-  <!-- Performance: Preload critical assets -->
+  <link rel="dns-prefetch" href="https://wa.me" />
+  <link rel="dns-prefetch" href="https://api.finovert.com" />
+
+  <!-- Performance: Preload critical above-the-fold assets -->
   <link rel="preload" href="/app-logo.png" as="image" type="image/png" />
+  <link rel="preload" href="/4b3ba9b0-f3e8-4230-a16e-518d1c309f72.jpg" as="image" type="image/jpeg" fetchpriority="high" />
   
   <!-- Security & Performance Headers -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -138,13 +157,20 @@
     }
   </script>
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6TT311PTYK"></script>
+  <!-- Google tag (gtag.js) - defer to not block rendering -->
   <script>
+    // Defer GA init until after page load to avoid render-blocking
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-6TT311PTYK');
+    gtag('config', 'G-6TT311PTYK', { 'send_page_view': false });
+    window.addEventListener('load', function() {
+      var s = document.createElement('script');
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-6TT311PTYK';
+      s.async = true;
+      document.head.appendChild(s);
+      gtag('event', 'page_view');
+    });
   </script>
 </head>
 

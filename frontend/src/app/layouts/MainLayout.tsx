@@ -10,7 +10,16 @@ export function MainLayout() {
     return (
         <div className="min-h-screen flex flex-col">
             {!isAdmin && <Navbar />}
-            <main className="flex-grow">
+            {/* 
+              Padding-top accounts for the fixed navbar height:
+              - h-14 (3.5rem = 56px) on mobile
+              - sm:h-16 (4rem = 64px) on sm+
+              This prevents content from hiding under the fixed nav on mobile.
+            */}
+            <main
+                className="flex-grow"
+                style={{ paddingTop: isAdmin ? 0 : 'var(--navbar-height, 56px)' }}
+            >
                 <Outlet />
             </main>
             {!isAdmin && <Footer />}
