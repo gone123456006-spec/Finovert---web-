@@ -48,36 +48,19 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        // Granular manual chunking for better HTTP/2 caching
-        manualChunks(id) {
-          // Core React runtime — always cached
-          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/react-router')) {
-            return 'react-vendor';
-          }
-          // Motion library
-          if (id.includes('node_modules/motion') || id.includes('node_modules/framer-motion')) {
-            return 'motion';
-          }
-          // Icon library
-          if (id.includes('node_modules/lucide-react')) {
-            return 'icons';
-          }
-          // Radix UI components (large, tree-shake poorly)
-          if (id.includes('node_modules/@radix-ui')) {
-            return 'radix-ui';
-          }
-          // MUI (very large - only used in admin section)
-          if (id.includes('node_modules/@mui') || id.includes('node_modules/@emotion')) {
-            return 'mui';
-          }
-          // Charts
-          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3')) {
-            return 'charts';
-          }
-          // Forms / utilities
-          if (id.includes('node_modules/react-hook-form') || id.includes('node_modules/date-fns')) {
-            return 'forms';
-          }
+        /*
+         * Declarative chunking only.
+         *
+         * An id-matching manualChunks(id) function previously shipped here and
+         * broke production with a blank page: assigning arbitrary node_modules
+         * subsets to chunks let Rollup emit chunks with circular top-level
+         * dependencies, so a module could be evaluated before its dependency
+         * had initialised. It never reproduces locally because dev serves
+         * unbundled ESM and never runs this code path. Keep it an explicit
+         * entry-point list.
+         */
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
         },
         // Deterministic file naming for better caching
         entryFileNames: 'assets/[name]-[hash].js',

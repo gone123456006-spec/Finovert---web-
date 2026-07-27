@@ -10,7 +10,10 @@
     "dev": "npm run dev --workspace=frontend",
     "server": "npm run dev --workspace=backend",
     "start": "npm start --workspace=backend",
-    "build": "cd frontend && npm run build",
+    "build": "npm run build --workspace=frontend",
     "install-all": "npm install"
+  },
+  "engines": {
+    "node": ">=20.0.0 <25.0.0"
   }
 }
