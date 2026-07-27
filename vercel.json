@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm install",
+  "installCommand": "npm install --include=optional && npm install @rollup/rollup-linux-x64-gnu@4.59.0 --workspace=@figma/my-make-file --no-save",
   "buildCommand": "npm run build",
   "outputDirectory": "frontend/dist",
   "redirects": [
