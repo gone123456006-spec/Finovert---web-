@@ -2,6 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import API_BASE from "../../config/api";
 import { rafThrottle } from "../utils/performance";
+import {
+  blogHref as postHref,
+  blogImageSrc,
+  blogKey as postKey,
+  formatBlogDate,
+} from "../utils/blog";
 
 type BlogPreview = {
   slug?: string;
@@ -74,30 +80,6 @@ const PAUSE_MS = 5000;
 const BLOG_CACHE_KEY = "finovert_blog_preview_v1";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-function blogImageSrc(image: string) {
-  if (!image) return FALLBACK_POSTS[0].image;
-  if (image.startsWith("http") || image.startsWith("data:")) return image;
-  return `${API_BASE}${image.startsWith("/") ? image : `/${image}`}`;
-}
-
-function formatBlogDate(post: BlogPreview) {
-  if (post.date) return post.date;
-  if (!post.createdAt) return "Recently";
-  return new Date(post.createdAt).toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-}
-
-function postHref(post: BlogPreview) {
-  return `/blog/${post.slug || post.id || post._id || ""}`;
-}
-
-function postKey(post: BlogPreview, index: number) {
-  return post.slug || post._id || post.id || `${post.title}-${index}`;
-}
-
 function BlogCard({ post }: { post: BlogPreview }) {
   return (
     <article className="flex h-full flex-col">
@@ -148,44 +130,50 @@ function BlogCardSkeleton() {
   );
 }
 
+function readCachedPosts(): BlogPreview[] | null {
+  try {
+    const cached = sessionStorage.getItem(BLOG_CACHE_KEY);
+    if (!cached) return null;
+    const { data, timestamp } = JSON.parse(cached);
+    if (Array.isArray(data) && data.length > 0 && Date.now() - timestamp < CACHE_TTL_MS) {
+      return data;
+    }
+  } catch {}
+  return null;
+}
+
 export function LatestBlogSection() {
-  const [posts, setPosts] = useState<BlogPreview[]>(() => {
-    try {
-      const cached = sessionStorage.getItem(BLOG_CACHE_KEY);
-      if (cached) {
-        const { data, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < CACHE_TTL_MS) {
-          return data;
-        }
-      }
-    } catch {}
-    return FALLBACK_POSTS;
-  });
+  const cachedPosts = useRef(readCachedPosts()).current;
+  const [posts, setPosts] = useState<BlogPreview[]>(cachedPosts ?? FALLBACK_POSTS);
+  // Skeletons only when there is nothing real to show yet
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<number | null>(null);
+  const resumeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
+    let active = true;
 
     const fetchLatest = async () => {
+      if (!active) return;
+      if (!cachedPosts) setLoading(true);
       try {
-        setLoading(true);
-        const res = await fetch(`${API_BASE}/api/blogs`, { 
+        const res = await fetch(`${API_BASE}/api/blogs`, {
           signal: controller.signal,
-          headers: { 'Accept': 'application/json' }
+          headers: { Accept: "application/json" },
         });
         if (res.ok) {
           const data: BlogPreview[] = await res.json();
-          if (data.length > 0) {
+          if (active && Array.isArray(data) && data.length > 0) {
             setPosts(data);
             try {
-              sessionStorage.setItem(BLOG_CACHE_KEY, JSON.stringify({
-                data,
-                timestamp: Date.now()
-              }));
+              sessionStorage.setItem(
+                BLOG_CACHE_KEY,
+                JSON.stringify({ data, timestamp: Date.now() })
+              );
             } catch {}
           }
         }
@@ -194,22 +182,32 @@ export function LatestBlogSection() {
           console.warn("Blog fetch failed (isolated):", err);
         }
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
-    // Use requestIdleCallback for lowest priority loading
-    if ('requestIdleCallback' in window) {
+    if (typeof window.requestIdleCallback === "function") {
       const idleCallbackId = window.requestIdleCallback(fetchLatest, { timeout: 3000 });
       return () => {
+        active = false;
         controller.abort();
         window.cancelIdleCallback(idleCallbackId);
       };
-    } else {
-      fetchLatest();
-      return () => controller.abort();
     }
-  }, []);
+
+    fetchLatest();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [cachedPosts]);
+
+  useEffect(
+    () => () => {
+      if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+    },
+    []
+  );
 
   const scrollToIndex = useMemo(() => 
     (index: number, behavior: ScrollBehavior = "smooth") => {
@@ -305,7 +303,8 @@ export function LatestBlogSection() {
           onMouseLeave={() => setPaused(false)}
           onTouchStart={() => setPaused(true)}
           onTouchEnd={() => {
-            window.setTimeout(() => setPaused(false), 2500);
+            if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+            resumeTimerRef.current = window.setTimeout(() => setPaused(false), 2500);
           }}
         >
           {loading
@@ -330,7 +329,8 @@ export function LatestBlogSection() {
                 onClick={() => {
                   setPaused(true);
                   scrollToIndex(idx);
-                  window.setTimeout(() => setPaused(false), PAUSE_MS);
+                  if (resumeTimerRef.current) window.clearTimeout(resumeTimerRef.current);
+                  resumeTimerRef.current = window.setTimeout(() => setPaused(false), PAUSE_MS);
                 }}
                 aria-label={`Go to blog ${idx + 1}`}
                 className={`rounded-full transition-all duration-300 ${

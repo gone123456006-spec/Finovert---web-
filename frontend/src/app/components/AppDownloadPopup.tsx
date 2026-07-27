@@ -1,25 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
 export function AppDownloadPopup() {
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const closeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Check if user has already closed the popup in this session
     const hasClosed = sessionStorage.getItem("app-popup-closed");
 
     if (!hasClosed) {
-      const timer = setTimeout(() => {
+      const timer = window.setTimeout(() => {
         setIsOpen(true);
       }, 5000); // Delay popup until after main UI is fully rendered
-      return () => clearTimeout(timer);
+      return () => window.clearTimeout(timer);
     }
   }, []);
 
+  useEffect(
+    () => () => {
+      if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
+    },
+    []
+  );
+
   const handleClose = () => {
+    if (closeTimerRef.current) return; // already closing
     setIsClosing(true);
-    setTimeout(() => {
+    closeTimerRef.current = window.setTimeout(() => {
+      closeTimerRef.current = null;
       setIsOpen(false);
       sessionStorage.setItem("app-popup-closed", "true");
     }, 150); // Faster close animation
@@ -40,6 +50,7 @@ export function AppDownloadPopup() {
       <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden relative">
         {/* Close Button - Bigger and Faster */}
         <button
+          type="button"
           onClick={handleClose}
           className="absolute top-3 right-3 p-2.5 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500 hover:text-gray-700 transition-all duration-150 z-10 shadow-sm hover:shadow-md"
           aria-label="Close popup"
@@ -85,6 +96,7 @@ export function AppDownloadPopup() {
             </a>
 
             <button
+              type="button"
               onClick={handleClose}
               className="w-full text-sm font-semibold text-gray-400 hover:text-gray-600 transition-colors py-1"
             >

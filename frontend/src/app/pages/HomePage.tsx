@@ -99,6 +99,14 @@ export function HomePage() {
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
   const lastScrollYRef = useRef(0);
   const scrollStopTimerRef = useRef<number | null>(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const faqItems = [
     {
@@ -187,12 +195,13 @@ export function HomePage() {
       setRegEmailError("");
     }
 
+    // Field errors are set first so they stay visible alongside the service alert
+    if (hasError) return;
+
     if (!regForm.businessType) {
       alert("Please select a service.");
       return;
     }
-
-    if (hasError) return;
 
     setRegSubmitting(true);
     try {
@@ -210,12 +219,14 @@ export function HomePage() {
       if (!response.ok) {
         throw new Error(data.message || "Failed to submit consultation request.");
       }
+      if (!isMountedRef.current) return;
       setRegForm({ name: "", contact: "", email: "", businessType: "" });
       alert("Consultation request submitted successfully.");
     } catch (error) {
+      if (!isMountedRef.current) return;
       alert(error instanceof Error ? error.message : "Could not submit right now. Please try again.");
     } finally {
-      setRegSubmitting(false);
+      if (isMountedRef.current) setRegSubmitting(false);
     }
   };
 

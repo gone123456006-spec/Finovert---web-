@@ -176,6 +176,21 @@ export function FinanceChatBoard() {
   // Always points to the latest sendMessage to avoid stale closure in voice callbacks
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sendMessageRef = useRef<(text: string) => void>(() => {});
+  // Every streaming timer, so unmounting never leaves an interval writing state
+  const timersRef = useRef<Set<number>>(new Set());
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => {
+      mountedRef.current = false;
+      timers.forEach((id) => {
+        window.clearTimeout(id);
+        window.clearInterval(id);
+      });
+      timers.clear();
+    };
+  }, []);
 
   const focusChatInput = () => {
     requestAnimationFrame(() => {
@@ -280,13 +295,22 @@ export function FinanceChatBoard() {
 
   const replyAssistant = (text: string, delay = 600) => {
     setIsTyping(true);
-    window.setTimeout(() => {
+    const startId = window.setTimeout(() => {
+      timersRef.current.delete(startId);
+      if (!mountedRef.current) return;
+
       setIsTyping(false);
       const msgId = createId();
       setMessages((prev) => [...prev, { id: msgId, role: "assistant", text: "" }]);
 
       let i = 0;
-      const interval = setInterval(() => {
+      const interval = window.setInterval(() => {
+        if (!mountedRef.current) {
+          window.clearInterval(interval);
+          timersRef.current.delete(interval);
+          return;
+        }
+
         setMessages((prev) =>
           prev.map((m) => m.id === msgId ? { ...m, text: text.slice(0, i + 1) } : m)
         );
@@ -295,7 +319,8 @@ export function FinanceChatBoard() {
           chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
         }
         if (i >= text.length) {
-          clearInterval(interval);
+          window.clearInterval(interval);
+          timersRef.current.delete(interval);
           setMessages((prev) =>
             prev.map((m) => m.id === msgId ? { ...m, text: text } : m)
           );
@@ -303,14 +328,18 @@ export function FinanceChatBoard() {
           const nudge = pendingNudgeRef.current;
           if (nudge) {
             pendingNudgeRef.current = null;
-            window.setTimeout(() => {
-              replyAssistant(nudge, 400);
+            const nudgeId = window.setTimeout(() => {
+              timersRef.current.delete(nudgeId);
+              if (mountedRef.current) replyAssistant(nudge, 400);
             }, 600);
+            timersRef.current.add(nudgeId);
           }
         }
       }, 10);
+      timersRef.current.add(interval);
       focusChatInput();
     }, delay);
+    timersRef.current.add(startId);
   };
 
   // ─────────────────────────────────────────────────────────────────────────────

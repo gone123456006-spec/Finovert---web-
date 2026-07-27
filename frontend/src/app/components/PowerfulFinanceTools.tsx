@@ -82,7 +82,10 @@ export function PowerfulFinanceTools() {
   );
 
   return (
-    <section className="overflow-hidden bg-[linear-gradient(to_bottom,#F8FAFC_0%,#f0f4ff_20%,#f8f9ff_65%,#faf9ff_100%)]">
+    <section
+      id="features"
+      className="scroll-mt-24 overflow-hidden bg-[linear-gradient(to_bottom,#F8FAFC_0%,#f0f4ff_20%,#f8f9ff_65%,#faf9ff_100%)]"
+    >
       <div
         ref={sectionRef}
         className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-14 lg:px-8 lg:py-16"

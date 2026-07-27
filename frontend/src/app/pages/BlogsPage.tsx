@@ -4,6 +4,7 @@ import { Search, Calendar, User, ArrowRight, BookOpen, Clock } from "lucide-reac
 import { Link, useSearchParams } from "react-router-dom";
 import { SEO } from "../components/SEO";
 import API_BASE from "../../config/api";
+import { blogHref, blogImageSrc, blogKey, formatBlogDate } from "../utils/blog";
 
 interface BlogPost {
   id?: string;
@@ -276,7 +277,7 @@ export function BlogsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredPosts.map((post, idx) => (
               <motion.article
-                key={post.id}
+                key={blogKey(post, idx)}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
@@ -290,7 +291,7 @@ export function BlogsPage() {
                     </span>
                   </div>
                   <img 
-                    src={post.image} 
+                    src={blogImageSrc(post.image)} 
                     alt={post.title}
                     className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
@@ -304,7 +305,7 @@ export function BlogsPage() {
                 <div className="p-6 sm:p-8 flex flex-col flex-grow">
                   <div className="flex items-center gap-4 text-xs text-gray-500 mb-4">
                     <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" /> {post.date}
+                      <Calendar className="w-3.5 h-3.5" /> {formatBlogDate(post)}
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5" /> {post.readTime}
@@ -312,7 +313,7 @@ export function BlogsPage() {
                   </div>
                   
                   <h2 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors line-clamp-2">
-                    <Link to={`/blog/${(post as BlogPost).slug || (post as BlogPost).id}`}>
+                    <Link to={blogHref(post)}>
                       {post.title}
                     </Link>
                   </h2>
@@ -330,7 +331,7 @@ export function BlogsPage() {
                     </div>
                     
                     <Link
-                      to={`/blog/${(post as BlogPost).slug || (post as BlogPost).id}`}
+                      to={blogHref(post)}
                       className="text-blue-600 hover:text-blue-700 flex items-center gap-1 text-sm font-semibold transition-colors"
                     >
                       Read More <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />

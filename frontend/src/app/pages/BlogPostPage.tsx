@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, Clock, User } from "lucide-react";
 import API_BASE from "../../config/api";
 import { SEO } from "../components/SEO";
 import { buildBlogPostMetadata } from "../config/seo";
+import { blogImageSrc } from "../utils/blog";
 
 // Hardcoded fallback posts matching BlogsPage local data
 const LOCAL_POSTS: Record<string, { title: string; author: string; category: string; date: string; readTime: string; image: string; content: string }> = {
@@ -43,6 +44,9 @@ export function BlogPostPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
 
+    const controller = new AbortController();
+    let active = true;
+
     const fetchPost = async () => {
       // 1. Try local hardcoded posts first
       if (slug && LOCAL_POSTS[slug]) {
@@ -53,17 +57,22 @@ export function BlogPostPage() {
 
       // 2. Try fetching from the backend API
       try {
-        const res = await fetch(`${API_BASE}/api/blogs/${slug}`);
+        const res = await fetch(`${API_BASE}/api/blogs/${slug}`, { signal: controller.signal });
         if (res.ok) {
           let data = await res.json();
 
           // If the stored content is too short, try to scrape the full article
           if (data.sourceLink && (!data.content || data.content.length < 300)) {
             try {
-              const scrapeRes = await fetch(`${API_BASE}/api/blogs/scrape-full/${slug}`, { method: 'POST' });
+              const scrapeRes = await fetch(`${API_BASE}/api/blogs/scrape-full/${slug}`, {
+                method: "POST",
+                signal: controller.signal,
+              });
               if (scrapeRes.ok) {
                 // Re-fetch the blog now that content has been updated in DB
-                const updatedRes = await fetch(`${API_BASE}/api/blogs/${slug}`);
+                const updatedRes = await fetch(`${API_BASE}/api/blogs/${slug}`, {
+                  signal: controller.signal,
+                });
                 if (updatedRes.ok) data = await updatedRes.json();
               }
             } catch {
@@ -71,18 +80,24 @@ export function BlogPostPage() {
             }
           }
 
-          setPost(data);
-        } else {
+          if (active) setPost(data);
+        } else if (active) {
           setNotFound(true);
         }
-      } catch {
-        setNotFound(true);
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        if (active) setNotFound(true);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     fetchPost();
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, [slug]);
 
   if (loading) {
@@ -142,7 +157,7 @@ export function BlogPostPage() {
       />
       {/* Hero Image */}
       <div className="w-full h-72 md:h-96 overflow-hidden relative">
-        <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+        <img src={blogImageSrc(post.image)} alt={post.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent" />
         <div className="absolute bottom-6 left-6">
           <span className="bg-white/90 text-gray-900 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">

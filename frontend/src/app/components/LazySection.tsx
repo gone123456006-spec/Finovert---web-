@@ -18,18 +18,30 @@ type LazySectionProps = {
   rootMargin?: string;
   /** Idle timeout before forcing load once visible */
   idleTimeout?: number;
-  /** Skip viewport check — load on idle after mount (for floating widgets) */
+  /**
+   * Skip the viewport check and load on idle after mount. Renders no wrapper
+   * element, so position:fixed widgets keep the viewport as containing block.
+   */
   loadOnIdle?: boolean;
   name?: string;
   fallback?: ReactNode;
   className?: string;
 };
 
+function scheduleIdle(run: () => void, timeout: number) {
+  if (typeof window.requestIdleCallback === "function") {
+    const id = window.requestIdleCallback(run, { timeout });
+    return () => window.cancelIdleCallback(id);
+  }
+  const id = window.setTimeout(run, Math.min(timeout, 800));
+  return () => window.clearTimeout(id);
+}
+
 /**
  * Loads one page section independently:
  * - IntersectionObserver: only when near viewport
  * - requestIdleCallback: lowest priority once visible
- * - Error boundary + CSS containment: cannot freeze or break other sections
+ * - Error boundary: a broken section cannot take down the page
  */
 export function LazySection({
   component: LazyComponent,
@@ -42,26 +54,19 @@ export function LazySection({
   className,
 }: LazySectionProps) {
   const [shouldLoad, setShouldLoad] = useState(false);
-  const triggeredRef = useRef(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (triggeredRef.current) return;
+    if (shouldLoad) return;
 
+    let cancelIdle: (() => void) | undefined;
     const startLoad = () => {
-      if (triggeredRef.current) return;
-      triggeredRef.current = true;
-
-      if ("requestIdleCallback" in window) {
-        window.requestIdleCallback(() => setShouldLoad(true), { timeout: idleTimeout });
-      } else {
-        window.setTimeout(() => setShouldLoad(true), Math.min(idleTimeout, 800));
-      }
+      cancelIdle = scheduleIdle(() => setShouldLoad(true), idleTimeout);
     };
 
     if (loadOnIdle) {
       startLoad();
-      return;
+      return () => cancelIdle?.();
     }
 
     const el = ref.current;
@@ -78,34 +83,40 @@ export function LazySection({
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
-  }, [idleTimeout, loadOnIdle, rootMargin]);
+    return () => {
+      observer.disconnect();
+      cancelIdle?.();
+    };
+  }, [idleTimeout, loadOnIdle, rootMargin, shouldLoad]);
 
-  const placeholder = fallback ?? <SectionSkeleton minHeight={minHeight} />;
+  // `null` is a valid "render nothing" placeholder, so only default on undefined
+  const placeholder =
+    fallback !== undefined ? fallback : <SectionSkeleton minHeight={minHeight} />;
+
+  const content = shouldLoad ? (
+    <SectionErrorBoundary name={name}>
+      <Suspense fallback={placeholder}>
+        <LazyComponent />
+      </Suspense>
+    </SectionErrorBoundary>
+  ) : (
+    placeholder
+  );
+
+  // Floating widgets must not sit inside a contained wrapper
+  if (loadOnIdle) return <>{content}</>;
 
   return (
     <div
       ref={ref}
       className={className}
-      data-lazy-section={name}
       style={{
-        /* 'style' containment only — 'layout' or 'paint' would break sticky/fixed ancestors */
-        contain: 'style',
-        /* Reserve space to prevent CLS */
+        // layout-only containment: isolates reflow without clipping visuals
+        contain: "layout",
         minHeight: shouldLoad ? undefined : minHeight,
-        /* Scroll margin for fixed navbar (~56px h-14 + buffer) */
-        scrollMarginTop: '4.5rem',
       }}
     >
-      {shouldLoad ? (
-        <SectionErrorBoundary name={name}>
-          <Suspense fallback={placeholder}>
-            <LazyComponent />
-          </Suspense>
-        </SectionErrorBoundary>
-      ) : (
-        placeholder
-      )}
+      {content}
     </div>
   );
 }

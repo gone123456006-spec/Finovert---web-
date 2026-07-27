@@ -330,8 +330,11 @@ a:active,
   transition: none !important;
 }
 
-/* Optimize click/tap responsiveness */
-* {
+/* Optimize click/tap responsiveness — interactive elements only, so body
+   text and blog content keep long-press copy/select on mobile */
+button,
+a,
+[role="button"] {
   -webkit-touch-callout: none;
 }
 
@@ -377,15 +380,12 @@ select,
   }
 }
 
-/* Below-fold sections: use content-visibility for paint performance */
-@media (max-width: 1024px) {
-
-  /* Apply to sections NOT in initial viewport */
-  section:not(:first-child),
-  [data-lazy-section] {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 400px;
-  }
+/* Below-fold rendering is handled in JS by LazySection (IntersectionObserver +
+   idle mount). A blanket content-visibility rule here made sections blank out
+   and the scroll position jump while scrolling back up, so it is opt-in only. */
+[data-lazy-section] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
 }
 
 /* iOS Safari auto-zooms focused fields below 16px — keep inputs at 16px on mobile */
