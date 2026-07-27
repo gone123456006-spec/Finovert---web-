@@ -94,7 +94,7 @@ export function LazySection({
     fallback !== undefined ? fallback : <SectionSkeleton minHeight={minHeight} />;
 
   const content = shouldLoad ? (
-    <SectionErrorBoundary name={name}>
+    <SectionErrorBoundary name={name} silent={loadOnIdle}>
       <Suspense fallback={placeholder}>
         <LazyComponent />
       </Suspense>

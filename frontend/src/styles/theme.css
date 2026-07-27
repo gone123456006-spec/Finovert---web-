@@ -380,13 +380,9 @@ select,
   }
 }
 
-/* Below-fold rendering is handled in JS by LazySection (IntersectionObserver +
-   idle mount). A blanket content-visibility rule here made sections blank out
-   and the scroll position jump while scrolling back up, so it is opt-in only. */
-[data-lazy-section] {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 400px;
-}
+/* NOTE: do not reintroduce a blanket `content-visibility: auto` on sections.
+   It made off-screen content blank out and the scroll position jump when
+   scrolling back up on mobile. */
 
 /* iOS Safari auto-zooms focused fields below 16px — keep inputs at 16px on mobile */
 @media (max-width: 767px) {

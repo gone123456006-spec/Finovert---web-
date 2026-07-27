@@ -19,33 +19,24 @@ import {
   formButtonClass,
 } from "../components/corporate/OutlinedField";
 
-/* Each section loads independently when near viewport — hero stays eager */
+/*
+ * Page sections are imported directly and always rendered. They total well
+ * under 30 kB, so code-splitting them cost more (extra requests + placeholder
+ * swaps) than it saved and made content pop in and out while scrolling.
+ */
+import { HowItWorks } from "../components/HowItWorks";
+import { RegistrationSection } from "../components/RegistrationSection";
+import { RegistrationServices } from "../components/RegistrationServices";
+import { SpecialServices } from "../components/SpecialServices";
+import { WhyFinovert } from "../components/WhyFinovert";
+import { PowerfulFinanceTools } from "../components/PowerfulFinanceTools";
+import { LatestBlogSection } from "../components/LatestBlogSection";
+import { TrustedPartners } from "../components/TrustedPartners";
+
+// The chat widget is the only genuinely heavy piece (~80 kB) and is overlaid,
+// so deferring it to idle cannot shift or blank any page content.
 const FinanceChatBoardLazy = lazy(() =>
   import("../components/FinanceChatBoard").then((m) => ({ default: m.FinanceChatBoard }))
-);
-const HowItWorksLazy = lazy(() =>
-  import("../components/HowItWorks").then((m) => ({ default: m.HowItWorks }))
-);
-const RegistrationSectionLazy = lazy(() =>
-  import("../components/RegistrationSection").then((m) => ({ default: m.RegistrationSection }))
-);
-const RegistrationServicesLazy = lazy(() =>
-  import("../components/RegistrationServices").then((m) => ({ default: m.RegistrationServices }))
-);
-const SpecialServicesLazy = lazy(() =>
-  import("../components/SpecialServices").then((m) => ({ default: m.SpecialServices }))
-);
-const WhyFinovertLazy = lazy(() =>
-  import("../components/WhyFinovert").then((m) => ({ default: m.WhyFinovert }))
-);
-const PowerfulFinanceToolsLazy = lazy(() =>
-  import("../components/PowerfulFinanceTools").then((m) => ({ default: m.PowerfulFinanceTools }))
-);
-const LatestBlogSectionLazy = lazy(() =>
-  import("../components/LatestBlogSection").then((m) => ({ default: m.LatestBlogSection }))
-);
-const TrustedPartnersLazy = lazy(() =>
-  import("../components/TrustedPartners").then((m) => ({ default: m.TrustedPartners }))
 );
 
 const HERO_FEATURES = [
@@ -402,10 +393,10 @@ export function HomePage() {
         </div>
       </section>
 
-      <LazySection name="HowItWorks" component={HowItWorksLazy} minHeight={360} />
-      <LazySection name="Registration" component={RegistrationSectionLazy} minHeight={160} />
-      <LazySection name="RegistrationServices" component={RegistrationServicesLazy} minHeight={420} />
-      <LazySection name="SpecialServices" component={SpecialServicesLazy} minHeight={480} />
+      <HowItWorks />
+      <RegistrationSection />
+      <RegistrationServices />
+      <SpecialServices />
 
       {/* Company registration lead — below special services */}
       <section id="company-registration" className="relative overflow-hidden bg-[#eef3f9] py-12 sm:py-16 scroll-mt-24">
@@ -498,20 +489,14 @@ export function HomePage() {
         </div>
       </section>
 
-      <LazySection name="WhyFinovert" component={WhyFinovertLazy} minHeight={400} />
-      <LazySection name="FinanceTools" component={PowerfulFinanceToolsLazy} minHeight={400} />
+      <WhyFinovert />
+      <PowerfulFinanceTools />
 
-      <LazySection
-        name="Blog"
-        component={LatestBlogSectionLazy}
-        minHeight={420}
-        rootMargin="160px"
-        idleTimeout={2200}
-      />
+      <LatestBlogSection />
 
       <section data-geo-faq className="relative overflow-hidden">
         <div className="bg-white pt-14 sm:pt-16 md:pt-20">
-          <LazySection name="TrustedPartners" component={TrustedPartnersLazy} minHeight={220} />
+          <TrustedPartners />
         </div>
 
         <div
