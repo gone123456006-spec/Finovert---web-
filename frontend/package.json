@@ -11,8 +11,9 @@
     "prebuild": "npm run check:assets && npm run generate:sitemap",
     "build": "vite build",
     "postbuild": "node scripts/verify-build.mjs",
-    "preview": "vite preview",
-    "dev": "vite"
+    "preview": "npm run build && wrangler dev",
+    "dev": "vite",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -72,6 +73,7 @@
     "vaul": "1.1.2"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.48.0",
     "@tailwindcss/vite": "4.1.12",
     "@types/node": "^25.3.2",
     "@types/react": "^19.2.14",
@@ -79,7 +81,8 @@
     "@vitejs/plugin-react": "4.7.0",
     "tailwindcss": "4.1.12",
     "typescript": "^5.9.3",
-    "vite": "6.3.5"
+    "vite": "6.3.5",
+    "wrangler": "^4.115.0"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.59.0",

@@ -3,30 +3,28 @@ import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 export default defineConfig({
-  plugins: [
-    // The React and Tailwind plugins are both required for Make, even if
-    // Tailwind is not being actively used – do not remove them
-    react(),
-    tailwindcss(),
-    {
-      name: 'mock-figma-assets',
-      enforce: 'pre',
-      resolveId(source) {
-        if (source.startsWith('figma:asset/')) {
-          return source;
-        }
-        return null;
-      },
-      load(id) {
-        if (id.startsWith('figma:asset/')) {
-          // Return a transparent 1x1 pixel PNG data URI as a fallback
-          return `export default "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";`;
-        }
-        return null;
+  plugins: [// The React and Tailwind plugins are both required for Make, even if
+  // Tailwind is not being actively used – do not remove them
+  react(), tailwindcss(), {
+    name: 'mock-figma-assets',
+    enforce: 'pre',
+    resolveId(source) {
+      if (source.startsWith('figma:asset/')) {
+        return source;
       }
+      return null;
+    },
+    load(id) {
+      if (id.startsWith('figma:asset/')) {
+        // Return a transparent 1x1 pixel PNG data URI as a fallback
+        return `export default "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";`;
+      }
+      return null;
     }
-  ],
+  }, cloudflare()],
   resolve: {
     alias: {
       // Alias @ to the src directory

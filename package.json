@@ -11,6 +11,7 @@
     "server": "npm run dev --workspace=backend",
     "start": "npm start --workspace=backend",
     "build": "npm run build --workspace=frontend",
+    "deploy": "cd frontend && npx wrangler deploy",
     "install-all": "npm install"
   },
   "engines": {
