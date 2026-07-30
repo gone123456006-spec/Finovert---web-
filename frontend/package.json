@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "generate:sitemap": "node scripts/generate-sitemap.mjs",
     "ping:sitemap": "node scripts/ping-google-sitemap.mjs",
