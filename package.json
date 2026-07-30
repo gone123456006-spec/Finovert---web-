@@ -14,9 +14,10 @@
     "install-all": "npm install"
   },
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.59.0"
+    "@rollup/rollup-linux-x64-gnu": "4.59.0",
+    "lightningcss-linux-x64-gnu": "1.30.1"
   }
 }
