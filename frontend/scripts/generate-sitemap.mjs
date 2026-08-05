@@ -1,10 +1,14 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import path, { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const frontendRoot = path.resolve(__dirname, "..");
 
 const SITE_URL = (process.env.SITE_URL || "https://www.finovert.com").replace(/\/+$/, "");
 const API_URL = (process.env.SITEMAP_API_URL || process.env.VITE_API_URL || "https://finovert-web-1.onrender.com").replace(/\/+$/, "");
-const OUTPUT_PATH = resolve(process.cwd(), "public", "sitemap.xml");
-const SERVICES_DATA_PATH = resolve(process.cwd(), "src", "app", "data", "services-seo.ts");
+const OUTPUT_PATH = resolve(frontendRoot, "public", "sitemap.xml");
+const SERVICES_DATA_PATH = resolve(frontendRoot, "src", "app", "data", "services-seo.ts");
 
 const STATIC_ROUTES = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
