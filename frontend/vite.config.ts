@@ -1,38 +1,72 @@
 import { defineConfig } from 'vite'
+import { createRequire } from 'node:module'
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import type { PluginOption } from 'vite'
 
-import { cloudflare } from "@cloudflare/vite-plugin";
+// ---------------------------------------------------------------------------
+// Platform guard for the Cloudflare Workers plugin
+//
+// @cloudflare/vite-plugin requires the Workerd native runtime and is ONLY
+// valid when deploying to Cloudflare Workers via `wrangler deploy`.
+//
+// On Vercel (and during any plain `vite build`) this env var is absent, so
+// the plugin — including its native Workerd binary — is never loaded.
+//
+// To deploy to Cloudflare Workers locally, set:
+//   DEPLOY_TARGET=cloudflare npm run deploy --workspace=frontend
+// ---------------------------------------------------------------------------
+function getCloudflarePlugin(): PluginOption {
+  if (process.env.DEPLOY_TARGET !== 'cloudflare') return null
+
+  try {
+    // ESM files cannot use require() directly. createRequire gives us CJS
+    // semantics without a dynamic import (which would need async defineConfig).
+    const _require = createRequire(import.meta.url)
+    const { cloudflare } = _require('@cloudflare/vite-plugin') as typeof import('@cloudflare/vite-plugin')
+    return cloudflare() as PluginOption
+  } catch {
+    // Plugin not installed in this environment — skip silently
+    return null
+  }
+}
 
 export default defineConfig({
-  plugins: [// The React and Tailwind plugins are both required for Make, even if
-  // Tailwind is not being actively used – do not remove them
-  react(), tailwindcss(), {
-    name: 'mock-figma-assets',
-    enforce: 'pre',
-    resolveId(source) {
-      if (source.startsWith('figma:asset/')) {
-        return source;
-      }
-      return null;
+  plugins: [
+    react(),
+    tailwindcss(),
+
+    // Intercept figma:asset/* virtual imports so the build does not crash on
+    // references that are only meaningful inside the Figma Make environment.
+    {
+      name: 'mock-figma-assets',
+      enforce: 'pre',
+      resolveId(source: string) {
+        if (source.startsWith('figma:asset/')) {
+          return source
+        }
+        return null
+      },
+      load(id: string) {
+        if (id.startsWith('figma:asset/')) {
+          // Transparent 1×1 PNG — safe fallback for any image reference
+          return `export default "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";`
+        }
+        return null
+      },
     },
-    load(id) {
-      if (id.startsWith('figma:asset/')) {
-        // Return a transparent 1x1 pixel PNG data URI as a fallback
-        return `export default "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";`;
-      }
-      return null;
-    }
-  }, cloudflare()],
+
+    getCloudflarePlugin(),
+  ],
+
   resolve: {
     alias: {
-      // Alias @ to the src directory
       '@': path.resolve(__dirname, './src'),
     },
   },
 
-  // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
+  // File types to support raw imports. Never add .css, .tsx, or .ts files here.
   assetsInclude: ['**/*.svg', '**/*.csv'],
 
   build: {
@@ -42,7 +76,6 @@ export default defineConfig({
     cssMinify: true,
     sourcemap: false,
     reportCompressedSize: false, // Faster builds
-    // Increase chunk size warning limit
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {

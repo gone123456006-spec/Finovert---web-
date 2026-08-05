@@ -1,12 +1,18 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm install --include=optional && npm install @rollup/rollup-linux-x64-gnu@4.59.0 --workspace=@figma/my-make-file --no-save",
-  "buildCommand": "npm run build",
+  "installCommand": "npm install --include=optional",
+  "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
+  "framework": null,
   "redirects": [
     {
       "source": "/:path*",
-      "has": [{ "type": "host", "value": "finovert.com" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "finovert.com"
+        }
+      ],
       "destination": "https://www.finovert.com/:path*",
       "permanent": true
     }
@@ -39,13 +45,24 @@
     {
       "source": "/sitemap.xml",
       "headers": [
-        { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
-        { "key": "Cache-Control", "value": "public, max-age=3600" }
+        {
+          "key": "Content-Type",
+          "value": "application/xml; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
       ]
     },
     {
       "source": "/(.*)",
-      "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }]
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
     }
   ]
 }

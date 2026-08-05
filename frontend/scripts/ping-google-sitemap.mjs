@@ -1,10 +1,20 @@
+/**
+ * Optionally pings Google Search Console after a successful sitemap generation.
+ *
+ * This script NEVER fails the build — it is informational only.
+ * The Google ping endpoint is deprecated; rely on Google Search Console
+ * and robots.txt for long-term sitemap discovery.
+ */
 const SITE_URL = (process.env.SITE_URL || "https://www.finovert.com").replace(/\/+$/, "");
 const SITEMAP_URL = `${SITE_URL}/sitemap.xml`;
 const PING_URL = `https://www.google.com/ping?sitemap=${encodeURIComponent(SITEMAP_URL)}`;
 
 async function run() {
   try {
-    const res = await fetch(PING_URL);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8_000);
+    const res = await fetch(PING_URL, { signal: controller.signal });
+    clearTimeout(timeoutId);
     const body = await res.text();
 
     if (res.ok) {
@@ -13,19 +23,20 @@ async function run() {
     }
 
     const combinedMessage = `${res.status} ${res.statusText} ${body}`.toLowerCase();
-    if (combinedMessage.includes("deprecated")) {
+    if (combinedMessage.includes("deprecated") || combinedMessage.includes("not found")) {
       console.warn(
         "[sitemap:ping] Google sitemap ping endpoint is deprecated. " +
-          "Use Google Search Console for sitemap discovery and rely on robots.txt + regular crawling.",
+        "Use Google Search Console for sitemap discovery.",
       );
-      console.warn(`[sitemap:ping] Sitemap URL remains: ${SITEMAP_URL}`);
+      console.warn(`[sitemap:ping] Sitemap URL: ${SITEMAP_URL}`);
       return;
     }
 
-    throw new Error(`Google ping failed: ${res.status} ${res.statusText}`);
+    // Log failure as warning — never block the build
+    console.warn(`[sitemap:ping] Non-OK response: ${res.status} ${res.statusText}`);
   } catch (error) {
-    console.error(`[sitemap:ping] ${error.message}`);
-    process.exitCode = 1;
+    // Network errors, timeouts, and other failures are warnings only
+    console.warn(`[sitemap:ping] Skipped (${error.message})`);
   }
 }
 

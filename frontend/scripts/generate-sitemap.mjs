@@ -58,12 +58,19 @@ function renderUrlTag({ loc, lastmod, changefreq, priority }) {
 
 async function fetchBlogs() {
   const url = `${API_URL}/api/blogs`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Failed to fetch blogs for sitemap: ${res.status} ${res.statusText}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10_000); // 10s max
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch blogs for sitemap: ${res.status} ${res.statusText}`);
+    }
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } finally {
+    clearTimeout(timeoutId);
   }
-  const data = await res.json();
-  return Array.isArray(data) ? data : [];
 }
 
 function buildSitemapXml(blogs, serviceSlugs) {
