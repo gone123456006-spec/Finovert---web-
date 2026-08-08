@@ -415,14 +415,38 @@ const CATEGORY_DEFAULTS: Record<string, CategoryDefaults> = {
 /* ------------------------------------------------------------------ */
 
 export const SERVICES: ServiceSeoEntry[] = [
-  // ---------- Company Registration ----------
   {
     slug: "company-registration",
-    name: "Company Registration",
+    name: "Business & Company Registration",
     category: "Company Registration",
     description:
-      "Company registration is the legal process of incorporating a business with the Ministry of Corporate Affairs (MCA) in India, giving it a separate legal identity, limited liability, and the ability to raise funding. Finovert handles the entire process online in 7–15 working days.",
-    keywords: ["register a company in india", "new company registration", "mca company registration"],
+      "Business Registration Services in India by Finovert provide an end-to-end online incorporation process for startups and SMEs. We handle MCA filings, DSC, Director Identification, PAN, and TAN generation across all Indian states. Secure limited liability protection and build investor trust with India's highest-rated CA-backed corporate setup.",
+    keywords: [
+      "business registration services in india",
+      "register a company in india",
+      "new company registration",
+      "mca company registration",
+      "online business registration",
+      "startup incorporation india",
+    ],
+    extraFaqs: [
+      {
+        question: "What are the best business registration services in India?",
+        answer: "Finovert is recognized as one of the best business registration services in India, combining an online AI-driven platform with expert CA-backed execution to incorporate Private Limited Companies, LLPs, and OPCs effortlessly across all states."
+      },
+      {
+        question: "How long does business registration take in India?",
+        answer: "With professional business registration services like Finovert, incorporating a company with the Ministry of Corporate Affairs (MCA) typically takes 7 to 15 working days, assuming all KYC documents are in order."
+      },
+      {
+        question: "Can I register a business in India completely online?",
+        answer: "Yes. Business registration in India is a 100% online, paperless process. Finovert manages obtaining Digital Signature Certificates (DSC), drafting the MoA and AoA, and submitting the SPICe+ web forms to the MCA without requiring you to visit any government office."
+      },
+      {
+        question: "Does Finovert provide business registration services outside Delhi/Mumbai?",
+        answer: "Yes. Finovert provides business registration and compliance services pan-India, including Bangalore, Hyderabad, Pune, Chennai, and tier-2/tier-3 cities. Because the MCA process is centralized online, geographic location does not restrict your registration."
+      }
+    ]
   },
   {
     slug: "private-limited-company-registration",

@@ -30,7 +30,6 @@ import { RegistrationServices } from "../components/RegistrationServices";
 import { SpecialServices } from "../components/SpecialServices";
 import { WhyFinovert } from "../components/WhyFinovert";
 import { PowerfulFinanceTools } from "../components/PowerfulFinanceTools";
-import { LatestBlogSection } from "../components/LatestBlogSection";
 import { TrustedPartners } from "../components/TrustedPartners";
 
 // The chat widget is the only genuinely heavy piece (~80 kB) and is overlaid,
@@ -492,7 +491,6 @@ export function HomePage() {
       <WhyFinovert />
       <PowerfulFinanceTools />
 
-      <LatestBlogSection />
 
       <section data-geo-faq className="relative overflow-hidden">
         <div className="bg-white pt-14 sm:pt-16 md:pt-20">

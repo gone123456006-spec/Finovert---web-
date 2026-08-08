@@ -2,7 +2,7 @@ services:
   # 1. Backend Web Service (Node.js)
   - type: web
     name: finovert-backend
-    env: node
+    runtime: node
     plan: free
     buildCommand: npm install
     startCommand: npm start --workspace=backend
