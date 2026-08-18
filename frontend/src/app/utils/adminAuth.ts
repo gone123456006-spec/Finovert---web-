@@ -27,7 +27,8 @@ export function getAdminToken() {
 
 export function saveAdminSession(role: AdminRole, user: AdminUser, token: string) {
   const session: AdminSession = { role, user, loggedInAt: Date.now() };
-  sessionStorage.setItem(TOKEN_KEY, token);
+  if (token) sessionStorage.setItem(TOKEN_KEY, token);
+  else sessionStorage.removeItem(TOKEN_KEY);
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
   try {
     localStorage.removeItem(LEGACY_KEY);
@@ -36,7 +37,6 @@ export function saveAdminSession(role: AdminRole, user: AdminUser, token: string
 
 export function readAdminSession(): AdminSession | null {
   try {
-    if (!getAdminToken()) return null;
     const raw = sessionStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     const session = JSON.parse(raw) as AdminSession;
@@ -82,6 +82,8 @@ export async function restoreAdminSession(): Promise<AdminSession | null> {
     clearAdminSession();
     return null;
   }
+
+  if (!getAdminToken()) return local;
 
   try {
     const res = await adminFetch(`${API_BASE}/api/auth/me`);

@@ -1,10 +1,11 @@
 import express from 'express';
 import Confirmation from '../models/Confirmation.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // GET all confirmations
-router.get('/', async (req, res) => {
+router.get('/', requireAuth('main_admin'), async (req, res) => {
   try {
     const confirmations = await Confirmation.find().sort({ createdAt: -1 });
     res.json(confirmations);

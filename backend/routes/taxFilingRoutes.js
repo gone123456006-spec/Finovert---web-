@@ -1,11 +1,12 @@
 import express from 'express';
 import TaxFilingLead from '../models/TaxFilingLead.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
 const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 
-router.get('/', async (req, res) => {
+router.get('/', requireAuth('main_admin'), async (req, res) => {
   try {
     const leads = await TaxFilingLead.find({}).sort({ createdAt: -1 });
     res.json(leads);
@@ -56,7 +57,7 @@ router.post('/:id/complete-payment', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth('main_admin'), async (req, res) => {
   try {
     const deleted = await TaxFilingLead.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ message: 'Record not found.' });

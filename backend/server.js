@@ -4,7 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -102,9 +102,18 @@ const emailLimiter = rateLimit({
   message: { message: 'Email sending limit reached. Try again in an hour.' },
 });
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many login attempts. Please try again in 15 minutes.' },
+});
+
 // ─── Middleware ────────────────────────────────────────────────────────────────
 app.use(compression());
 app.use(morgan(IS_PROD ? 'combined' : 'dev'));
+app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -138,6 +147,9 @@ app.use('/uploads', (req, res) => {
 
 // ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api', apiLimiter);
+app.use('/api/auth/main-login', loginLimiter);
+app.use('/api/subadmins/login', loginLimiter);
+app.use('/api/subadmins/request', loginLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/verifications', verificationRoutes);

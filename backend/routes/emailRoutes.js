@@ -2,8 +2,11 @@ import express from 'express';
 import SubAdmin from '../models/SubAdmin.js';
 import Internship from '../models/Internship.js';
 import { sendEmail, emails } from '../utils/emailService.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
+
+router.use(requireAuth('main_admin'));
 
 // Send to individual email
 router.post('/send', async (req, res) => {

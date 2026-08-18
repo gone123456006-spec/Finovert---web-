@@ -1,32 +1,45 @@
 import express from 'express';
+import { requireAuth, signAdminToken, setAuthCookie, clearAuthCookie } from '../middleware/auth.js';
 
 const router = express.Router();
 
-/**
- * @route   POST /api/auth/main-login
- * @desc    Authenticate the Main Admin using a backend password
- * @access  Public
- */
+function getAdminPassword() {
+  // Keep the existing password. Do not force a new env var or lock the owner out.
+  return process.env.ADMIN_PASSWORD || 'Ar@v1234';
+}
+
 router.post('/main-login', (req, res) => {
   try {
     const { password } = req.body;
-    
-    // We get the password from the environment variable for security.
-    // This way, it is never hardcoded in the frontend or version control.
-    const adminPassword = process.env.ADMIN_PASSWORD || 'Ar@v1234';
+    const adminPassword = getAdminPassword();
 
-    if (password === adminPassword) {
-      res.json({ 
-        message: 'Login successful', 
-        role: 'main_admin', 
-        user: { name: 'Main Admin', username: 'admin' } 
-      });
-    } else {
-      res.status(401).json({ message: 'Incorrect password. Access denied.' });
+    if (!adminPassword) {
+      return res.status(500).json({ message: 'Admin password is not configured on the server.' });
     }
+
+    if (!password || password !== adminPassword) {
+      return res.status(401).json({ message: 'Incorrect password. Access denied.' });
+    }
+
+    const user = { name: 'Main Admin', username: 'admin' };
+    const token = signAdminToken({ role: 'main_admin', ...user });
+    setAuthCookie(res, token);
+    res.json({ message: 'Login successful', role: 'main_admin', user, token });
   } catch (error) {
-    res.status(500).json({ message: 'Authentication error', error: error.message });
+    res.status(500).json({ message: 'Authentication error' });
   }
+});
+
+router.get('/me', requireAuth('main_admin', 'sub_admin'), (req, res) => {
+  res.json({
+    role: req.admin.role,
+    user: { name: req.admin.name, username: req.admin.username },
+  });
+});
+
+router.post('/logout', (req, res) => {
+  clearAuthCookie(res);
+  res.json({ message: 'Logged out' });
 });
 
 export default router;

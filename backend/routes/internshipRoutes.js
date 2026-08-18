@@ -2,12 +2,13 @@ import express from 'express';
 import mongoose from 'mongoose';
 import Internship from '../models/Internship.js';
 import { sendEmail, emails } from '../utils/emailService.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
 const INDIAN_MOBILE_REGEX = /^[6-9]\d{9}$/;
 
-router.get('/', async (req, res) => {
+router.get('/', requireAuth('main_admin'), async (req, res) => {
   try {
     const records = await Internship.find().select('-resumeUrl -idProofUrl -collegeIdUrl').sort({ createdAt: -1 });
     res.json(records);
@@ -16,7 +17,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id/resume', async (req, res) => {
+router.get('/:id/resume', requireAuth('main_admin'), async (req, res) => {
   try {
     const record = await Internship.findById(req.params.id).select('resumeUrl');
     if (!record) return res.status(404).json({ message: 'Record not found' });
@@ -85,7 +86,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth('main_admin'), async (req, res) => {
   try {
     const record = await Internship.findByIdAndDelete(req.params.id);
     if (!record) return res.status(404).json({ message: 'Record not found' });
@@ -95,7 +96,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-router.put('/:id/status', async (req, res) => {
+router.put('/:id/status', requireAuth('main_admin'), async (req, res) => {
   try {
     const { status } = req.body;
     const record = await Internship.findByIdAndUpdate(req.params.id, { status }, { new: true });

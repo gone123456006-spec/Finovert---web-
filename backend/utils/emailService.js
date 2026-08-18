@@ -118,25 +118,15 @@ export const emails = {
     `),
   }),
 
-  // Sub-admin approved (includes credentials)
-  subAdminApproved: (name, username, password) => ({
+  // Sub-admin approved — never email the password (it is hashed and the user already chose it)
+  subAdminApproved: (name, username) => ({
     subject: '✅ Your Sub-Admin Access Has Been Approved – Finovert',
     html: baseHtml(`
       <h2>Welcome to the Team, ${name}! ✅</h2>
       <p>Great news! Your request for Sub-Admin access on the <strong>Finovert Admin Portal</strong> has been <span class="badge badge-green">Approved</span>.</p>
-      <p>You can now log in to the admin portal using the credentials below:</p>
-      <div class="cred-box">
-        <div class="cred-row">
-          <span class="cred-label">Username</span>
-          <span class="cred-value">${username}</span>
-        </div>
-        <div class="cred-row">
-          <span class="cred-label">Password</span>
-          <span class="cred-value">${password}</span>
-        </div>
-      </div>
-      <p>Please keep these credentials safe. You will be able to publish and manage blog articles from your writer portal.</p>
-      <a class="btn" href="https://finovert.com/admin">Go to Admin Portal</a>
+      <p>You can now log in with the username <strong>${username}</strong> and the password you created when you requested access.</p>
+      <p>If you forgot that password, request access again or contact the main admin.</p>
+      <a class="btn" href="https://www.finovert.com/TawangJOB">Go to Admin Portal</a>
     `),
   }),
 

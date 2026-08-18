@@ -1,11 +1,12 @@
 import express from 'express';
 import Verification from '../models/Verification.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // @route   POST /api/verifications
 // @desc    Add a new verification record
-router.post('/', async (req, res) => {
+router.post('/', requireAuth('main_admin'), async (req, res) => {
   try {
     const { id, name, institute, joinDate, endDate, role, remarks } = req.body;
     
@@ -34,7 +35,7 @@ router.post('/', async (req, res) => {
 
 // @route   GET /api/verifications
 // @desc    Get all verification records
-router.get('/', async (req, res) => {
+router.get('/', requireAuth('main_admin'), async (req, res) => {
   try {
     const verifications = await Verification.find({}).sort({ createdAt: -1 });
     res.json(verifications);
@@ -60,7 +61,7 @@ router.get('/:id', async (req, res) => {
 
 // @route   DELETE /api/verifications/:id
 // @desc    Delete a verification record by MongoDB _id
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth('main_admin'), async (req, res) => {
   try {
     await Verification.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted successfully' });

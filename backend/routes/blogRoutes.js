@@ -4,6 +4,7 @@ import Parser from 'rss-parser';
 import cron from 'node-cron';
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
+import { requireAuth } from '../middleware/auth.js';
 
 const parser = new Parser({
   customFields: {
@@ -311,7 +312,7 @@ router.get('/:slug', async (req, res) => {
 });
 
 // DELETE a blog
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth('main_admin', 'sub_admin'), async (req, res) => {
   try {
     const blog = await Blog.findByIdAndDelete(req.params.id);
     if (!blog) return res.status(404).json({ message: 'Blog not found' });
@@ -322,7 +323,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // UPDATE a blog
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAuth('main_admin', 'sub_admin'), async (req, res) => {
   try {
     const { title, excerpt, content, category, author, image, readTime } = req.body;
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
@@ -339,7 +340,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // POST a new blog manually
-router.post('/', async (req, res) => {
+router.post('/', requireAuth('main_admin', 'sub_admin'), async (req, res) => {
   try {
     const seoTitle = await buildUniqueSeoTitle(req.body.title);
     const blog = new Blog({
@@ -361,7 +362,7 @@ router.post('/', async (req, res) => {
 });
 
 // POST — trigger fetch manually via admin button
-router.post('/fetch-news', async (req, res) => {
+router.post('/fetch-news', requireAuth('main_admin'), async (req, res) => {
   try {
     const addedCount = await fetchAndSaveNews();
     res.json({ message: `Successfully fetched and added ${addedCount} new articles to the blog.` });
@@ -371,7 +372,7 @@ router.post('/fetch-news', async (req, res) => {
 });
 
 // POST — fix images for all existing blogs in DB
-router.post('/fix-images', async (req, res) => {
+router.post('/fix-images', requireAuth('main_admin'), async (req, res) => {
   try {
     const allBlogs = await Blog.find({});
     for (let i = 0; i < allBlogs.length; i++) {
@@ -388,7 +389,7 @@ router.post('/fix-images', async (req, res) => {
 
 // POST — one-time cleanup: remove other-site source names from existing
 // blog slugs/authors so only Finovert branding is ever shown or linked.
-router.post('/fix-source-branding', async (req, res) => {
+router.post('/fix-source-branding', requireAuth('main_admin'), async (req, res) => {
   try {
     const KNOWN_SOURCES = NEWS_SOURCES.map((s) => s.name);
     const blogs = await Blog.find({});

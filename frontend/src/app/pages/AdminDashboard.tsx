@@ -458,14 +458,10 @@ export function AdminDashboard() {
       const data = await response.json();
 
       if (response.ok) {
-        if (!data.token) {
-          setError("Login succeeded but no session token was returned.");
-          return;
-        }
-        const user = { name: "Main Admin", username: "admin" };
+        const user = data.user || { name: "Main Admin", username: "admin" };
         setAuthRole("main_admin");
         setCurrentUser(user);
-        saveAdminSession("main_admin", user, data.token);
+        saveAdminSession("main_admin", user, data.token || "");
         setPassword("");
         setUserCaptcha("");
         setError("");
@@ -518,14 +514,11 @@ export function AdminDashboard() {
       });
       const data = await res.json();
       if (res.ok) {
-        if (!data.token) {
-          setError("Login succeeded but no session token was returned.");
-          return;
-        }
+        const user = data.user || { name: subUsername, username: subUsername };
         setAuthRole("sub_admin");
-        setCurrentUser(data.user);
-        saveAdminSession("sub_admin", data.user, data.token);
-        setFormData(prev => ({ ...prev, author: data.user.name }));
+        setCurrentUser(user);
+        saveAdminSession("sub_admin", user, data.token || "");
+        setFormData(prev => ({ ...prev, author: user.name }));
         setActiveTab("blog"); // Sub-admins only see blogs
         setSubPassword("");
         setError("");

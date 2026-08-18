@@ -2,11 +2,12 @@ import express from 'express';
 import mongoose from 'mongoose';
 import ConsultationLead from '../models/ConsultationLead.js';
 import { sendWhatsApp } from '../utils/whatsappService.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // GET all inquiries
-router.get('/', async (req, res) => {
+router.get('/', requireAuth('main_admin'), async (req, res) => {
   try {
     const leads = await ConsultationLead.find({}).sort({ createdAt: -1 });
     res.json(leads);
@@ -47,7 +48,7 @@ router.post('/', async (req, res) => {
 });
 
 // DELETE inquiry
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAuth('main_admin'), async (req, res) => {
   try {
     const deleted = await ConsultationLead.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ message: 'Inquiry not found' });
