@@ -60,7 +60,7 @@ export function AboutPage() {
 
   return (
     <div className="min-h-screen bg-white pt-24 pb-20 overflow-hidden">
-      <SEO 
+      <SEO
         title="About Finovert | India's Best Compliance & Virtual CFO Platform"
         description="Meet the Finovert team simplifying finance and compliance for startups across India. Learn about our mission, vision, and expert-led approach to GST filing, ITR filing, ROC compliance, and virtual CFO services."
         path="/about"
@@ -98,7 +98,7 @@ export function AboutPage() {
       <section className="bg-gray-50 py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <motion.div 
+            <motion.div
               whileHover={{ y: -5 }}
               className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100"
             >
@@ -108,7 +108,7 @@ export function AboutPage() {
               </p>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               whileHover={{ y: -5 }}
               className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100"
             >
@@ -118,7 +118,7 @@ export function AboutPage() {
               </p>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               whileHover={{ y: -5 }}
               className="bg-white p-10 rounded-3xl shadow-sm border border-gray-100"
             >
@@ -133,7 +133,7 @@ export function AboutPage() {
 
       {/* Leadership Section - The Core Part */}
       <section className="py-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -156,8 +156,8 @@ export function AboutPage() {
               className="group"
             >
               <div className="relative mb-8 overflow-hidden rounded-[2rem] aspect-[4/5] shadow-lg group-hover:shadow-2xl transition-all duration-500">
-                <img 
-                  src={member.image} 
+                <img
+                  src={member.image}
                   alt={member.name}
                   className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
                 />
@@ -186,17 +186,17 @@ export function AboutPage() {
       <section className="bg-gray-900 rounded-[3rem] mx-4 sm:mx-8 lg:mx-20 py-20 px-8 text-center text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-blue-600/20 blur-[100px] rounded-full" />
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-purple-600/20 blur-[100px] rounded-full" />
-        
+
         <div className="relative z-10 max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-5xl font-bold mb-8 tracking-tight">Come build the future of <br className="hidden md:block" /> finance with us.</h2>
           <p className="text-gray-400 text-lg mb-10 max-w-2xl mx-auto">
             We're always looking for talented individuals to join our mission. Explore open roles and help us simplify the world of business.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-full font-bold transition-all shadow-lg hover:shadow-blue-500/30">
+            <button className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-full font-bold transition-all duration-300 shadow-lg hover:shadow-blue-500/30 hover:scale-[1.03] active:scale-95">
               View Careers
             </button>
-            <button className="border border-white/20 hover:bg-white/10 px-10 py-4 rounded-full font-bold transition-all">
+            <button className="border border-white/20 hover:bg-white/10 px-10 py-4 rounded-full font-bold transition-all duration-300 hover:scale-[1.03] active:scale-95">
               Contact Sales
             </button>
           </div>

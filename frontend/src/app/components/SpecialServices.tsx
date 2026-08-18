@@ -5,22 +5,22 @@ const SERVICES = [
   {
     image: "/service-1.png",
     title: "Company Registration",
-    link: "/book-consultation"
+    link: "/book-consultation?service=Private%20Limited%20Company"
   },
   {
     image: "/service-2.png",
     title: "CFO Services",
-    link: "/book-consultation"
+    link: "/book-consultation?service=Virtual%20CFO"
   },
   {
     image: "/service-4.png",
     title: "GST Filing",
-    link: "/book-consultation"
+    link: "/book-consultation?service=GST%20Filing"
   },
   {
     image: "/service-3.png",
     title: "ITR Filing",
-    link: "/book-consultation"
+    link: "/book-consultation?service=ITR%20Filing"
   },
 ];
 
@@ -68,12 +68,12 @@ export function SpecialServices() {
                     className="w-full h-full object-cover object-top"
                     loading="lazy"
                   />
-                  
+
                   {/* Button overlaid on image at bottom */}
                   <div className="absolute bottom-0 left-0 right-0 p-3 flex justify-center">
                     <Link
                       to={service.link}
-                      className="px-8 py-2 text-xs font-semibold text-black bg-white/20 border border-white/40 hover:bg-white/30 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-md"
+                      className="px-8 py-2 text-xs font-semibold text-black bg-white/20 border border-white/40 hover:bg-white/30 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 backdrop-blur-md"
                     >
                       Get Started
                     </Link>

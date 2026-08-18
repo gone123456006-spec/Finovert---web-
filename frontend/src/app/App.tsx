@@ -63,7 +63,7 @@ export default function App() {
               <BlogPostPage />
             </Suspense>
           } />
-          <Route path="admin" element={
+          <Route path="TawangJOB" element={
             <Suspense fallback={<PageLoader />}>
               <AdminDashboard />
             </Suspense>

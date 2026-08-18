@@ -104,10 +104,10 @@ export function RegistrationServices() {
 
   return (
     <>
-      <section 
-        className="py-4 sm:py-6 bg-white" 
+      <section
+        className="py-4 sm:py-6 bg-white"
         id="registration-services"
-        itemScope 
+        itemScope
         itemType="https://schema.org/Service"
         aria-label="Business Registration Services"
       >
@@ -115,7 +115,7 @@ export function RegistrationServices() {
           {/* Responsive container: vertical on mobile, horizontal on desktop */}
           <article className="flex flex-col lg:flex-row gap-0 bg-white rounded-lg lg:rounded-2xl shadow-lg overflow-hidden border border-gray-200">
             {/* Sidebar - horizontal scroll on mobile, vertical on desktop */}
-            <nav 
+            <nav
               className="w-full lg:w-52 bg-[#2d3e50] flex-shrink-0 overflow-x-auto lg:overflow-x-visible"
               aria-label="Service Categories"
               role="navigation"
@@ -125,11 +125,10 @@ export function RegistrationServices() {
                   <button
                     key={category}
                     onClick={() => setActiveCategory(category)}
-                    className={`px-4 py-3 text-left text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${
-                      activeCategory === category
-                        ? "bg-[#1e2936] text-white"
-                        : "text-gray-300 hover:bg-[#374b5e] hover:text-white"
-                    }`}
+                    className={`px-4 py-3 text-left text-xs sm:text-sm font-medium transition-colors whitespace-nowrap ${activeCategory === category
+                      ? "bg-[#1e2936] text-white"
+                      : "text-gray-300 hover:bg-[#374b5e] hover:text-white"
+                      }`}
                     aria-current={activeCategory === category ? "page" : undefined}
                     aria-label={`${category} services`}
                   >
@@ -141,7 +140,7 @@ export function RegistrationServices() {
 
             {/* Content area - responsive grid */}
             <div className="flex-1 bg-gray-50" role="main">
-              <div 
+              <div
                 className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y divide-gray-300 sm:divide-y-0"
                 itemScope
                 itemType="https://schema.org/ItemList"
@@ -153,7 +152,7 @@ export function RegistrationServices() {
                     tablet: (idx + 1) % 2 === 0,
                     desktop: (idx + 1) % 3 === 0,
                   };
-                  
+
                   const isLastRow = {
                     mobile: idx === array.length - 1,
                     tablet: idx >= array.length - (array.length % 2 || 2),
@@ -201,8 +200,8 @@ export function RegistrationServices() {
                       <meta itemProp="provider" content="Finovert" />
                       <meta itemProp="areaServed" content="India" />
                       <Link
-                        to="/book-consultation"
-                        className="ml-2 px-2 py-1 sm:px-3 sm:py-1 text-xs font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded transition-colors whitespace-nowrap"
+                        to={`/book-consultation?service=${encodeURIComponent(service)}`}
+                        className="ml-2 px-2 py-1 sm:px-3 sm:py-1 text-xs font-semibold text-white bg-blue-500 hover:bg-blue-600 hover:scale-105 active:scale-95 rounded transition-all duration-300 whitespace-nowrap shadow-sm hover:shadow-md"
                         aria-label={`Apply for ${service}`}
                         itemProp="url"
                       >

@@ -125,9 +125,8 @@ export function WhyFinovert() {
             </p>
 
             <p
-              className={`mt-5 text-[15px] leading-[1.8] text-[#475569] sm:text-base sm:leading-[1.85] ${
-                isExpanded ? "block" : "hidden sm:block"
-              }`}
+              className={`mt-5 text-[15px] leading-[1.8] text-[#475569] sm:text-base sm:leading-[1.85] ${isExpanded ? "block" : "hidden sm:block"
+                }`}
             >
               We understand that managing finances across scattered spreadsheets and outdated
               software creates unnecessary chaos and bottlenecks. That&apos;s why{" "}
@@ -142,9 +141,8 @@ export function WhyFinovert() {
             </p>
 
             <p
-              className={`mt-5 text-[15px] leading-[1.8] text-[#475569] sm:text-base sm:leading-[1.85] ${
-                isExpanded ? "block" : "hidden sm:block"
-              }`}
+              className={`mt-5 text-[15px] leading-[1.8] text-[#475569] sm:text-base sm:leading-[1.85] ${isExpanded ? "block" : "hidden sm:block"
+                }`}
             >
               Furthermore, <span className="font-semibold text-[#0F2A5F]">Finovert</span>
               &apos;s robust compliance architecture ensures that you never miss a tax deadline

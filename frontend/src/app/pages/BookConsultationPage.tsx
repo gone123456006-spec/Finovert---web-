@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { SEO } from "../components/SEO";
 import { CorporateFormLayout } from "../components/corporate/CorporateFormLayout";
@@ -30,15 +30,24 @@ const SERVICES_LIST = [
 ] as const;
 
 export function BookConsultationPage() {
+  const [searchParams] = useSearchParams();
+  const requestedService = searchParams.get("service") || "";
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    service: "",
+    service: requestedService || "",
     email: "",
   });
 
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+
+  // Create dynamic options list ensuring the requested service is included if it's not in the default list
+  const displayServices = [...SERVICES_LIST];
+  if (requestedService && !displayServices.includes(requestedService as any)) {
+    displayServices.unshift(requestedService as any);
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -161,7 +170,7 @@ export function BookConsultationPage() {
             onChange={handleChange}
           >
             <option value="">-Select-</option>
-            {SERVICES_LIST.map((service) => (
+            {displayServices.map((service) => (
               <option key={service} value={service}>
                 {service}
               </option>

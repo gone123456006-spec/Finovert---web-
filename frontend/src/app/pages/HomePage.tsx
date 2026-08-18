@@ -570,7 +570,7 @@ export function HomePage() {
         href="https://wa.me/916205425499"
         target="_blank"
         rel="noopener noreferrer"
-        className={`fixed right-3 bottom-5 z-50 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-200 hover:bg-[#1ebe57] sm:right-4 sm:bottom-6 sm:h-14 sm:w-14 ${showFloatingButtons ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
+        className={`fixed right-3 bottom-5 z-50 inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-300 hover:bg-[#1ebe57] hover:scale-110 active:scale-95 sm:right-4 sm:bottom-6 sm:h-14 sm:w-14 ${showFloatingButtons ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
           }`}
         aria-label="Chat on WhatsApp"
       >

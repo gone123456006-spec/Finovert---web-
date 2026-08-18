@@ -43,7 +43,7 @@ export const formSelectClass = `${formInputClass} cursor-pointer`;
 export const formTextareaClass = `${formInputClass} resize-none min-h-[100px]`;
 
 export const formButtonClass =
-  "w-full rounded-lg bg-[#0F2A5F] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#163a7a] disabled:cursor-not-allowed disabled:opacity-70 sm:text-[15px]";
+  "w-full rounded-lg bg-[#0F2A5F] px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-300 hover:scale-[1.02] active:scale-95 hover:bg-[#163a7a] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100 sm:text-[15px]";
 
 /** @deprecated Use formInputClass */
 export const outlinedInputClass = formInputClass;
@@ -65,9 +65,8 @@ export function PhoneField({
   return (
     <OutlinedField label={label} required={required} htmlFor={id} error={error}>
       <div
-        className={`flex overflow-hidden rounded-lg border border-slate-300 focus-within:border-[#0F2A5F] focus-within:ring-2 focus-within:ring-[#0F2A5F]/15 ${
-          error ? "border-red-400" : ""
-        }`}
+        className={`flex overflow-hidden rounded-lg border border-slate-300 focus-within:border-[#0F2A5F] focus-within:ring-2 focus-within:ring-[#0F2A5F]/15 ${error ? "border-red-400" : ""
+          }`}
       >
         <span className="flex shrink-0 items-center border-r border-slate-300 bg-slate-50 px-3 text-sm font-medium text-slate-700">
           +91

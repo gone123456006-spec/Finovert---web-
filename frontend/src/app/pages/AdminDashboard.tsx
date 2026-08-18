@@ -1,41 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
 import { Lock, FileText, CheckCircle, AlertCircle, BadgeCheck, Users, Clock, Briefcase, Trash2, Download, XCircle, Check, Mail, Building, Calendar, RefreshCw, PhoneCall, Filter, Search, LogOut, FileSpreadsheet, Receipt, Eye, CheckSquare, ClipboardList } from "lucide-react";
-
-const AUTH_STORAGE_KEY = "finovert_admin_session";
-const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
-
-type AdminSession = {
-  role: "main_admin" | "sub_admin";
-  user: { name: string; username: string };
-  loggedInAt: number;
-};
-
-function readAdminSession(): AdminSession | null {
-  try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (!raw) return null;
-    const session = JSON.parse(raw) as AdminSession;
-    if (!session?.role || !session?.loggedInAt || !session?.user) return null;
-    if (Date.now() - session.loggedInAt > SESSION_MAX_AGE_MS) {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
-      return null;
-    }
-    return session;
-  } catch {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    return null;
-  }
-}
-
-function saveAdminSession(role: AdminSession["role"], user: AdminSession["user"]) {
-  const session: AdminSession = { role, user, loggedInAt: Date.now() };
-  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
-}
-
-function clearAdminSession() {
-  localStorage.removeItem(AUTH_STORAGE_KEY);
-}
+import API_BASE from "../../config/api";
+import {
+  adminFetch,
+  saveAdminSession,
+  restoreAdminSession,
+  logoutAdmin,
+} from "../utils/adminAuth";
 
 function escapeCsvCell(value: unknown) {
   const s = String(value ?? "").replace(/"/g, '""');
@@ -114,7 +86,6 @@ const INTERN_PREFERRED_ROLES = [
   "Customer Support",
   "Marketing and Tech",
 ] as const;
-import API_BASE from "../../config/api";
 
 export function AdminDashboard() {
   const [authRole, setAuthRole] = useState<"main_admin" | "sub_admin" | null>(null);
@@ -184,20 +155,34 @@ export function AdminDashboard() {
     document.title = "Admin Dashboard | Finovert";
     generateCaptcha();
 
-    const session = readAdminSession();
-    if (session) {
-      setAuthRole(session.role);
-      setCurrentUser(session.user);
-      if (session.role === "sub_admin") {
-        setFormData((prev) => ({ ...prev, author: session.user.name }));
-        setActiveTab("blog");
+    let cancelled = false;
+    restoreAdminSession().then((session) => {
+      if (cancelled) return;
+      if (session) {
+        setAuthRole(session.role);
+        setCurrentUser(session.user);
+        if (session.role === "sub_admin") {
+          setFormData((prev) => ({ ...prev, author: session.user.name }));
+          setActiveTab("blog");
+        }
       }
-    }
-    setAuthRestored(true);
+      setAuthRestored(true);
+    });
+
+    const onUnauthorized = () => {
+      setAuthRole(null);
+      setCurrentUser(null);
+      setError("Session expired. Please log in again.");
+    };
+    window.addEventListener("finovert-admin-unauthorized", onUnauthorized);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("finovert-admin-unauthorized", onUnauthorized);
+    };
   }, []);
 
-  const handleLogout = () => {
-    clearAdminSession();
+  const handleLogout = async () => {
+    await logoutAdmin();
     setAuthRole(null);
     setCurrentUser(null);
     setPassword("");
@@ -212,7 +197,7 @@ export function AdminDashboard() {
 
   const fetchPendingRequests = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/subadmins/requests`);
+      const res = await adminFetch(`${API_BASE}/api/subadmins/requests`);
       if (res.ok) setPendingRequests(await res.json());
     } catch (e) {
       console.error(e);
@@ -221,7 +206,7 @@ export function AdminDashboard() {
 
   const fetchVerifications = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/verifications`);
+      const res = await adminFetch(`${API_BASE}/api/verifications`);
       if (res.ok) {
         const data = await res.json();
         setAllVerifications(data);
@@ -240,7 +225,7 @@ export function AdminDashboard() {
 
   const fetchAllBlogs = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/blogs`);
+      const res = await adminFetch(`${API_BASE}/api/blogs`);
       if (res.ok) setAllBlogs(await res.json());
     } catch (e) {
       console.error(e);
@@ -249,7 +234,7 @@ export function AdminDashboard() {
 
   const fetchInterns = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/internships`);
+      const res = await adminFetch(`${API_BASE}/api/internships`);
       if (res.ok) setInterns(await res.json());
     } catch (e) {
       console.error(e);
@@ -258,7 +243,7 @@ export function AdminDashboard() {
 
   const fetchConsultations = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/consultations`);
+      const res = await adminFetch(`${API_BASE}/api/consultations`);
       if (res.ok) setConsultations(await res.json());
     } catch (e) {
       console.error(e);
@@ -267,7 +252,7 @@ export function AdminDashboard() {
 
   const fetchTaxFilings = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/tax-filings`);
+      const res = await adminFetch(`${API_BASE}/api/tax-filings`);
       if (res.ok) setTaxFilings(await res.json());
     } catch (e) {
       console.error(e);
@@ -276,7 +261,7 @@ export function AdminDashboard() {
 
   const fetchConfirmations = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/confirmations`);
+      const res = await adminFetch(`${API_BASE}/api/confirmations`);
       if (res.ok) setConfirmations(await res.json());
     } catch (e) {
       console.error(e);
@@ -285,7 +270,7 @@ export function AdminDashboard() {
 
   const fetchInquiries = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/consultations`);
+      const res = await adminFetch(`${API_BASE}/api/consultations`);
       if (res.ok) setInquiries(await res.json());
     } catch (e) {
       console.error(e);
@@ -295,7 +280,7 @@ export function AdminDashboard() {
   const handleDeleteInquiry = async (id: string) => {
     if (!confirm("Delete this inquiry?")) return;
     try {
-      await fetch(`${API_BASE}/api/consultations/${id}`, { method: "DELETE" });
+      await adminFetch(`${API_BASE}/api/consultations/${id}`, { method: "DELETE" });
       fetchInquiries();
     } catch (e) {
       console.error(e);
@@ -375,7 +360,7 @@ export function AdminDashboard() {
 
   const handleInternStatus = async (id: string, newStatus: 'selected' | 'rejected') => {
     try {
-      const res = await fetch(`${API_BASE}/api/internships/${id}/status`, {
+      const res = await adminFetch(`${API_BASE}/api/internships/${id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus })
@@ -439,7 +424,7 @@ export function AdminDashboard() {
   const handleDownloadResume = async (e: React.MouseEvent, internId: string, internName: string) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_BASE}/api/internships/${internId}/resume`);
+      const res = await adminFetch(`${API_BASE}/api/internships/${internId}/resume`);
       if (!res.ok) throw new Error("Failed to fetch resume");
       const data = await res.json();
       const url = data.resumeUrl;
@@ -464,7 +449,7 @@ export function AdminDashboard() {
     }
 
     try {
-      const response = await fetch(`${API_BASE}/api/auth/main-login`, {
+      const response = await adminFetch(`${API_BASE}/api/auth/main-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
@@ -473,10 +458,14 @@ export function AdminDashboard() {
       const data = await response.json();
 
       if (response.ok) {
+        if (!data.token) {
+          setError("Login succeeded but no session token was returned.");
+          return;
+        }
         const user = { name: "Main Admin", username: "admin" };
         setAuthRole("main_admin");
         setCurrentUser(user);
-        saveAdminSession("main_admin", user);
+        saveAdminSession("main_admin", user, data.token);
         setPassword("");
         setUserCaptcha("");
         setError("");
@@ -498,7 +487,7 @@ export function AdminDashboard() {
     
     setIsSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/api/subadmins/request`, {
+      const res = await adminFetch(`${API_BASE}/api/subadmins/request`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: subName, username: subUsername, password: subPassword, email: subEmail })
       });
@@ -523,15 +512,19 @@ export function AdminDashboard() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/api/subadmins/login`, {
+      const res = await adminFetch(`${API_BASE}/api/subadmins/login`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: subUsername, password: subPassword })
       });
       const data = await res.json();
       if (res.ok) {
+        if (!data.token) {
+          setError("Login succeeded but no session token was returned.");
+          return;
+        }
         setAuthRole("sub_admin");
         setCurrentUser(data.user);
-        saveAdminSession("sub_admin", data.user);
+        saveAdminSession("sub_admin", data.user, data.token);
         setFormData(prev => ({ ...prev, author: data.user.name }));
         setActiveTab("blog"); // Sub-admins only see blogs
         setSubPassword("");
@@ -548,7 +541,7 @@ export function AdminDashboard() {
 
   const handleRequestAction = async (id: string, action: 'approved' | 'rejected') => {
     try {
-      await fetch(`${API_BASE}/api/subadmins/requests/${id}`, {
+      await adminFetch(`${API_BASE}/api/subadmins/requests/${id}`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: action })
       });
@@ -586,7 +579,7 @@ export function AdminDashboard() {
       const url = editingBlogId ? `${API_BASE}/api/blogs/${editingBlogId}` : `${API_BASE}/api/blogs`;
       const method = editingBlogId ? "PUT" : "POST";
 
-      const response = await fetch(url, {
+      const response = await adminFetch(url, {
         method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(formData),
       });
       if (response.ok) {
@@ -602,7 +595,7 @@ export function AdminDashboard() {
   const handleDeleteBlog = async (id: string) => {
     if(!confirm("Are you sure you want to permanently delete this blog?")) return;
     try {
-      await fetch(`${API_BASE}/api/blogs/${id}`, { method: "DELETE" });
+      await adminFetch(`${API_BASE}/api/blogs/${id}`, { method: "DELETE" });
       fetchAllBlogs();
       setStatus("success");
       setFetchMessage("Blog deleted successfully");
@@ -616,7 +609,7 @@ export function AdminDashboard() {
     e.preventDefault();
     setStatus("loading");
     try {
-      const response = await fetch(`${API_BASE}/api/verifications`, {
+      const response = await adminFetch(`${API_BASE}/api/verifications`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(verificationData),
       });
       if (response.ok) {
@@ -642,7 +635,7 @@ export function AdminDashboard() {
 
     setUploadingImage(true);
     try {
-      const response = await fetch(`${API_BASE}/api/upload`, {
+      const response = await adminFetch(`${API_BASE}/api/upload`, {
         method: 'POST',
         body: formDataUpload
       });
@@ -924,7 +917,7 @@ export function AdminDashboard() {
                           </button>
                           <button onClick={async () => {
                             if (confirm(`Are you sure you want to delete the record for ${v.name}?`)) {
-                              const res = await fetch(`${API_BASE}/api/verifications/${v._id}`, { method: 'DELETE' });
+                              const res = await adminFetch(`${API_BASE}/api/verifications/${v._id}`, { method: 'DELETE' });
                               if (res.ok) fetchVerifications();
                             }
                           }} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all" title="Delete Record">
@@ -971,7 +964,7 @@ export function AdminDashboard() {
                           )}
                           <button onClick={async () => {
                             if(confirm("Are you sure you want to permanently delete this sub-admin?")) {
-                              await fetch(`${API_BASE}/api/subadmins/requests/${req._id}`, { method: "DELETE" });
+                              await adminFetch(`${API_BASE}/api/subadmins/requests/${req._id}`, { method: "DELETE" });
                               fetchPendingRequests();
                             }
                           }} className="px-4 py-2 bg-red-100 text-red-700 text-sm font-semibold rounded-lg hover:bg-red-200 transition-colors">Delete Sub-Admin</button>
@@ -1185,7 +1178,7 @@ export function AdminDashboard() {
                               )}
                               <button onClick={async () => {
                                 if (confirm("Delete this application permanently?")) {
-                                  await fetch(`${API_BASE}/api/internships/${intern._id}`, { method: "DELETE" });
+                                  await adminFetch(`${API_BASE}/api/internships/${intern._id}`, { method: "DELETE" });
                                   fetchInterns();
                                 }
                               }} className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
@@ -1293,7 +1286,7 @@ export function AdminDashboard() {
                               type="button"
                               onClick={async () => {
                                 if (confirm("Delete this tax filing record?")) {
-                                  const res = await fetch(`${API_BASE}/api/tax-filings/${row._id}`, {
+                                  const res = await adminFetch(`${API_BASE}/api/tax-filings/${row._id}`, {
                                     method: "DELETE",
                                   });
                                   if (res.ok) fetchTaxFilings();
@@ -1344,7 +1337,7 @@ export function AdminDashboard() {
                             <button
                               onClick={async () => {
                                 if (confirm("Delete this consultation request?")) {
-                                  const res = await fetch(`${API_BASE}/api/consultations/${lead._id}`, { method: "DELETE" });
+                                  const res = await adminFetch(`${API_BASE}/api/consultations/${lead._id}`, { method: "DELETE" });
                                   if (res.ok) fetchConsultations();
                                 }
                               }}
@@ -1367,7 +1360,7 @@ export function AdminDashboard() {
             const sendEmailAction = async (endpoint: string, payload: object) => {
               setEmailStatus("loading"); setEmailResult("");
               try {
-                const res = await fetch(`${API_BASE}/api/email/${endpoint}`, {
+                const res = await adminFetch(`${API_BASE}/api/email/${endpoint}`, {
                   method: "POST", headers: { "Content-Type": "application/json" },
                   body: JSON.stringify(payload)
                 });
