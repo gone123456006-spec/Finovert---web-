@@ -376,8 +376,16 @@ export function CareersPage() {
                     className="mt-0.5 h-4 w-4 border-slate-300 text-[#0F2A5F] focus:ring-[#0F2A5F]"
                   />
                   <span className="text-sm leading-relaxed text-slate-700">
-                    I confirm that all information provided is accurate. I understand that false details may
-                    result in rejection of my application.
+                    I confirm that all information provided is accurate and that I have read the{" "}
+                    <a
+                      href="/internship-terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-[#0F2A5F] underline underline-offset-2"
+                    >
+                      Internship Terms and Conditions Unpaid
+                    </a>
+                    . I understand that false details may result in rejection of my application.
                   </span>
                 </label>
               </div>

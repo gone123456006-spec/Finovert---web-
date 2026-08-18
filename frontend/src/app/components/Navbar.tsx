@@ -116,6 +116,7 @@ const MEGA_MENUS: Record<string, MegaCategory[]> = {
       links: [
         { name: "Book Inquiry", href: BOOK },
         { name: "ID Verification", href: "/verify" },
+        { name: "Internship Terms (Unpaid)", href: "/internship-terms" },
         { name: "Privacy Policy", href: "/privacy" },
         { name: "Contact", href: "/#contact" },
       ],

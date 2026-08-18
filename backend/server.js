@@ -23,6 +23,7 @@ import consultationRoutes from './routes/consultationRoutes.js';
 import taxFilingRoutes from './routes/taxFilingRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import confirmationRoutes from './routes/confirmationRoutes.js';
+import termsAcceptanceRoutes from './routes/termsAcceptanceRoutes.js';
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 dotenv.config();
@@ -115,8 +116,8 @@ const loginLimiter = rateLimit({
 app.use(compression());
 app.use(morgan(IS_PROD ? 'combined' : 'dev'));
 app.use(cookieParser());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {
@@ -162,6 +163,7 @@ app.use('/api/consultations', consultationRoutes);
 app.use('/api/tax-filings', taxFilingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/confirmations', confirmationRoutes);
+app.use('/api/terms-acceptances', termsAcceptanceRoutes);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {

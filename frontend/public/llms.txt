@@ -29,6 +29,7 @@ Founders, startup teams, SMEs, and growing companies in India that need structur
 - Homepage: https://www.finovert.com/
 - About: https://www.finovert.com/about
 - Careers: https://www.finovert.com/careers
+- Unpaid Internship Terms: https://www.finovert.com/internship-terms
 - Finance Guides: https://www.finovert.com/finance-guides
 - Blog: https://www.finovert.com/blog
 - Sitemap: https://www.finovert.com/sitemap.xml

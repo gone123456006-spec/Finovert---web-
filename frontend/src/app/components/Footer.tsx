@@ -162,6 +162,7 @@ export function Footer() {
             <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-[12px] font-medium">
               <a href="/privacy" className="hover:text-[#1d1d1f] transition-colors">Privacy Policy</a>
               <a href="/privacy#account-deletion" className="hover:text-[#1d1d1f] transition-colors">Account Delete Policy</a>
+              <a href="/internship-terms" className="hover:text-[#1d1d1f] transition-colors">Internship Terms (Unpaid)</a>
               <a href="#terms" className="hover:text-[#1d1d1f] transition-colors">Terms of Service</a>
             </div>
           </div>

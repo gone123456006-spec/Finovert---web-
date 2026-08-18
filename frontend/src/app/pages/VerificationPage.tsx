@@ -89,8 +89,8 @@ export function VerificationPage() {
   return (
     <>
       <SEO
-        title="Finovert - Verification Portal"
-        description="Verify Intern ID or Employee ID authenticity with Finovert's official verification portal."
+        title="ID Verification"
+        description="Verify Employee ID authenticity with Finovert's official ID verification portal."
         path="/verify"
       />
 
@@ -105,10 +105,10 @@ export function VerificationPage() {
               <BadgeCheck className="h-7 w-7" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-[#0F2A5F] sm:text-3xl">
-              Verification Portal
+              ID Verification
             </h1>
             <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600 sm:text-[15px]">
-              Enter an Intern ID or Employee ID to verify authenticity and view official profile details.
+              Enter an Employee ID to verify authenticity and view official profile details.
             </p>
           </motion.div>
 
@@ -126,7 +126,7 @@ export function VerificationPage() {
             <div className="mt-5 space-y-4 sm:mt-6 sm:space-y-5">
               <TextField
                 id="verify-id"
-                label="Intern / Employee ID"
+                label="Employee ID"
                 required
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
@@ -261,7 +261,7 @@ export function VerificationPage() {
                     </div>
                     <h3 className="mb-2 text-xl font-bold text-[#0F2A5F]">Record Not Found</h3>
                     <p className="text-sm leading-relaxed text-slate-600">
-                      The ID <strong className="text-slate-800">&quot;{searchId}&quot;</strong> does not match any
+                      The Employee ID <strong className="text-slate-800">&quot;{searchId}&quot;</strong> does not match any
                       active or past records in our system. Please check the ID and try again.
                     </p>
                   </div>

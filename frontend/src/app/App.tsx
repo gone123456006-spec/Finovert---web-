@@ -11,6 +11,7 @@ import { HomePage } from "./pages/HomePage";
 const AboutPage = lazy(() => import("./pages/AboutPage").then(m => ({ default: m.AboutPage })));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy").then(m => ({ default: m.PrivacyPolicy })));
 const VerificationPage = lazy(() => import("./pages/VerificationPage").then(m => ({ default: m.VerificationPage })));
+const InternshipTermsPage = lazy(() => import("./pages/InternshipTermsPage").then(m => ({ default: m.InternshipTermsPage })));
 const ContributorsPage = lazy(() => import("./pages/ContributorsPage").then(m => ({ default: m.ContributorsPage })));
 const BlogsPage = lazy(() => import("./pages/BlogsPage").then(m => ({ default: m.BlogsPage })));
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage").then(m => ({ default: m.BlogPostPage })));
@@ -46,6 +47,11 @@ export default function App() {
           <Route path="verify" element={
             <Suspense fallback={<PageLoader />}>
               <VerificationPage />
+            </Suspense>
+          } />
+          <Route path="internship-terms" element={
+            <Suspense fallback={<PageLoader />}>
+              <InternshipTermsPage />
             </Suspense>
           } />
           <Route path="contributors" element={
