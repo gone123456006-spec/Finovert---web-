@@ -379,7 +379,7 @@ export function FaceVerificationCamera({
           {required ? <span style={{ color: ERROR }}> *</span> : null}
         </span>
 
-        <div className="relative aspect-[5/6] max-h-[280px] w-full overflow-hidden rounded bg-[#f8f9fa] sm:aspect-[4/3] sm:max-h-none">
+        <div className="relative mx-auto aspect-[3/4] w-full max-w-[280px] overflow-hidden rounded bg-[#f8f9fa] sm:mx-0 sm:aspect-[4/3] sm:max-w-none">
           {status === "captured" && photo ? (
             <img src={photo} alt="Captured face for verification" className="h-full w-full object-cover" />
           ) : (
@@ -396,7 +396,7 @@ export function FaceVerificationCamera({
           {status === "live" ? (
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div
-                className="h-[58%] w-[62%] max-w-[220px] rounded-[50%] border-[3px] transition-colors duration-200 sm:h-[72%] sm:w-[52%] sm:max-w-[240px]"
+                className="h-[78%] w-[56%] max-h-[320px] max-w-[180px] rounded-[50%] border-[3px] transition-colors duration-200 sm:h-[72%] sm:w-[52%] sm:max-h-none sm:max-w-[240px]"
                 style={{
                   borderColor: faceOk ? GREEN : "rgba(255,255,255,0.95)",
                   boxShadow: faceOk

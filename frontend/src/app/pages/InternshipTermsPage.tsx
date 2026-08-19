@@ -406,7 +406,7 @@ export function InternshipTermsPage() {
                 style={{ color: MUTED }}
               >
                 Your signed terms, details, face verification, and signature have been saved in the
-                Finovert admin panel.
+                Finovert admin panel. A copy has also been sent to your Gmail.
               </p>
             </div>
             <div className="flex justify-end gap-2 px-4 py-4 sm:px-6 sm:pb-5">

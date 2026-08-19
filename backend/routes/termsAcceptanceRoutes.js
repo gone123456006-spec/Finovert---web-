@@ -2,6 +2,7 @@ import express from 'express';
 import TermsAcceptance from '../models/TermsAcceptance.js';
 import { generateTermsPdf } from '../utils/termsPdf.js';
 import { waitForMongo } from '../utils/waitForMongo.js';
+import { sendEmail, emails } from '../utils/emailService.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -94,6 +95,17 @@ router.post('/', async (req, res) => {
       id: saved._id,
       message: 'Terms accepted and saved.',
     });
+
+    const { subject, html, attachments } = emails.termsOnboarded({
+      fullName,
+      email,
+      phone,
+      date,
+      aadhaarNumber,
+      facePhoto,
+      signature,
+    });
+    void sendEmail({ to: email, subject, html, attachments });
   } catch (error) {
     console.error('[terms-acceptances]', error);
     res.status(400).json({ message: error.message || 'Failed to save terms acceptance.' });

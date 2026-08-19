@@ -2,16 +2,105 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Create transporter using Gmail SMTP
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD, // Use an App Password, not your real Gmail password
-  },
-});
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL || process.env.GMAIL_USER;
+const BREVO_SENDER_NAME = process.env.BREVO_SENDER_NAME || 'Finovert';
 
-const FROM_ADDRESS = `"Finovert No-Reply" <${process.env.GMAIL_USER}>`;
+const gmailReady =
+  process.env.GMAIL_USER &&
+  process.env.GMAIL_APP_PASSWORD &&
+  !String(process.env.GMAIL_APP_PASSWORD).includes('your_');
+
+const transporter = gmailReady
+  ? nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    })
+  : null;
+
+const FROM_ADDRESS = `"${BREVO_SENDER_NAME}" <${BREVO_SENDER_EMAIL || process.env.GMAIL_USER || 'noreply@finovert.com'}>`;
+
+function toBase64(content) {
+  if (!content) return '';
+  if (Buffer.isBuffer(content)) return content.toString('base64');
+  return String(content);
+}
+
+function parseDataUrl(dataUrl) {
+  const match = /^data:([^;]+);base64,(.+)$/.exec(String(dataUrl || '').trim());
+  if (!match) return null;
+  return { mime: match[1], base64: match[2], buffer: Buffer.from(match[2], 'base64') };
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function maskAadhaar(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (digits.length < 4) return '—';
+  return `XXXX XXXX ${digits.slice(-4)}`;
+}
+
+function attachmentExt(mime, fallback) {
+  if (mime?.includes('png')) return 'png';
+  if (mime?.includes('webp')) return 'webp';
+  if (mime?.includes('jpeg') || mime?.includes('jpg')) return 'jpg';
+  return fallback;
+}
+
+async function sendViaBrevo({ to, subject, html, attachments = [] }) {
+  const payload = {
+    sender: { name: BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
+    to: [{ email: to }],
+    subject,
+    htmlContent: html,
+  };
+
+  if (attachments.length) {
+    payload.attachment = attachments.map((file) => ({
+      name: file.filename,
+      content: toBase64(file.content),
+    }));
+  }
+
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+      'api-key': BREVO_API_KEY,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`Brevo ${response.status}: ${errorBody}`);
+  }
+}
+
+async function sendViaGmail({ to, subject, html, attachments = [] }) {
+  await transporter.sendMail({
+    from: FROM_ADDRESS,
+    to,
+    subject,
+    html,
+    attachments: attachments.map((file) => ({
+      filename: file.filename,
+      content: file.content,
+      contentType: file.contentType,
+      cid: file.cid,
+    })),
+  });
+}
 
 // ─── Templates ────────────────────────────────────────────────────────────────
 
@@ -62,14 +151,15 @@ const baseHtml = (body) => `
 
 // ─── Email Sending Function ────────────────────────────────────────────────────
 
-export const sendEmail = async ({ to, subject, html }) => {
+export const sendEmail = async ({ to, subject, html, attachments = [] }) => {
   try {
-    await transporter.sendMail({
-      from: FROM_ADDRESS,
-      to,
-      subject,
-      html,
-    });
+    if (BREVO_API_KEY && BREVO_SENDER_EMAIL) {
+      await sendViaBrevo({ to, subject, html, attachments });
+    } else if (transporter) {
+      await sendViaGmail({ to, subject, html, attachments });
+    } else {
+      throw new Error('Email is not configured. Set BREVO_API_KEY or Gmail SMTP credentials.');
+    }
     console.log(`Email sent to ${to}: ${subject}`);
     return { success: true };
   } catch (err) {
@@ -159,4 +249,53 @@ export const emails = {
       <p>${adminMessage.replace(/\n/g, '<br/>')}</p>
     `),
   }),
+
+  termsOnboarded: ({ fullName, email, phone, date, aadhaarNumber, facePhoto, signature }) => {
+    const face = parseDataUrl(facePhoto);
+    const sign = parseDataUrl(signature);
+    const safeName = escapeHtml(fullName);
+    const attachments = [];
+
+    if (face) {
+      attachments.push({
+        filename: `face-verification.${attachmentExt(face.mime, 'jpg')}`,
+        content: face.buffer,
+        contentType: face.mime,
+        cid: 'facephoto',
+      });
+    }
+    if (sign) {
+      attachments.push({
+        filename: `signature.${attachmentExt(sign.mime, 'png')}`,
+        content: sign.buffer,
+        contentType: sign.mime,
+        cid: 'signature',
+      });
+    }
+
+    const faceSrc = face ? `data:${face.mime};base64,${face.base64}` : '';
+    const signSrc = sign ? `data:${sign.mime};base64,${sign.base64}` : '';
+
+    return {
+      subject: 'You’re now onboarding with Finovert',
+      attachments,
+      html: baseHtml(`
+        <h2>Welcome aboard, ${safeName}</h2>
+        <p>You’re now onboarding on our team. We have received your signed internship terms, identity details, face verification, and signature.</p>
+        <span class="badge badge-green">Onboarding started</span>
+        <div class="cred-box">
+          <div class="cred-row"><span class="cred-label">Full name</span><span class="cred-value">${safeName}</span></div>
+          <div class="cred-row"><span class="cred-label">Email</span><span class="cred-value">${escapeHtml(email)}</span></div>
+          <div class="cred-row"><span class="cred-label">Phone</span><span class="cred-value">${escapeHtml(phone)}</span></div>
+          <div class="cred-row"><span class="cred-label">Date</span><span class="cred-value">${escapeHtml(date)}</span></div>
+          <div class="cred-row"><span class="cred-label">Aadhaar</span><span class="cred-value">${escapeHtml(maskAadhaar(aadhaarNumber))}</span></div>
+        </div>
+        <p style="margin-top:8px;"><strong>Face verification</strong></p>
+        ${faceSrc ? `<img src="${faceSrc}" alt="Face verification" style="width:160px;height:160px;object-fit:cover;border-radius:12px;border:1px solid #e2e8f0;" />` : '<p>Not attached</p>'}
+        <p style="margin-top:18px;"><strong>Signature</strong></p>
+        ${signSrc ? `<img src="${signSrc}" alt="Signature" style="max-width:280px;height:90px;object-fit:contain;background:#fff;border-radius:8px;border:1px solid #e2e8f0;padding:8px;" />` : '<p>Not attached</p>'}
+        <p>If you have questions, reply to this email or contact the Finovert team.</p>
+      `),
+    };
+  },
 };
