@@ -128,8 +128,8 @@
 
   html {
     scroll-behavior: smooth;
-    /* Prevent scroll bouncing that can cause unmounting */
-    overscroll-behavior-y: contain;
+    /* Allow native scroll everywhere — do NOT block Y overscroll on Android */
+    overscroll-behavior-x: none;
     /* Prevent horizontal overflow on mobile */
     overflow-x: hidden;
     /* Smooth rendering on all browsers */
@@ -172,7 +172,8 @@
   #root {
     position: relative;
     min-height: 100vh;
-    isolation: isolate;
+    /* NOTE: do NOT use isolation:isolate — it creates a stacking context that
+       traps scroll events on Android WebView / Chrome for Android */
   }
 
   /**
@@ -315,7 +316,8 @@
 button,
 a,
 [role="button"] {
-  /* Use native click without transform lag */
+  /* manipulation = allows tap + double-tap, does NOT suppress scroll
+     IMPORTANT: do NOT use pan-y or pan-x here — it blocks Android scroll */
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   /* Mobile Safari optimization */
@@ -350,12 +352,16 @@ select,
 /* Mobile-specific scroll optimizations */
 @media (max-width: 768px) {
 
-  /* Optimize touch scrolling on mobile */
-  body,
+  /* Touch scrolling — do NOT set -webkit-overflow-scrolling or
+     overscroll-behavior-y:none here; they lock scroll on Android Chrome */
   html {
-    -webkit-overflow-scrolling: touch;
-    /* Prevent overscroll bounce that causes lag */
-    overscroll-behavior-y: none;
+    /* Only block horizontal overscroll to prevent accidental navigation */
+    overscroll-behavior-x: none;
+  }
+
+  body {
+    /* Keep body scrollable — never set overflow:hidden on body on mobile */
+    touch-action: pan-y;
   }
 
   /* Reduce GPU layers on mobile — do NOT set will-change globally */

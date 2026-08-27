@@ -264,8 +264,8 @@ export function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 ${showNavBg
-          ? "bg-white/95 shadow-[0_1px_0_rgba(15,42,95,0.08)] backdrop-blur-md"
-          : "bg-transparent shadow-none"
+        ? "bg-white/95 shadow-[0_1px_0_rgba(15,42,95,0.08)] backdrop-blur-md"
+        : "bg-transparent shadow-none"
         }`}
       style={{
         /* Permanent GPU composite layer — never repaint during scroll */
@@ -273,8 +273,6 @@ export function Navbar() {
         WebkitTransform: 'translateZ(0)',
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
-        /* Contain layout so navbar changes don't trigger page reflow */
-        contain: 'layout style',
         /* Only transition background and shadow — NO backdrop-filter transition (expensive) */
         transition: 'background-color 0.25s ease-out, box-shadow 0.25s ease-out',
         willChange: 'auto',
@@ -298,8 +296,8 @@ export function Navbar() {
                     onMouseEnter={() => openMenu(link.name)}
                     onFocus={() => openMenu(link.name)}
                     className={`inline-flex items-center gap-1 px-3 py-2 text-[14px] font-medium transition-colors ${openMega === link.name
-                        ? "text-[#0F2A5F]"
-                        : "text-[#0F2A5F]/80 hover:text-[#0F2A5F]"
+                      ? "text-[#0F2A5F]"
+                      : "text-[#0F2A5F]/80 hover:text-[#0F2A5F]"
                       }`}
                   >
                     {link.name}
@@ -523,8 +521,8 @@ export function Navbar() {
                         onMouseEnter={() => setActiveCategory(idx)}
                         onClick={() => setActiveCategory(idx)}
                         className={`w-full text-left px-3 py-2.5 text-[14px] font-semibold mb-0.5 transition-colors ${activeCategory === idx
-                            ? "bg-[#0F2A5F] text-white"
-                            : "text-[#334155] hover:bg-white"
+                          ? "bg-[#0F2A5F] text-white"
+                          : "text-[#334155] hover:bg-white"
                           }`}
                       >
                         {cat.name}

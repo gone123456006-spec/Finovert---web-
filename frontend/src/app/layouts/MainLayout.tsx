@@ -19,10 +19,10 @@ export function MainLayout() {
                 <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                         key={pathname}
-                        initial={isTermsPage ? { opacity: 0 } : { opacity: 0, filter: "blur(4px)" }}
-                        animate={isTermsPage ? { opacity: 1 } : { opacity: 1, filter: "blur(0px)" }}
-                        exit={isTermsPage ? { opacity: 0 } : { opacity: 0, filter: "blur(4px)" }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.25, ease: "easeInOut" }}
                         className={isTermsPage ? "flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden" : "flex-1 w-full"}
                     >
                         <Outlet />

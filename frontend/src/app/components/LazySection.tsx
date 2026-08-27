@@ -111,8 +111,9 @@ export function LazySection({
       ref={ref}
       className={className}
       style={{
-        // layout-only containment: isolates reflow without clipping visuals
-        contain: "layout",
+        // NOTE: do NOT use contain:"layout" here \u2014 it blocks scroll event
+        // propagation on Android WebView / Chrome for Android, freezing the page
+        // at each section boundary.
         minHeight: shouldLoad ? undefined : minHeight,
       }}
     >

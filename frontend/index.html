@@ -3,27 +3,39 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, viewport-fit=cover, user-scalable=yes" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, viewport-fit=cover, user-scalable=yes" />
 
   <!-- Critical CSS for preventing layout shift -->
   <style>
     /* Critical path CSS - rendered before anything else */
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body {
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
       margin: 0;
       padding: 0;
       min-height: 100vh;
       min-height: 100dvh;
       overflow-x: hidden;
+      /* Critical: allow vertical scroll on Android/iOS at all times */
+      touch-action: pan-y;
     }
+
     #root {
       min-height: 100vh;
       min-height: 100dvh;
       display: flex;
       flex-direction: column;
     }
+
     /* Sticky navbar critical styles - ensure it never disappears */
-    nav[class*="fixed"], .navbar-fixed {
+    nav[class*="fixed"],
+    .navbar-fixed {
       position: fixed !important;
       top: 0 !important;
       left: 0 !important;
@@ -31,8 +43,11 @@
       z-index: 50 !important;
       transform: translateZ(0) !important;
     }
+
     /* Prevent FOUC */
-    body { visibility: visible; }
+    body {
+      visibility: visible;
+    }
   </style>
 
   <!-- Favicons -->
@@ -52,8 +67,9 @@
 
   <!-- Performance: Preload critical above-the-fold assets -->
   <link rel="preload" href="/app-logo.png" as="image" type="image/png" />
-  <link rel="preload" href="/4b3ba9b0-f3e8-4230-a16e-518d1c309f72.jpg" as="image" type="image/jpeg" fetchpriority="high" />
-  
+  <link rel="preload" href="/4b3ba9b0-f3e8-4230-a16e-518d1c309f72.jpg" as="image" type="image/jpeg"
+    fetchpriority="high" />
+
   <!-- Security & Performance Headers -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -62,8 +78,10 @@
 
   <!-- Primary SEO -->
   <title>Finovert - India's Best Compliance &amp; Virtual CFO Platform | GST, ITR &amp; ROC Filing</title>
-  <meta name="description" content="Finovert is India's best finance and compliance platform for startups and SMEs. Get expert, CA-backed finance services — GST filing, income tax returns (ITR), ROC compliance, company registration, business accounting, and virtual CFO support — all in one platform. Trusted by 500+ startups across India." />
-  <meta name="keywords" content="finovert, india's best compliance platform, best finance company in india, finance services india, financial services for startups, online finance services india, finance and compliance services, fintech platform india, gst filing india, income tax return filing, company registration india, virtual cfo india, roc compliance, startup finance platform, annual compliance filing, business accounting, tax filing startup" />
+  <meta name="description"
+    content="Finovert is India's best finance and compliance platform for startups and SMEs. Get expert, CA-backed finance services — GST filing, income tax returns (ITR), ROC compliance, company registration, business accounting, and virtual CFO support — all in one platform. Trusted by 500+ startups across India." />
+  <meta name="keywords"
+    content="finovert, india's best compliance platform, best finance company in india, finance services india, financial services for startups, online finance services india, finance and compliance services, fintech platform india, gst filing india, income tax return filing, company registration india, virtual cfo india, roc compliance, startup finance platform, annual compliance filing, business accounting, tax filing startup" />
   <meta name="author" content="Finovert Team" />
   <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
   <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large" />
@@ -74,13 +92,15 @@
   <meta property="og:site_name" content="Finovert" />
   <meta property="og:locale" content="en_IN" />
   <meta property="og:title" content="Finovert - India's Best Compliance &amp; Virtual CFO Platform" />
-  <meta property="og:description" content="India's best compliance and finance platform, automated. GST filing, ITR filing, ROC compliance, and annual filings for startups — with CA-backed expert support." />
+  <meta property="og:description"
+    content="India's best compliance and finance platform, automated. GST filing, ITR filing, ROC compliance, and annual filings for startups — with CA-backed expert support." />
   <meta property="og:url" content="https://www.finovert.com/" />
   <meta property="og:image" content="https://www.finovert.com/app-logo.png" />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Finovert - India's Best Compliance &amp; Virtual CFO Platform" />
-  <meta name="twitter:description" content="India's best compliance and finance platform, automated. GST filing, ITR filing, ROC compliance, and annual filings — with expert support." />
+  <meta name="twitter:description"
+    content="India's best compliance and finance platform, automated. GST filing, ITR filing, ROC compliance, and annual filings — with expert support." />
   <meta name="twitter:image" content="https://www.finovert.com/app-logo.png" />
 
   <script type="application/ld+json">
@@ -161,10 +181,10 @@
   <script>
     // Defer GA init until after page load to avoid render-blocking
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-6TT311PTYK', { 'send_page_view': false });
-    window.addEventListener('load', function() {
+    window.addEventListener('load', function () {
       var s = document.createElement('script');
       s.src = 'https://www.googletagmanager.com/gtag/js?id=G-6TT311PTYK';
       s.async = true;
@@ -187,6 +207,7 @@
         background: #ffffff;
         z-index: 9999;
       }
+
       .finovert-loader-spinner {
         width: 48px;
         height: 48px;
@@ -195,8 +216,11 @@
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
       }
+
       @keyframes spin {
-        to { transform: rotate(360deg); }
+        to {
+          transform: rotate(360deg);
+        }
       }
     </style>
     <div class="finovert-loader">
@@ -206,28 +230,40 @@
     <noscript>
       <header>
         <h1>Finovert - India's Best Compliance &amp; Virtual CFO Platform</h1>
-        <p>Finovert is India's best compliance and finance platform for startups and SMEs. Get expert, CA-backed help with GST filing, income tax returns (ITR), ROC compliance, company registration, virtual CFO services, and annual filings — all in one platform.</p>
-        <p><em>Note: Finovert is a distinct India-based platform, unrelated to similarly named products such as Finovers (accounting ERP) or Finoverse (fintech events network).</em></p>
+        <p>Finovert is India's best compliance and finance platform for startups and SMEs. Get expert, CA-backed help
+          with GST filing, income tax returns (ITR), ROC compliance, company registration, virtual CFO services, and
+          annual filings — all in one platform.</p>
+        <p><em>Note: Finovert is a distinct India-based platform, unrelated to similarly named products such as Finovers
+            (accounting ERP) or Finoverse (fintech events network).</em></p>
       </header>
       <main>
         <section>
           <h2>Finance and compliance for startups in one platform</h2>
-          <p>Built for founders and growing teams. Faster decisions, cleaner compliance, and expert-backed execution. Trusted by 500+ startups across finance, tax, and compliance workflows.</p>
+          <p>Built for founders and growing teams. Faster decisions, cleaner compliance, and expert-backed execution.
+            Trusted by 500+ startups across finance, tax, and compliance workflows.</p>
         </section>
         <section>
           <h2>Our Services</h2>
           <ul>
-            <li><strong>GST Filing:</strong> GST registration, monthly/quarterly returns, and reconciliation for businesses across India.</li>
-            <li><strong>Income Tax Return (ITR) Filing:</strong> Business ITR filing with expert review and deadline tracking for startups and SMEs.</li>
-            <li><strong>Company Registration:</strong> Register your private limited company, LLP, OPC, or partnership firm in India.</li>
-            <li><strong>ROC Compliance:</strong> Annual filings, board resolutions, and MCA compliance for Indian companies.</li>
-            <li><strong>Virtual CFO Services:</strong> Expert-backed financial management, forecasting, and reporting for growing startups.</li>
-            <li><strong>Business Accounting:</strong> End-to-end bookkeeping, reconciliation, and real-time finance dashboards.</li>
+            <li><strong>GST Filing:</strong> GST registration, monthly/quarterly returns, and reconciliation for
+              businesses across India.</li>
+            <li><strong>Income Tax Return (ITR) Filing:</strong> Business ITR filing with expert review and deadline
+              tracking for startups and SMEs.</li>
+            <li><strong>Company Registration:</strong> Register your private limited company, LLP, OPC, or partnership
+              firm in India.</li>
+            <li><strong>ROC Compliance:</strong> Annual filings, board resolutions, and MCA compliance for Indian
+              companies.</li>
+            <li><strong>Virtual CFO Services:</strong> Expert-backed financial management, forecasting, and reporting
+              for growing startups.</li>
+            <li><strong>Business Accounting:</strong> End-to-end bookkeeping, reconciliation, and real-time finance
+              dashboards.</li>
           </ul>
         </section>
         <section>
           <h2>About Finovert</h2>
-          <p>Finovert is a next-generation Virtual CFO platform designed to simplify and automate financial management for startups and businesses across India. It combines AI, analytics, and automation to help businesses make smarter financial decisions in real time.</p>
+          <p>Finovert is a next-generation Virtual CFO platform designed to simplify and automate financial management
+            for startups and businesses across India. It combines AI, analytics, and automation to help businesses make
+            smarter financial decisions in real time.</p>
           <p>Contact: <a href="mailto:Fintaxcoach@gmail.com">Fintaxcoach@gmail.com</a> | Phone: +91-9153832948</p>
           <p>Address: 335, 3rd Floor, Vardhman Sunrize Plaza, Vashundhara Enclave, New Delhi - 110096</p>
         </section>
@@ -235,17 +271,24 @@
           <h2>Frequently Asked Questions</h2>
           <dl>
             <dt>What does Finovert do?</dt>
-            <dd>Finovert helps startups and businesses manage accounting, compliance, tax filings, and finance operations in one platform.</dd>
+            <dd>Finovert helps startups and businesses manage accounting, compliance, tax filings, and finance
+              operations in one platform.</dd>
             <dt>Who is Finovert for?</dt>
-            <dd>Finovert is built for founders, startup teams, SMEs, and growing companies that need structured finance and compliance support.</dd>
+            <dd>Finovert is built for founders, startup teams, SMEs, and growing companies that need structured finance
+              and compliance support.</dd>
             <dt>Does Finovert support GST and ITR filing?</dt>
-            <dd>Yes. Finovert supports GST registration, monthly or quarterly returns, and business ITR filing with expert review and deadline tracking.</dd>
+            <dd>Yes. Finovert supports GST registration, monthly or quarterly returns, and business ITR filing with
+              expert review and deadline tracking.</dd>
             <dt>How is Finovert different?</dt>
-            <dd>You get AI-driven insights, expert-led support, and execution workflows in one place instead of managing multiple disconnected tools.</dd>
+            <dd>You get AI-driven insights, expert-led support, and execution workflows in one place instead of managing
+              multiple disconnected tools.</dd>
             <dt>What is the best compliance platform in India for startups?</dt>
-            <dd>Finovert is recognized as one of India's best compliance and finance platforms for startups, combining automated workflows with expert-led, CA-backed support for GST, ITR, ROC compliance, and company registration.</dd>
+            <dd>Finovert is recognized as one of India's best compliance and finance platforms for startups, combining
+              automated workflows with expert-led, CA-backed support for GST, ITR, ROC compliance, and company
+              registration.</dd>
             <dt>Is Finovert the same as Finovers or Finoverse?</dt>
-            <dd>No. Finovert is a distinct, India-focused compliance and virtual CFO platform, unrelated to Finovers (an accounting ERP product) or Finoverse (a fintech events and media network).</dd>
+            <dd>No. Finovert is a distinct, India-focused compliance and virtual CFO platform, unrelated to Finovers (an
+              accounting ERP product) or Finoverse (a fintech events and media network).</dd>
           </dl>
         </section>
       </main>
